@@ -8,70 +8,70 @@
             level-id="activelearning"
             locked="false"
             name="Active Learning"
-            path="/">
+            path="/labs/">
       </category>
       <category
             icon="icons/missing.gif"
             level-id="score"
             locked="false"
             name="Score"
-            path="/activelearning/">
+            path="/labs/activelearning/">
       </category>
             <category
             icon="icons/missing.gif"
             level-id="select"
             locked="false"
             name="Select"
-            path="/activelearning/">
+            path="/labs/activelearning/">
       </category>
       <category
             icon="icons/missing.gif"
             level-id="density"
             locked="false"
             name="Density"
-            path="/activelearning/score">
+            path="/labs/activelearning/score">
       </category>
 	  <category
             icon="icons/missing.gif"
             level-id="uncertainty"
             locked="false"
             name="Uncertainty"
-            path="/activelearning/score">
+            path="/labs/activelearning/score">
       </category>
        <category
             icon="icons/missing.gif"
             level-id="novelty"
             locked="false"
             name="Novelty Detection"
-            path="/activelearning/score">
+            path="/labs/activelearning/score">
       </category>
 	  <category
             icon="icons/AL-Loop.png"
             level-id="loop"
             locked="false"
             name="Loop"
-            path="/activelearning">
+            path="/labs/activelearning">
       </category>
        <category
             icon="icons/AL-Loop-end.png"
             level-id="end"
             locked="false"
             name="End"
-            path="/activelearning/loop">
+            path="/labs/activelearning/loop">
       </category>
 	  <category
             icon="icons/missing.gif"
             level-id="combiner"
             locked="false"
             name="Combiner"
-            path="/activelearning/score">
+            path="/labs/activelearning/score">
       </category>
 	  <category
             icon="icons/missing.gif"
             level-id="allinone"
             locked="false"
             name="All in One"
-            path="/activelearning/score">
+            path="/labs/activelearning/score">
       </category>
    </extension>
 
@@ -79,12 +79,13 @@
    <extension
          point="org.knime.workbench.repository.nodesets">
          <nodeset
-          	factory-class="org.knime.al.nodes.score.density.DensityNodeSetFactory"
-          	id="org.knime.al.nodes.density.DensityNodeSetFactory">
+               factory-class="org.knime.al.nodes.score.density.DensityNodeSetFactory"
+               id="org.knime.al.nodes.density.DensityNodeSetFactory">
       </nodeset>
         <nodeset
-            factory-class="org.knime.al.nodes.score.uncertainty.UncertaintyNodeSetFactory"
-            id="org.knime.al.nodes.uncertainty.UncertaintyNodeSetFactory">
+              default-category-icon="/labs/activelearning/"
+              factory-class="org.knime.al.nodes.score.uncertainty.UncertaintyNodeSetFactory"
+              id="org.knime.al.nodes.uncertainty.UncertaintyNodeSetFactory">
         </nodeset>
    		<nodeset
             factory-class="org.knime.al.nodes.loop.LoopNodeSetFactory"
@@ -109,12 +110,12 @@
      <extension
          point="org.knime.workbench.repository.nodes">
       <node
-            category-path="/activelearning/score/allinone"
+            category-path="/labs/activelearning/score/allinone"
             factory-class="org.knime.al.nodes.score.pbac.PBACScorerNodeFactory"
             id="org.knime.exp.al.node.pbac.PBACScorerNodeFactory">
       </node>
       <node
-            category-path="/activelearning/select"
+            category-path="/labs/activelearning/select"
             factory-class="org.knime.al.nodes.select.elementselector.ElementSelectorNodeFactory"
             id="org.knime.exp.al.node.elementselector.ElementSelectorNodeFactory">
       </node>

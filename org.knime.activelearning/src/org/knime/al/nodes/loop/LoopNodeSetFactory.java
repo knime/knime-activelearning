@@ -69,7 +69,7 @@ public class LoopNodeSetFactory implements NodeSetFactory {
     /**
      *
      */
-    private static final String CATEGORY_PREFIX = "/activelearning/loop";
+    private static final String CATEGORY_PREFIX = "/labs/activelearning/loop";
     private static final NodeLogger LOGGER =
             NodeLogger.getLogger(LoopNodeSetFactory.class);
     private final Map<String, String> m_nodeFactories =

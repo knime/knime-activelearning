@@ -68,7 +68,7 @@ public class DensityNodeSetFactory implements NodeSetFactory {
     /**
      *
      */
-    private static final String CATEGORY = "/activelearning/score/density";
+    private static final String CATEGORY = "/labs/activelearning/score/density";
     private static final NodeLogger LOGGER =
             NodeLogger.getLogger(DensityNodeSetFactory.class);
     private final Map<String, String> m_nodeFactories =

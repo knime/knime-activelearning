@@ -115,7 +115,7 @@ public class CombinerNodeSetFactory implements NodeSetFactory {
     @Override
     public Collection<String> getNodeFactoryIds() {
         m_nodeFactories.put(UncertaintyDistributionScorerNodeFactory.class
-                .getCanonicalName(), "/activelearning/score/combiner");
+                .getCanonicalName(), "/labs/activelearning/score/combiner");
         return m_nodeFactories.keySet();
     }
 }

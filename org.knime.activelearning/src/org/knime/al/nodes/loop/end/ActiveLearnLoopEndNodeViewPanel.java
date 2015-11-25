@@ -379,7 +379,6 @@ public class ActiveLearnLoopEndNodeViewPanel extends JPanel {
 
         add(m_continueButton, gbc_contBtn);
         add(m_terminateButton, gbc_termBtn);
-        // add(m_autoContCheckBox, gbc_autCont);
     }
 
     /**

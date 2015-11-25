@@ -70,7 +70,7 @@ public class UncertaintyNodeSetFactory implements NodeSetFactory {
     /**
      *
      */
-    private static final String CATEGORY = "/activelearning/score/uncertainty";
+    private static final String CATEGORY = "/labs/activelearning/score/uncertainty";
     private static final NodeLogger LOGGER =
             NodeLogger.getLogger(UncertaintyNodeSetFactory.class);
     private final Map<String, String> m_nodeFactories =

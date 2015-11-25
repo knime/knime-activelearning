@@ -68,7 +68,7 @@ public class NoveltyNodeSetFactory implements NodeSetFactory {
     /**
      *
      */
-    private static final String CATEGORY = "/activelearning/score/novelty";
+    private static final String CATEGORY = "/labs/activelearning/score/novelty";
     private static final NodeLogger LOGGER =
             NodeLogger.getLogger(NoveltyNodeSetFactory.class);
     private final Map<String, String> m_nodeFactories =
