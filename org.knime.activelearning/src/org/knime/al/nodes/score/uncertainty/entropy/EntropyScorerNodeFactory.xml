@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="entropyscorer.png" type="Manipulator"
+	xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+
+	<name>Entropy Scorer</name>
+	<shortDescription>
+		Calculates the entropy of the class probability distribution .
+	</shortDescription>
+	<fullDescription>
+		<intro>
+			Calculates the entropy of a class probability distribution. 
+			The distribution must add up to 1 to be considered a valid input.
+		</intro>
+		<option name="Column Selection"> Select all columns that are part of the class probability distribution.
+		</option>
+	</fullDescription>
+
+	<ports>
+		<inPort name="Unlabeled Data" index="0">Unlabeled data with class probability distribution</inPort>
+		<outPort name="Input Data with Entropy Score" index="0">Input data with entropy score</outPort>
+	</ports>
+</knimeNode>

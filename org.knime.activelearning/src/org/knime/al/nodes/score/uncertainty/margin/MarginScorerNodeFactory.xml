@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="marginscorer.png" type="Manipulator"
+	xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+
+	<name>Margin Scorer</name>
+	<shortDescription>
+		Assigns a score for a class probability distribution based on the margin between the two
+		classes with the highest probability.
+	</shortDescription>
+	<fullDescription>
+		<intro>
+			Uncertainty Sampling Scorer that assigns a score to a class probability distribution based on the
+			margin between the two classes with the highest probability.
+			Note that a high score means a low margin between class probabilities.
+		</intro>
+		<option name="Column Selection">Select all columns containing that are part of the class probability distribution.
+		</option>
+	</fullDescription>
+
+	<ports>
+		<inPort name="Unlabeled Data" index="0">Unlabeled data with class probability distribution</inPort>
+		<outPort name="Input Data with Margin Score" index="0">Input data with margin score.</outPort>
+	</ports>
+</knimeNode>

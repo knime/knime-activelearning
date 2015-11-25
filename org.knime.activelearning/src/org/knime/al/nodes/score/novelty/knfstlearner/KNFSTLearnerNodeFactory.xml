@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode type="Learner" icon="knfst.png">
+	<name>KNFST Learner</name>
+	<shortDescription>Learns a KNFST-Model for Novelty Detection</shortDescription>
+
+	<fullDescription>
+		<intro>
+		<p>
+			Calculates a Kernel Null Foley-Sammon Transformation that
+			can be used to calculate a novelty score for a test sample in
+			relation to the training samples.
+		</p>
+		<p>
+			The corresponding source code is a java adaption of the Matlab code provided by Bodesheim et al. 
+			for their paper "Kernel Null Space Methods for Novelty Detection".
+		</p>
+		</intro>
+		<tab name="Options">
+
+			<option name="Training Columns"> The columns which should be used for training
+			(right now only numeric columns can be used for training)
+			</option>
+
+			<option name="Class Column"> The column containing the class of the training samples
+			</option>
+			<option name="Kernel">
+				Choose the Kernel that should be used
+				<ul>
+					<li>RBF - Radial basis function kernel (with parameter sigma)</li>
+					<li>HIK - Histogram intersection kernel</li>
+					<li>EXPHIK - Exponential variant of the HIK</li>
+					<li>Polynomial - Polynomial kernel (with parameters gamma, bias and sigma)</li>
+				</ul>
+			</option>
+			<option name="Sort Table"> 
+			If you check this option, the input table will be sorted by class prior to calculating the nullspace. 
+			If it already is sorted by class, don't use this option.
+			</option>
+		</tab>
+	</fullDescription>
+	<ports>
+		<inPort index="0" name="Training data"> Training data
+		</inPort>
+		<outPort index="0" name="Target points">Target points. Each class of the input table is represented by one point in the nullspace to which
+		all instances of that class are projected.</outPort>
+		<outPort index="1" name="KNFST-model">KNFST-model that can be used by a <i>KNFST Novelty Scorer</i> node to rate the novelty of instances</outPort>
+	</ports>
+</knimeNode>

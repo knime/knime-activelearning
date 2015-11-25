@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="elementselector.png" type="Manipulator"
+	xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+	<name>Element Selector</name>
+
+	<shortDescription>
+		Returns the n rows with the highest or lowest values in a specific column.
+	</shortDescription>
+
+	<fullDescription>
+		<intro>
+			Returns the n rows with the highest or lowest values in a specific column.
+		</intro>
+
+		<option name="number of elements">Number of rows that should be returned.</option>
+		<option name="Selection Strategy">Determines which objects are selected.</option>
+		<option name="Column to use">Select the column with values are used for the ranking.</option>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="Data">Table with at least one column containing double
+			values.</inPort>
+		<outPort index="0" name="Selected Rows">Table containing the
+			selected rows.</outPort>
+	</ports>
+</knimeNode>

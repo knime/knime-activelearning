@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="UncertaintyDistributionScorer.png" type="Manipulator"
+	xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+
+	<name>Uncertainty Distribution Scorer</name>
+	<shortDescription>
+		Calculates the uncertainty distribution score based
+		on an exploitation and an exploration score.
+	</shortDescription>
+	<fullDescription>
+		<intro>
+			Calculates the uncertainty distribution score based on an
+			exploitation and an exploration score.
+			<br />
+			see paper by Cebron:
+			<a href="http://www.inf.uni-konstanz.de/bioml2/publications/Papers2009/CeBe09.pdf">
+			http://www.inf.uni-konstanz.de/bioml2/publications/Papers2009/CeBe09.pdf
+			</a>
+		</intro>
+		<option name="Exploration score"> The column containing the exploration score.
+		</option>
+		<option name="Exploitation score"> The column containing the exploitation score.
+		</option>
+		<option name="Exploitation factor"> The weighting factor between the exploration and
+			exploitation score.
+		</option>
+	</fullDescription>
+
+	<ports>
+		<inPort name="Data" index="0">Data with exploration score and
+			exploitation score column.</inPort>
+		<outPort name="Input data with added uncertainty distribution score."
+			index="0">Input data with added uncertainty distribution score."
+		</outPort>
+	</ports>
+</knimeNode>

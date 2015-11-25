@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="loop-end-dbg.png" type="LoopEnd"
+	xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+	<name>Auto Active Learn Loop End</name>
+	<shortDescription>
+		Automated oracle for the active learn loop.
+	</shortDescription>
+
+	<fullDescription>
+		<intro>
+			Acts as an automated oracle for an active learning loop.
+			It is meant for testing purposes and requires an fully labeled
+			input table at the second input port.
+		</intro>
+		<option name="Ground Truth Column">The column containing the class labels in the ground truth table. </option>
+		<option name="Number of Iterations">The number of times the loop will run until termination. </option>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="Unlabeled Table">Table with data to be labeled by the
+			node.</inPort>
+		<inPort index="1" name="Fully labeled Table">Ground truth table used to look up the
+			labels. This table only needs to have a class column </inPort>
+		<inPort index="2" optional="true" name="Passthrough Port Input">Pass through Port - Will
+			be the output of the Loop
+		</inPort>
+
+		<outPort index="0" name="Passthrough Port Output">Pass through Port Output</outPort>
+	</ports>
+</knimeNode>

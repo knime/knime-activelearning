@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="variancescorer.png" type="Manipulator"
+	xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+	<name>Variance Scorer</name>
+	<shortDescription>
+		Calculates the variance of a class probability distribution.
+	</shortDescription>
+	<fullDescription>
+		<intro>
+			Calculates the variance of a class probability distribution.
+		</intro>
+
+		<option name="Column Selection"> The columns containing the class probabilities.</option>
+	</fullDescription>
+
+	<ports>
+		<inPort name="Unlabeled Data" index="0">Unlabeled data with class probabilities.</inPort>
+		<outPort name="Input Data with Variance Score" index="0">Input data with variance score.</outPort>
+	</ports>
+</knimeNode>

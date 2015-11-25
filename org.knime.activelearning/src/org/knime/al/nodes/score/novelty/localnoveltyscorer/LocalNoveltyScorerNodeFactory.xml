@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode type="Predictor" icon="lns.png">
+	<name>Local Novelty Scorer</name>
+	<shortDescription>
+		Scores the novelty of test instances based on a local KNFST model trained with the k nearest neighbors in kernel space.
+	</shortDescription>
+
+	<fullDescription>
+		<intro>
+			This node calculates a local KNFST-model based on the nearest neighbors in the kernel space
+			 for every single data point that is to be tested.
+			 The corresponding source code is a Java adaption of the Matlab code provided by Bodesheim et al.
+			 for their paper "Local Novelty Detection in Multi-class Recognition Problems".
+		</intro>
+		<tab name="Options">
+
+			<option name="Training Columns"> The columns which should be used for training
+			(right now only numeric columns can be used for training)
+			</option>
+
+			<option name="Class Column"> The column containing the class of the training samples
+			</option>
+			<option name="Kernel">
+				Choose the Kernel that should be used
+				<ul>
+					<li>HIK - Histogram intersection kernel</li>
+					<li>EXPHIK - Exponential variant of the HIK</li>
+					<li>RBF - Radial basis function kernel (with parameter sigma)</li>
+					<li>Polynomial - Polynomial kernel (with parameters gamma, bias and power)</li>
+				</ul>
+			</option>
+			<option name="Number of Neighbors"> 
+				Select the number of neighbors that should be used for training the local models.
+			</option>
+			<option name="Normalize Novelty Scores">
+				Check to normalize the Novelty Scores by the minimum distance between target points.
+			</option>
+			<option name="Sort Training Table">
+				Check to sort training table by class prior to calculation of the local models.
+				Only use if training table is not already sorted by class.
+			</option>			
+		</tab>
+	</fullDescription>
+	<ports>
+		<inPort index="0" name="KNFST model">KNFST model
+		</inPort>
+		<inPort index="1" name="Test Data">Test Data</inPort>
+		<outPort index="0" name="Novelty Scores">Novelty Scores</outPort>
+	</ports>
+
+</knimeNode>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode type="Predictor" icon="knfst.png">
+	<name>KNFST Novelty Scorer</name>
+	<shortDescription>
+		Uses KNFST-model to calculate Novelty Scores for new data points
+	</shortDescription>
+	
+	<fullDescription>
+		<intro>
+			Scores the novelty of test instances based on a KNFST-model from a
+			KNFST Learner node.
+			The corresponding source code is a Java adaption of
+			the Matlab code
+			provided by Bodesheim et al.
+			for their paper"Kernel Null
+			Space Methods for Novelty Detection".
+		</intro>
+		<tab name="Options">
+
+			<option name="Append Novelty Scores">
+				Check to append Novelty Scores
+			</option>
+
+			<option name="Normalize Novelty Score">
+				Check to normalize Novelty Scores by dividing them by the minimum distance between target points.
+			</option>
+			<option name="Append Nullspace Coordinates">
+				Check this to append the coordinates in the nullspace.
+				This can be used to visualize the nullspace.
+			</option>
+		</tab>
+	</fullDescription>
+	<ports>
+		<inPort index="0" name="KNFST model">KNFST model
+		</inPort>
+		<inPort index="1" name="Test Data">Test Data</inPort>
+		<outPort index="0" name="Novelty Scores">Novelty Scores</outPort>
+	</ports>
+</knimeNode>

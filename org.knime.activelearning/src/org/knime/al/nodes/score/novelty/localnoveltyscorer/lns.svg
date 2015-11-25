@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="16"
+   height="16"
+   id="svg4158"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   viewBox="0 0 16 16"
+   sodipodi:docname="lns.svg"
+   inkscape:export-filename="C:\Users\Adrian\git\Bachelor Projekt\knime-novelty-detection\src\org\knime\knip\noveltydetection\nodes\localnoveltyscorer\lns.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4160" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="22.197802"
+     inkscape:cx="-1.8433169"
+     inkscape:cy="8"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:grid-bbox="true"
+     inkscape:document-units="px"
+     inkscape:window-width="1920"
+     inkscape:window-height="1140"
+     inkscape:window-x="1358"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata4163">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer">
+    <rect
+       style="fill:#000000"
+       id="rect4166"
+       width="2.0272276"
+       height="1.892079"
+       x="1.8019803"
+       y="1.9896039" />
+    <rect
+       style="fill:#000000"
+       id="rect4168"
+       width="2.0722775"
+       height="2.1623762"
+       x="3.6039605"
+       y="6.0891089" />
+    <rect
+       style="fill:#000000"
+       id="rect4170"
+       width="2.2074254"
+       height="2.1623766"
+       x="7.838614"
+       y="4.7826734" />
+    <rect
+       style="fill:#000000"
+       id="rect4172"
+       width="0.090099014"
+       height="0.36039606"
+       x="9.14505"
+       y="6.3143563" />
+    <rect
+       style="fill:#ff0000"
+       id="rect4174"
+       width="2.252475"
+       height="2.1623762"
+       x="6.6673269"
+       y="9.1524754" />
+    <rect
+       style="fill:#000000"
+       id="rect4176"
+       width="2.2074258"
+       height="2.0272281"
+       x="3.1985149"
+       y="12.39604" />
+    <ellipse
+       style="fill:none;stroke:#000000;stroke-opacity:1"
+       id="path4178"
+       cx="6.6222773"
+       cy="9.8056927"
+       rx="5.9915843"
+       ry="5.6987624" />
+  </g>
+</svg>

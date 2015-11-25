@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="loop-end.png" type="LoopEnd"
+	xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+
+	<name>Active Learn Loop End</name>
+	<shortDescription>
+		The interactive end node for the Active Learning Loop.
+		Provides an annotation view.
+	</shortDescription>
+
+	<fullDescription>
+		<intro></intro>
+		<tab name="Node Options">
+			<option name="Representative Column" optional="false">The column which
+				value will be shown in the detailed view area of the node View.
+			</option>
+			<option name="Class Column" optional="false">The column which holds
+				the classes in each row.
+			</option>
+			<option name="Allow Unlabeled Rows" optional="false">Whether to use a
+				default class or not. If this checkbox in not checked, continuing
+				with the Iteration will be prevented until all rows of the Iteration
+				are labeled.
+			</option>
+			<option name="Default Class Name" optional="true"> Name of the
+				default class. Option is disabled, if Allow Unlabeled Rows is not checked.
+			</option>
+			<option name="Auto Terminate" optional="false">If checked, execution
+				will automatically be terminated when there are now unlabeled rows left.
+			</option>
+		</tab>
+	</fullDescription>
+
+	<ports>
+		<inPort index="0" name="Unlabeled Table">Unlabeled Table.</inPort>
+		<inPort index="1" name="Passthrough Port">Passthrough Port - Will be the output of
+			the Loop.
+		</inPort>
+
+		<outPort index="0" name="Passthrough Out">Passthrough output.</outPort>
+	</ports>
+
+	<views>
+		<view index="0" name="View">
+			The user is asked to enter classes for the input rows.
+			A class can be
+			entered and text field in any of the three tabs
+			and should be then
+			assigned to the rows.The view consists of 3 tabs:
+			<br></br>
+			<br></br>
+			<b>Table Selection </b>
+			<br></br>
+			All rows are presented in a table. Rows can be labeled either by
+			selecting one or more rows in the table and then selecting a class in
+			the combobox above, or by clicking and changing the value of the
+			class column of a row directly.
+			<br></br>
+			<br></br>
+			<b>Wizard </b>
+			<br></br>
+			This is for labeling rows one by one. One unlabeled row after the
+			other is shown to the user and can be labeled by clicking one of the
+			class buttons.
+			<br></br>
+			<br></br>
+			<b>Manage Classes </b>
+			<br></br>
+			For adding and removing classes. Be aware that this will not remove
+			lables from datapoints handled in previous iterations.
+		</view>
+	</views>
+</knimeNode>

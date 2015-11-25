@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="leastconfidentscorer.png" type="Manipulator"
+	xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+
+	<name>Least Confident Scorer</name>
+	<shortDescription>
+		Assigns a score based on the overall lowest certainty.
+	</shortDescription>
+	<fullDescription>
+		<intro>
+			Basic Uncertainty Sampling Scorer, the score is calculated as
+			1 minus the highest class probability for the row. Notice: This method is very
+			sensitive to noise!
+		</intro>
+		<option name="Column Selection">Select all columns that are part of the class probability distribution.
+		</option>
+	</fullDescription>
+
+	<ports>
+		<inPort name="Unlabeled Data" index="0">Unlabeled data with class probability distribution.</inPort>
+		<outPort name="Input Data with Least Confident Score" index="0">Input data with least confident score</outPort>
+	</ports>
+</knimeNode>

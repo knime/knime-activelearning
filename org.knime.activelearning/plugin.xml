@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+      <extension
+         point="org.knime.workbench.repository.categories">
+      <category
+            icon="icons/AL.png"
+            level-id="activelearning"
+            locked="false"
+            name="Active Learning"
+            path="/">
+      </category>
+      <category
+            icon="icons/missing.gif"
+            level-id="score"
+            locked="false"
+            name="Score"
+            path="/activelearning/">
+      </category>
+            <category
+            icon="icons/missing.gif"
+            level-id="select"
+            locked="false"
+            name="Select"
+            path="/activelearning/">
+      </category>
+      <category
+            icon="icons/missing.gif"
+            level-id="density"
+            locked="false"
+            name="Density"
+            path="/activelearning/score">
+      </category>
+	  <category
+            icon="icons/missing.gif"
+            level-id="uncertainty"
+            locked="false"
+            name="Uncertainty"
+            path="/activelearning/score">
+      </category>
+       <category
+            icon="icons/missing.gif"
+            level-id="novelty"
+            locked="false"
+            name="Novelty Detection"
+            path="/activelearning/score">
+      </category>
+	  <category
+            icon="icons/AL-Loop.png"
+            level-id="loop"
+            locked="false"
+            name="Loop"
+            path="/activelearning">
+      </category>
+       <category
+            icon="icons/AL-Loop-end.png"
+            level-id="end"
+            locked="false"
+            name="End"
+            path="/activelearning/loop">
+      </category>
+	  <category
+            icon="icons/missing.gif"
+            level-id="combiner"
+            locked="false"
+            name="Combiner"
+            path="/activelearning/score">
+      </category>
+	  <category
+            icon="icons/missing.gif"
+            level-id="allinone"
+            locked="false"
+            name="All in One"
+            path="/activelearning/score">
+      </category>
+   </extension>
+
+   <!-- Nodesets -->
+   <extension
+         point="org.knime.workbench.repository.nodesets">
+         <nodeset
+          	factory-class="org.knime.al.nodes.score.density.DensityNodeSetFactory"
+          	id="org.knime.al.nodes.density.DensityNodeSetFactory">
+      </nodeset>
+        <nodeset
+            factory-class="org.knime.al.nodes.score.uncertainty.UncertaintyNodeSetFactory"
+            id="org.knime.al.nodes.uncertainty.UncertaintyNodeSetFactory">
+        </nodeset>
+   		<nodeset
+            factory-class="org.knime.al.nodes.loop.LoopNodeSetFactory"
+            id="org.knime.al.node.loop.LoopNodeSetFactory">
+        </nodeset>
+        <nodeset
+            factory-class="org.knime.al.nodes.score.combine.CombinerNodeSetFactory"
+            id="org.knime.al.nodes.combiner.CombinerNodeSetFactory">
+        </nodeset>
+        <nodeset
+              deprecated="false"
+              factory-class="org.knime.al.nodes.score.novelty.NoveltyNodeSetFactory"
+              id="org.knime.al.nodes.score.novelty.NoveltyNodeSetFactory">
+        </nodeset>
+       <!-- <nodeset
+            factory-class="org.knime.al.nodes.score.novelty.NoveltyNodeSetFactory"
+            id="org.knime.al.nodes.score.novelty.NoveltyNodeSetFactory">
+        </nodeset> -->
+     </extension>
+     
+     <!-- Nodes -->
+     <extension
+         point="org.knime.workbench.repository.nodes">
+      <node
+            category-path="/activelearning/score/allinone"
+            factory-class="org.knime.al.nodes.score.pbac.PBACScorerNodeFactory"
+            id="org.knime.exp.al.node.pbac.PBACScorerNodeFactory">
+      </node>
+      <node
+            category-path="/activelearning/select"
+            factory-class="org.knime.al.nodes.select.elementselector.ElementSelectorNodeFactory"
+            id="org.knime.exp.al.node.elementselector.ElementSelectorNodeFactory">
+      </node>
+   </extension>
+     <extension
+           point="org.knime.core.PortType">
+        <portType
+              hidden="false"
+              name="org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObject"
+              objectClass="org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObject"
+              objectSerializer="org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObject$Serializer"
+              specClass="org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObjectSpec"
+              specSerializer="org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObjectSpec$Serializer">
+        </portType>
+   org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObjectSpec  </extension>
+</plugin>
