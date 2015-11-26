@@ -83,7 +83,6 @@
                id="org.knime.al.nodes.density.DensityNodeSetFactory">
       </nodeset>
         <nodeset
-              default-category-icon="/labs/activelearning/"
               factory-class="org.knime.al.nodes.score.uncertainty.UncertaintyNodeSetFactory"
               id="org.knime.al.nodes.uncertainty.UncertaintyNodeSetFactory">
         </nodeset>
