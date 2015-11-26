@@ -50,6 +50,7 @@
  */
 package org.knime.al.nodes.loop.end;
 
+import org.knime.core.data.DataValue;
 import org.knime.core.data.StringValue;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -109,7 +110,7 @@ public class ActiveLearnLoopEndNodeFactory
             {
                 addDialogComponent(new DialogComponentColumnNameSelection(
                         ActiveLearnLoopEndSettingsModels.createRepColumnModel(),
-                        "Representative Column", 0, StringValue.class));
+                        "Representative Column", 0, DataValue.class));
 
                 addDialogComponent(new DialogComponentColumnNameSelection(
                         ActiveLearnLoopEndSettingsModels

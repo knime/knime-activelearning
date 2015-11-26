@@ -2,15 +2,14 @@
 <knimeNode icon="PBACScorer.png" type="Manipulator">
 	<name>PBAC Scorer</name>
 	<shortDescription>
-		All in one node that calculates/updates the PBAC
-		Score.
+		All in one node that calculates/updates the PBAC Score.
 	</shortDescription>
 
 	<fullDescription>
 		<intro>
-			This node contains the default PBAC implementation in one node. <br/>
-			For more information on PBAC see: <br/>
-			<a href="ww.inf.uni-konstanz.de/bioml2/publications/Papers2009/CeBe09.pdf">ww.inf.uni-konstanz.de/bioml2/publications/Papers2009/CeBe09.pdf</a>
+			This node contains the default Prototype Based Active Classification (PBAC) implementation. <br/>
+			For more information on PBAC see
+			Active Learning for object classification: from exploration to exploitation (Cebron et al., 2009) <br/>
 		</intro>
 		<option name="Exploitation Factor">The weighting factor between exploration and exploitation.</option>
 		<option name="Radius Alpha">The radius alpha parameter for the node potential portion of PBAC.</option>

@@ -155,7 +155,7 @@ public class ActiveLearnLoopEndNodeView
     private void showConfigured() {
         m_messageContainer.removeAll();
         m_messageContainer
-                .add(new JLabel("Configured.. Waiting for Execution"));
+                .add(new JLabel("Configured... Waiting for Execution"));
         setComponent(m_messageContainer);
     }
 

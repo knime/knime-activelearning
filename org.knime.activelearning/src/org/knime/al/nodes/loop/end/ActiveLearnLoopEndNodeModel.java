@@ -144,6 +144,9 @@ public class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
         m_isExecuting = false;
         m_isTerminated = false;
 
+        // empty row map if no input data is present, yet.
+        m_rowMap = new HashMap<RowKey, DataRow>();
+
         m_classModel = new ClassModel();
 
         m_curIterationIndex = 0;
@@ -202,7 +205,7 @@ public class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
         if (!m_autoTerminateModel.getBooleanValue()
                 || (inData[DATA_PORT].getRowCount() > 0)) {
 
-            m_rowMap = new HashMap<>(inData[DATA_PORT].getRowCount());
+            m_rowMap = new HashMap<>((int)inData[DATA_PORT].size());
             for (final DataRow row : inData[DATA_PORT]) {
                 m_rowMap.put(row.getKey(), row);
             }

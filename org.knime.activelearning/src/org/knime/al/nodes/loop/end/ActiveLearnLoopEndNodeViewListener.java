@@ -53,7 +53,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
@@ -372,7 +374,9 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
     private void finishAndContinue() {
         // Next Iteration is about to be processed. Finish current iteration
         // and prepare the next one
-        finishCurrentIteration(); // prepares next iteration aswell
+        finishCurrentIteration();
+
+        // prepares next iteration as well
         m_nodeModel.continueExecution();
     }
 
@@ -475,7 +479,7 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
      * Prepare a new Iteration
      */
     private void prepareNextIteration() {
-        m_classMap = new HashMap<RowKey, String>(); // make aw new hiliteMap
+        m_classMap = new HashMap<RowKey, String>(); // make a new hiliteMap
 
         // Add the hilites to our hiliteMap
         for (final RowKey key : m_nodeModel.getRowMap().keySet()) {
@@ -501,10 +505,15 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
             } else {
 
                 // add all rows labeled with NO_CLASS to toBeRemoved list
+                final List<RowKey> toBeRemoved = new ArrayList<RowKey>();
                 for (final RowKey key : m_classMap.keySet()) {
                     if (m_classMap.get(key).equals(ClassModel.NO_CLASS)) {
-                        m_classMap.remove(key);
+                        toBeRemoved.add(key);
                     }
+                }
+
+                for(final RowKey remove : toBeRemoved){
+                    m_classMap.remove(remove);
                 }
             }
         }
