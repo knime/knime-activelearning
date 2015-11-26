@@ -727,13 +727,6 @@ license terms applicable to such Node, including when such Node is
 propagated with or for interoperation with KNIME.
    </license>
 
-   <requires>
-      <import plugin="org.knime.core" version="3.0.0" match="greaterOrEqual"/>
-      <import plugin="org.knime.base" version="3.0.0" match="greaterOrEqual"/>
-      <import plugin="org.apache.commons.math3" version="3.4.1" match="greaterOrEqual"/>
-      <import plugin="org.junit"/>
-   </requires>
-
    <plugin
          id="org.knime.activelearning"
          download-size="0"
