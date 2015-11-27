@@ -120,7 +120,7 @@ public class ActiveLearnLoopEndNodeFactory
                 addDialogComponent(new DialogComponentOptionalString(
                         ActiveLearnLoopEndSettingsModels
                                 .createDefaultClassModel(),
-                        "Allow Unlabeled Rows; Default Class:"));
+                        "Automatically label rows with default class:"));
 
                 addDialogComponent(new DialogComponentBoolean(
                         ActiveLearnLoopEndSettingsModels

@@ -245,8 +245,22 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
 
         // continueButton
         if (command.equals("continue")) {
-            finishAndContinue();
+            if (getAllRowsLabeled() || m_defaultClassModel.isActive()) {
+                // Cleanup and stop
+                finishAndContinue();
+            } else {
+                final int ret = JOptionPane.showConfirmDialog(m_gui,
+                        "Not all rows are labeled, are you sure you want to continue? \n"
+                                + "Continuing will cause these rows to be added back to the unlabeled pool.",
+                        "Continue?", JOptionPane.CANCEL_OPTION,
+                        JOptionPane.WARNING_MESSAGE);
 
+                if ((ret == JOptionPane.CANCEL_OPTION)
+                        || (ret == JOptionPane.CLOSED_OPTION)) {
+                    return;
+                }
+                finishAndContinue();
+            }
             return;
         }
 
@@ -287,20 +301,21 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
             // If we're through all the rows, start from beginning
             RowKey curKey = null;
 
-            while (++m_curRow < m_classViewerTable.getRowCount()) {
+            while (m_curRow < m_classViewerTable.getRowCount()) {
                 curKey = m_classViewerTable.getRowKeyOf(m_curRow);
                 if (m_classMap.get(curKey).equals(ClassModel.NO_CLASS)) {
                     break;
                 }
+                m_curRow++;
             }
 
             //
-            if (m_curRow == m_classViewerTable.getRowCount()) {
+            if (m_curRow >= m_classViewerTable.getRowCount()) {
                 if (!getAllRowsLabeled()) {
                     if (m_gui.m_autoContCheckBox.isSelected()
                             && !m_defaultClassModel.isActive()) {
                         final int ret = JOptionPane.showConfirmDialog(m_gui,
-                                "You are at the end of the hiliteList,\n"
+                                "You are at the end of the list,\n"
                                         + "but there are still rows unlabeled.\n"
                                         + "Do you want to continue anyway?\n",
                                 "Continue with unlabeled?",
@@ -321,7 +336,7 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
                 // update view with new row.
                 updateDetailedView(curKey);
             }
-            updateRowStatsLabel();
+            updateRowStatsLabel(curKey);
         }
 
         if (command.equals("removeClass")) {
@@ -449,7 +464,7 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
 
                 // update view with m_curRow
                 updateDetailedView(m_classViewerTable.getRowKeyOf(m_curRow));
-                updateRowStatsLabel();
+                updateRowStatsLabel(m_classViewerTable.getRowKeyOf(m_curRow));
             } else if (selectedPanel == CLASS_PANEL) {
                 m_gui.m_hiliteTable.clearSelection();
             }
@@ -512,7 +527,7 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
                     }
                 }
 
-                for(final RowKey remove : toBeRemoved){
+                for (final RowKey remove : toBeRemoved) {
                     m_classMap.remove(remove);
                 }
             }
@@ -552,7 +567,7 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
             m_gui.m_classBtnList.setDefaultText("- Skip -");
         }
 
-        updateRowStatsLabel();
+        updateRowStatsLabel(m_classViewerTable.getRowKeyOf(m_curRow));
 
         m_gui.m_iterLbl.setText(
                 "Current Iteration: " + m_nodeModel.getCurrentIterationIndex());
@@ -602,7 +617,7 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
      * Update the row stats label of the Wizard Panel with number of unlabeled
      * rows and the currently "selected" row.
      */
-    private void updateRowStatsLabel() {
+    private void updateRowStatsLabel(final RowKey rowKey) {
         int numUnlabeled = 0;
 
         for (final String cls : m_classMap.values()) {
@@ -612,7 +627,7 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
         }
 
         m_gui.m_rowStatsWiz.setText("Number of unlabeled rows: " + numUnlabeled
-                + ", current row: " + m_curRow);
+                + ", current row: " + rowKey.toString());
     }
 
     /*
