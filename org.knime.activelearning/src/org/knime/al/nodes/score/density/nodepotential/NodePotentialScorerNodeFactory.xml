@@ -3,7 +3,7 @@
 	xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
 
-	<name>Node Potential Scorer</name>
+	<name>Potential Uncertainty Scorer</name>
 	<shortDescription>
 		Calculates/Updates a density based exploration potential of a n-dimensional vector space.
 	</shortDescription>
@@ -13,9 +13,9 @@
 			Calculates/Updates the density based exploration potential of a
 			n-dimensional vector space.
 			<br />
-			See Paper by Cebron: <br/>
+			See Paper by Cebron et. al: <br/>
 			<a
-				href="http://ww.inf.uni-konstanz.de/bioml2/publications/Papers2009/CeBe09.pdf">ww.inf.uni-konstanz.de/bioml2/publications/Papers2009/CeBe09.pdf
+				href="http://www.inf.uni-konstanz.de/bioml2/publications/Papers2009/CeBe09.pdf">http://www.inf.uni-konstanz.de/bioml2/publications/Papers2009/CeBe09.pdf
 			</a>
 		</intro>
 		<option name="Radius Alpha">Radius Alpha parameter, influences the size of the

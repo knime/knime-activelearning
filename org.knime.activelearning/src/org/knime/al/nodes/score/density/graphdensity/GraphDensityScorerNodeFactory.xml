@@ -1,24 +1,35 @@
 <!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
 <knimeNode icon="graphdensityscorer.png" type="Manipulator">
-	<name>Graph Density Scorer</name>
+	<name>Graph Density Uncertainty Scorer</name>
 	<shortDescription>
-		Calculates/Updates the density of a n-dimensional vector space, based on a kNN graph. 
-		From the RALF Paper: https://www.d2.mpi-inf.mpg.de/content/ralf-reinforced-active-learning-formulation
+		Calculates/Updates the density of a n-dimensional
+		vector space, based on a kNN graph.
+		For details see the RALF Paper:
+		https://www.d2.mpi-inf.mpg.de/content/ralf-reinforced-active-learning-formulation
 	</shortDescription>
 
 	<fullDescription>
 		<intro>
-		Calculates/Updates the density of a n-dimensional vector space, based on a kNN graph. 
-		From the RALF Paper: https://www.d2.mpi-inf.mpg.de/content/ralf-reinforced-active-learning-formulation
+			Calculates/Updates the density of a n-dimensional vector space, based
+			on a kNN graph.
+			For details see the RALF Paper:
+			<a
+				href="https://www.d2.mpi-inf.mpg.de/content/ralf-reinforced-active-learning-formulation">https://www.d2.mpi-inf.mpg.de/content/ralf-reinforced-active-learning-formulation</a>
 		</intro>
-		<option name="Number of Neighbors">The number of neighbors which are considered.</option>
-		<option name="Sigma">The sigma for the distance weighting function</option>
-		<option name="Column Selection"> The columns used for calculating the density.</option>
+		<option name="Number of Neighbors">The number of neighbors which are considered.
+		</option>
+		<option name="Sigma">The sigma for the distance weighting function
+		</option>
+		<option name="Column Selection"> The columns used for calculating the density.
+		</option>
 	</fullDescription>
 
 	<ports>
-		<inPort name="Unlabeled data" index="0">Rows without an class label.</inPort>
-		<inPort name="Newly labeled data" index="1">Rows that where labeled in the last iteration.</inPort>
-		<outPort name="Unlabed Data with Graph Density score" index="0">Unlabed Data with Graph Density score.</outPort>
+		<inPort name="Unlabeled data" index="0">Rows without an class
+			label.</inPort>
+		<inPort name="Newly labeled data" index="1">Rows that where labeled
+			in the last iteration.</inPort>
+		<outPort name="Unlabed Data with Graph Density score" index="0">Unlabed
+			Data with Graph Density score.</outPort>
 	</ports>
 </knimeNode>

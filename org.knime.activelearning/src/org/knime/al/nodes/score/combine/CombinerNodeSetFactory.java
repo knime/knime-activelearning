@@ -52,7 +52,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.knime.al.nodes.score.combine.uncertaintydistribution.UncertaintyDistributionScorerNodeFactory;
+import org.knime.al.nodes.score.combine.pbac.UncertaintyDistributionScorerNodeFactory;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;

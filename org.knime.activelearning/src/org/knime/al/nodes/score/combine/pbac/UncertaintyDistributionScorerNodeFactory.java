@@ -45,7 +45,7 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  *
  */
-package org.knime.al.nodes.score.combine.uncertaintydistribution;
+package org.knime.al.nodes.score.combine.pbac;
 
 import org.knime.al.nodes.score.combine.AbstractCombinerNodeFactory;
 import org.knime.al.nodes.score.combine.AbstractCombinerNodeModel;

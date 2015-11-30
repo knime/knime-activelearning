@@ -3,9 +3,9 @@
 	xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
 
-	<name>Entropy Scorer</name>
+	<name>Entropy Uncertainty Scorer</name>
 	<shortDescription>
-		Calculates the entropy of the class probability distribution .
+		Calculates the entropy of the class probability distribution.
 	</shortDescription>
 	<fullDescription>
 		<intro>

@@ -3,27 +3,25 @@
 	xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
 
-	<name>Uncertainty Distribution Scorer</name>
+	<name>Exploration/Exploitation Scorer</name>
 	<shortDescription>
-		Calculates the uncertainty distribution score based
-		on an exploitation and an exploration score.
+		Calculates a combined exploration / exploitation score.
 	</shortDescription>
 	<fullDescription>
 		<intro>
-			Calculates the uncertainty distribution score based on an
-			exploitation and an exploration score.
+			Calculates a combined exploration / exploitation score. 
 			<br />
 			see paper by Cebron:
 			<a href="http://www.inf.uni-konstanz.de/bioml2/publications/Papers2009/CeBe09.pdf">
 			http://www.inf.uni-konstanz.de/bioml2/publications/Papers2009/CeBe09.pdf
 			</a>
 		</intro>
-		<option name="Exploration score"> The column containing the exploration score.
+		<option name="Exploration Score"> The column containing the exploration score.
 		</option>
-		<option name="Exploitation score"> The column containing the exploitation score.
+		<option name="Exploitation Score"> The column containing the exploitation score.
 		</option>
-		<option name="Exploitation factor"> The weighting factor between the exploration and
-			exploitation score.
+		<option name="Exploitation Factor"> The weighting factor between the exploration and
+			exploitation score. Exploration is weighted with (1- Exploitation Factor)).
 		</option>
 	</fullDescription>
 
