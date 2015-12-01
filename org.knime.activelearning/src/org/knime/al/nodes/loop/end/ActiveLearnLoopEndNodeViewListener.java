@@ -567,10 +567,12 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
             m_gui.m_classBtnList.setDefaultText("- Skip -");
         }
 
-        updateRowStatsLabel(m_classViewerTable.getRowKeyOf(m_curRow));
-
-        m_gui.m_iterLbl.setText(
-                "Current Iteration: " + m_nodeModel.getCurrentIterationIndex());
+        final RowKey key = m_classViewerTable.getRowKeyOf(m_curRow);
+        if (key != null) {
+            updateRowStatsLabel(key);
+            m_gui.m_iterLbl.setText("Current Iteration: "
+                    + m_nodeModel.getCurrentIterationIndex());
+        }
     }
 
     /*
@@ -642,7 +644,7 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
      * Notification to the listener that all rows have been labeled; no
      * unlabeled rows are left.
      */
-    void notifyAllRowsLabled() {
+            void notifyAllRowsLabled() {
         if (m_defaultClassModel.isActive()) {
             // means, buttons were deactivated
             m_gui.m_continueButton.setEnabled(true);
@@ -666,7 +668,7 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
      * Notify the Listener that there still are unlabeled rows. The Listener
      * will then update the GUI (disable Buttons/ set Tooltips etc).
      */
-    void notifyRowsStillUnlabeled() {
+            void notifyRowsStillUnlabeled() {
         if (m_defaultClassModel.isActive()) {
             return;
         }
@@ -685,7 +687,7 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
     /*
      * Set class of a row (index) to cls
      */
-    void setClass(final int row, final String cls) {
+            void setClass(final int row, final String cls) {
         m_classViewerTable.setValueAt(cls, row,
                 m_nodeModel.getClassColumnIndex() + 1);
     }
@@ -744,7 +746,7 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
     /*
      * Retruns true if there are no unlabeled rows left.
      */
-    boolean getAllRowsLabeled() {
+            boolean getAllRowsLabeled() {
         return !m_classMap.containsValue(ClassModel.NO_CLASS);
     }
 }

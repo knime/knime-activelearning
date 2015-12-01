@@ -182,7 +182,6 @@ public class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
     /**
      * {@inheritDoc}
      */
-    @SuppressWarnings("deprecation")
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
@@ -203,7 +202,7 @@ public class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
 
         // Automatically terminate if there are no more rows
         if (!m_autoTerminateModel.getBooleanValue()
-                || (inData[DATA_PORT].getRowCount() > 0)) {
+                || (inData[DATA_PORT].size() > 0)) {
 
             m_rowMap = new HashMap<>((int)inData[DATA_PORT].size());
             for (final DataRow row : inData[DATA_PORT]) {
@@ -220,7 +219,7 @@ public class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
         exec.setProgress("Processing ...");
 
         // Tabelle mit hilites (keys sind rowkeys von tabelle)
-        if ((inData[DATA_PORT].getRowCount() > 0) && !m_isTerminated) {
+        if ((inData[DATA_PORT].size() > 0) && !m_isTerminated) {
             super.continueLoop();
             // This called after each loop, nothing is returned on outport of
             // node
@@ -290,7 +289,6 @@ public class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
     protected void terminate() {
         m_isExecuting = false;
         m_isTerminated = true;
-
         m_curIterationIndex = 0;
 
         m_semaphore.setState(true);
