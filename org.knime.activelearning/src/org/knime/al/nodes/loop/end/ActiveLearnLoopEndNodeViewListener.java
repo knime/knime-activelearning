@@ -331,6 +331,8 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
                     updateDetailedView(
                             m_classViewerTable.getRowKeyOf(m_curRow));
 
+                }else {
+                    finishAndContinue();
                 }
             } else {
                 // update view with new row.
