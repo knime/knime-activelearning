@@ -614,6 +614,7 @@ public class ActiveLearnLoopEndNodeViewListener implements ActionListener,
             m_gui.m_detailedView
                     .add(m_nodeModel.requireRenderer(selectedValue));
             m_gui.m_detailedView.repaint();
+            m_gui.updateUI();
         }
     }
 
