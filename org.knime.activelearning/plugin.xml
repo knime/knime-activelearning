@@ -110,13 +110,11 @@
          point="org.knime.workbench.repository.nodes">
       <node
             category-path="/labs/activelearning/score/allinone"
-            factory-class="org.knime.al.nodes.score.pbac.PBACScorerNodeFactory"
-            id="org.knime.exp.al.node.pbac.PBACScorerNodeFactory">
+            factory-class="org.knime.al.nodes.score.pbac.PBACScorerNodeFactory">
       </node>
       <node
             category-path="/labs/activelearning/select"
-            factory-class="org.knime.al.nodes.select.elementselector.ElementSelectorNodeFactory"
-            id="org.knime.exp.al.node.elementselector.ElementSelectorNodeFactory">
+            factory-class="org.knime.al.nodes.select.elementselector.ElementSelectorNodeFactory">
       </node>
    </extension>
      <extension
