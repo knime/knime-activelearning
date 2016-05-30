@@ -79,29 +79,23 @@
    <extension
          point="org.knime.workbench.repository.nodesets">
          <nodeset
-               factory-class="org.knime.al.nodes.score.density.DensityNodeSetFactory"
-               id="org.knime.al.nodes.density.DensityNodeSetFactory">
+               factory-class="org.knime.al.nodes.score.density.DensityNodeSetFactory">
       </nodeset>
         <nodeset
-              factory-class="org.knime.al.nodes.score.uncertainty.UncertaintyNodeSetFactory"
-              id="org.knime.al.nodes.uncertainty.UncertaintyNodeSetFactory">
+              factory-class="org.knime.al.nodes.score.uncertainty.UncertaintyNodeSetFactory">
         </nodeset>
    		<nodeset
-            factory-class="org.knime.al.nodes.loop.LoopNodeSetFactory"
-            id="org.knime.al.node.loop.LoopNodeSetFactory">
+            factory-class="org.knime.al.nodes.loop.LoopNodeSetFactory">
         </nodeset>
         <nodeset
-            factory-class="org.knime.al.nodes.score.combine.CombinerNodeSetFactory"
-            id="org.knime.al.nodes.combiner.CombinerNodeSetFactory">
+            factory-class="org.knime.al.nodes.score.combine.CombinerNodeSetFactory">
         </nodeset>
         <nodeset
               deprecated="false"
-              factory-class="org.knime.al.nodes.score.novelty.NoveltyNodeSetFactory"
-              id="org.knime.al.nodes.score.novelty.NoveltyNodeSetFactory">
+              factory-class="org.knime.al.nodes.score.novelty.NoveltyNodeSetFactory">
         </nodeset>
        <!-- <nodeset
-            factory-class="org.knime.al.nodes.score.novelty.NoveltyNodeSetFactory"
-            id="org.knime.al.nodes.score.novelty.NoveltyNodeSetFactory">
+            factory-class="org.knime.al.nodes.score.novelty.NoveltyNodeSetFactory">
         </nodeset> -->
      </extension>
      
