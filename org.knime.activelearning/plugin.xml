@@ -115,7 +115,7 @@
            point="org.knime.core.PortType">
         <portType
               hidden="false"
-              name="org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObject"
+              name="KNFST Model"
               objectClass="org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObject"
               objectSerializer="org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObject$Serializer"
               specClass="org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObjectSpec"
