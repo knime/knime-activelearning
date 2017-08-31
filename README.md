@@ -23,12 +23,12 @@ This example illustrates the active learning process with KNIME Active
 Learning:
 
 -   It starts with the *Active Learn Loop Start* node and ends with one
-    of the *Active Learn Loop End* nodes.
+    of the *Active Learn Loop End* nodes.
 -   Each unlabeled row is assigned a score in the **Score** module.
 -   In the **Select** module, one (or more) rows are selected
     for labeling.
 -   The selected rows are then assigned a class label in the *Active
-    Learn Loop End *node.
+    Learn Loop End* node.
 
 #### Example Workflows
 
@@ -55,7 +55,7 @@ nodes:
 
 Scorer nodes are nodes which calculate a score for each row that
 describes its relevance for the active learning process. KNIME Active
-Learning provides scorer nodes grouped in the following categories:
+Learning provides scorer nodes grouped in the following categories:
 
 -   **Uncertainty:** Nodes in this category calculate their score based
     on a class probability distribution which is a configurable output
