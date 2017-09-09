@@ -1,4 +1,4 @@
-# KNIME Active Learning
+# ![Image](https://www.knime.com/files/knime_logo_github_40x40_4layers.png) KNIME® Active Learning
 
 The KNIME Active Learning plugin comprises a set of KNIME nodes for
 modular active learning and novelty detection in KNIME. Active learning
