@@ -4,7 +4,7 @@ Bundle-Name: KNIME Active Learning Plug-in
 Bundle-SymbolicName: org.knime.activelearning;singleton:=true
 Bundle-Version: 3.5.0.qualifier
 Bundle-ClassPath: knime-activelearning.jar
-Bundle-Vendor: KNIME GmbH, Konstanz, Germany
+Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Export-Package: org.knime.al.nodes.loop,
  org.knime.al.nodes.loop.dbg,
  org.knime.al.nodes.loop.end.components,
