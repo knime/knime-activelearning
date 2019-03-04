@@ -30,7 +30,6 @@
 		<knime.shared.p2>${env.KNIME_SHARED_P2}</knime.shared.p2>
 		<knime.tp.p2>${env.KNIME_TP_P2}</knime.tp.p2>
 		<knime.javasnippet.p2>${env.KNIME_JAVASNIPPET_P2}</knime.javasnippet.p2>
-		<knime.workbench.p2>${env.KNIME_WORKBENCH_P2}</knime.workbench.p2>
 	</properties>
 
 	<modules>
@@ -69,11 +68,6 @@
 			<id>knime.javasnippet.p2</id>
 			<layout>p2</layout>
 			<url>${knime.javasnippet.p2}</url>
-		</repository>
-		<repository>
-			<id>knime.workbench.p2</id>
-			<layout>p2</layout>
-			<url>${knime.workbench.p2}</url>
 		</repository>
 	</repositories>
 </project>
