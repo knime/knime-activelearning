@@ -51,9 +51,10 @@ import org.knime.al.nodes.score.uncertainty.AbstractUncertaintyNodeFactory;
  * Node Factory for the Entropy Scorer Node.
  *
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated use the {@link VarianceScorer2NodeFactory} instead
  */
-public class VarianceScorerNodeFactory
-        extends AbstractUncertaintyNodeFactory<VarianceScorerNodeModel> {
+@Deprecated
+public class VarianceScorerNodeFactory extends AbstractUncertaintyNodeFactory<VarianceScorerNodeModel> {
 
     /**
      * {@inheritDoc}

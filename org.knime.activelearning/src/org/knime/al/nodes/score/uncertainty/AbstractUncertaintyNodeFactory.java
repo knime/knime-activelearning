@@ -48,22 +48,30 @@
  */
 package org.knime.al.nodes.score.uncertainty;
 
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NodeView;
+import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
+import org.knime.core.node.defaultnodesettings.DialogComponentLabel;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
+import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
 
 /**
- * Abstract superclass for the Exploitation scorer nodes, contains all the
- * common methods. Subclasses only need to implement the
- * {@link #createNodeModel()} method.
+ * Abstract superclass for the Exploitation scorer nodes, contains all the common methods. Subclasses only need to
+ * implement the {@link #createNodeModel()} method.
  *
  * @author gabriel
+ * @author Simon Schmid, KNIME GmbH, Konstanz, Germany
  * @param <T>
  */
-public abstract class AbstractUncertaintyNodeFactory<T extends AbstractUncertaintyNodeModel>
-        extends NodeFactory<T> {
+public abstract class AbstractUncertaintyNodeFactory<T extends AbstractUncertaintyNodeModel> extends NodeFactory<T> {
 
     /**
      * {@inheritDoc}
@@ -101,11 +109,45 @@ public abstract class AbstractUncertaintyNodeFactory<T extends AbstractUncertain
     @Override
     protected NodeDialogPane createNodeDialogPane() {
         return new DefaultNodeSettingsPane() {
+
+            private DataTableSpec m_spec;
+
+            private SettingsModelColumnFilter2 m_createColumnFilterModel =
+                AbstractUncertaintyNodeModel.createColumnFilterModel();
+
             {
                 createNewGroup("Column Selection");
-                addDialogComponent(new DialogComponentColumnFilter2(
-                        AbstractUncertaintyNodeModel.createColumnFilterModel(),
-                        0, false));
+                addDialogComponent(new DialogComponentColumnFilter2(m_createColumnFilterModel, 0, false));
+
+                createNewGroup("Output Settings");
+                addDialogComponent(new DialogComponentString(AbstractUncertaintyNodeModel.createColumnNameModel(null),
+                    "Output column name ", true, 17));
+
+                // placeholder
+                addDialogComponent(new DialogComponentLabel(""));
+
+                addDialogComponent(
+                    new DialogComponentButtonGroup(AbstractUncertaintyNodeModel.createExceptionHandlingModel(),
+                        "In case of invalid input...", true, ExceptionHandling.values()));
+            }
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void saveAdditionalSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+                if (m_spec != null && m_createColumnFilterModel.applyTo(m_spec).getIncludes().length < 2) {
+                    throw new InvalidSettingsException("At least two columns must be included.");
+                }
+            }
+
+            /**
+             * {@inheritDoc}
+             */
+            @Override
+            public void loadAdditionalSettingsFrom(final NodeSettingsRO settings, final DataTableSpec[] specs)
+                throws NotConfigurableException {
+                m_spec = specs[0];
             }
         };
     }

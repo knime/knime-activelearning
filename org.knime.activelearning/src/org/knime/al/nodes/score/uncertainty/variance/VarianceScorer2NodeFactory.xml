@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<knimeNode icon="marginscorer.png" type="Manipulator"
+<knimeNode icon="variancescorer.png" type="Manipulator"
 	xmlns="http://knime.org/node/v2.12"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
-
-	<name>Margin Uncertainty Scorer</name>
+	<name>Variance Uncertainty Scorer</name>
 	<shortDescription>
-		Calculates the margin uncertainty score for a class probability distribution.
+		Calculates the variance uncertainty score of a class probability distribution.
 	</shortDescription>
 	<fullDescription>
 		<intro>
-			Calculates the margin uncertainty score of a class
+			Calculates the variance uncertainty score of a class
 			probability
-			distribution which is one minus the difference between the two
-			classes with the
-			highest probabilities, i.e.,
-			a low difference leads to
-			a
-			high uncertainty.
+			distribution. The output will be
+			one minus the variance of
+			the probabilities, i.e.,
+			a lower variance means higher
+			uncertainty.
 		</intro>
 		<option name="Column Selection">
 			Include the columns containing the class

@@ -41,38 +41,24 @@
  *  propagated with or for interoperation with KNIME.  The owner of a Node
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
- * ---------------------------------------------------------------------
  *
- * Created on 11.03.2013 by dietyc
  */
-package org.knime.al.nodes.score.uncertainty.margin;
+package org.knime.al.nodes.score.uncertainty.variance;
 
-import java.util.Arrays;
-
-import org.knime.al.nodes.score.uncertainty.AbstractUncertaintyNodeModel;
+import org.knime.al.nodes.score.uncertainty.AbstractUncertaintyNodeFactory;
 
 /**
+ * Node Factory for the Entropy Scorer Node.
+ *
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
- * @author Simon Schmid, KNIME GmbH, Konstanz, Germany
  */
-final class MarginScorerNodeModel extends AbstractUncertaintyNodeModel {
-
-    private static final String DEF_COLUMN_NAME = "Margin Score";
+public class VarianceScorer2NodeFactory extends AbstractUncertaintyNodeFactory<VarianceScorer2NodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected double calculateUncertainty(final double[] values) {
-        Arrays.sort(values);
-        return 1 - (values[values.length - 1] - values[values.length - 2]);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected String getDefaultColumnName() {
-        return DEF_COLUMN_NAME;
+    public VarianceScorer2NodeModel createNodeModel() {
+        return new VarianceScorer2NodeModel();
     }
 }

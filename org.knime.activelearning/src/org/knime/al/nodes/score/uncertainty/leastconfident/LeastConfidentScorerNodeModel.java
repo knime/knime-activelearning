@@ -48,67 +48,34 @@
 package org.knime.al.nodes.score.uncertainty.leastconfident;
 
 import java.util.Arrays;
-import java.util.List;
 
 import org.knime.al.nodes.score.uncertainty.AbstractUncertaintyNodeModel;
-import org.knime.al.nodes.score.uncertainty.entropy.EntropyScorerNodeModel;
-import org.knime.al.util.MathUtils;
-import org.knime.al.util.NodeTools;
-import org.knime.core.data.DataCell;
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataRow;
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DoubleValue;
-import org.knime.core.data.container.ColumnRearranger;
-import org.knime.core.data.container.SingleCellFactory;
-import org.knime.core.data.def.DoubleCell;
-import org.knime.core.node.InvalidSettingsException;
 
 /**
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @author Simon Schmid, KNIME GmbH, Konstanz, Germany
  */
-public class LeastConfidentScorerNodeModel
-        extends AbstractUncertaintyNodeModel {
+final class LeastConfidentScorerNodeModel extends AbstractUncertaintyNodeModel {
+
+    private static final String DEF_COLUMN_NAME = "Least Confident Score";
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected ColumnRearranger createResRearranger(final DataTableSpec inSpec)
-            throws InvalidSettingsException {
-        final ColumnRearranger rearranger = new ColumnRearranger(inSpec);
-        final DataColumnSpec newColSpec =
-                new DataColumnSpecCreator("Least Confident Score",
-                        DoubleCell.TYPE).createSpec();
-
-        final List<Integer> selectedColumns =
-                NodeTools.getIndicesFromFilter(inSpec, m_columnFilterModel,
-                        DoubleValue.class, EntropyScorerNodeModel.class);
-
-        if (selectedColumns.size() < 2) {
-            throw new InvalidSettingsException(
-                    "Need at least 2 DoubleType columns!");
-        }
-        // utility object that calculates the difference between top scoring
-        // class predictions
-        rearranger.append(new SingleCellFactory(newColSpec) {
-            @Override
-            public DataCell getCell(final DataRow row) {
-                final double[] values =
-                        NodeTools.toDoubleArray(row, selectedColumns);
-                Arrays.sort(values);
-                // make sure the distribution is valid,
-                if (!MathUtils.checkDistribution(values)) {
-                    AbstractUncertaintyNodeModel
-                            .handleInvalidDistribution(row.getKey());
-                }
-
-                // to make this node compatible with the other uncertainty
-                // scorers we invert the value.
-                return new DoubleCell(1 - (values[values.length - 1]));
-            }
-        });
-        return rearranger;
+    protected double calculateUncertainty(final double[] values) {
+        final double maxValue = Arrays.stream(values).max().getAsDouble();
+        // to make this node compatible with the other uncertainty
+        // scorers we invert the value.
+        return 1 - maxValue;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String getDefaultColumnName() {
+        return DEF_COLUMN_NAME;
+    }
+
 }

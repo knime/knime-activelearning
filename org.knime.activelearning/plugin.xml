@@ -81,9 +81,6 @@
          <nodeset
                factory-class="org.knime.al.nodes.score.density.DensityNodeSetFactory">
       </nodeset>
-        <nodeset
-              factory-class="org.knime.al.nodes.score.uncertainty.UncertaintyNodeSetFactory">
-        </nodeset>
    		<nodeset
             factory-class="org.knime.al.nodes.loop.LoopNodeSetFactory">
         </nodeset>
@@ -109,6 +106,31 @@
       <node
             category-path="/labs/activelearning/select"
             factory-class="org.knime.al.nodes.select.elementselector.ElementSelectorNodeFactory">
+      </node>
+      <node
+            category-path="/labs/activelearning/score/uncertainty"
+            deprecated="false"
+            factory-class="org.knime.al.nodes.score.uncertainty.entropy.EntropyScorerNodeFactory">
+      </node>
+      <node
+            category-path="/labs/activelearning/score/uncertainty"
+            deprecated="false"
+            factory-class="org.knime.al.nodes.score.uncertainty.margin.MarginScorerNodeFactory">
+      </node>
+      <node
+            category-path="/labs/activelearning/score/uncertainty"
+            deprecated="true"
+            factory-class="org.knime.al.nodes.score.uncertainty.variance.VarianceScorerNodeFactory">
+      </node>
+      <node
+            category-path="/labs/activelearning/score/uncertainty"
+            deprecated="false"
+            factory-class="org.knime.al.nodes.score.uncertainty.variance.VarianceScorer2NodeFactory">
+      </node>
+      <node
+            category-path="/labs/activelearning/score/uncertainty"
+            deprecated="false"
+            factory-class="org.knime.al.nodes.score.uncertainty.leastconfident.LeastConfidentScorerNodeFactory">
       </node>
    </extension>
      <extension

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <knimeNode icon="variancescorer.png" type="Manipulator"
-	xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	deprecated="true" xmlns="http://knime.org/node/v2.12"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
 	<name>Variance Uncertainty Scorer</name>
 	<shortDescription>
@@ -8,14 +9,45 @@
 	</shortDescription>
 	<fullDescription>
 		<intro>
-			Calculates the variance of a class probability distribution.
+			Calculates the variance of a class probability
+			distribution.
 		</intro>
-
-		<option name="Column Selection">The columns containing the class probabilities.</option>
+		<option name="Column Selection">
+			Include the columns containing the class
+			probabilities. The values must sum up to 1 for each data row.
+		</option>
+		<option name="Output column name">
+			Set the name of the appended output column.
+		</option>
+		<option name="In case of invalid input...">
+			Specify the action if a data row of the input is invalid.
+			Invalid
+			could mean a missing value in
+			the input or
+			an
+			invalid distribution
+			(the
+			probabilities
+			must sum up to 1). If
+			<i>fail</i>
+			is
+			selected,
+			the node will fail.
+			Otherwise, the node just gives a
+			warning
+			and puts
+			missing values in
+			the output for the corresponding
+			rows.
+		</option>
 	</fullDescription>
 
 	<ports>
-		<inPort name="Class Probabilities" index="0">Class Probabilities</inPort>
-		<outPort name="Input Data with Variance Score" index="0">Input data with variance score.</outPort>
+		<inPort name="Class Probabilities" index="0">Table containing two
+			or more columns containing class probabilities that sum up to 1.
+		</inPort>
+		<outPort name="Input Data with Uncertainty Score" index="0">Input
+			data with an appended column that contains the uncertainty score.
+		</outPort>
 	</ports>
 </knimeNode>

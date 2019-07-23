@@ -45,21 +45,8 @@
  */
 package org.knime.al.nodes.score.uncertainty.entropy;
 
-import java.util.List;
-
 import org.knime.al.nodes.score.uncertainty.AbstractUncertaintyNodeModel;
 import org.knime.al.util.MathUtils;
-import org.knime.al.util.NodeTools;
-import org.knime.core.data.DataCell;
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataRow;
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DoubleValue;
-import org.knime.core.data.container.ColumnRearranger;
-import org.knime.core.data.container.SingleCellFactory;
-import org.knime.core.data.def.DoubleCell;
-import org.knime.core.node.InvalidSettingsException;
 
 /**
  * @author dietzc, University of Konstanz
@@ -68,40 +55,26 @@ import org.knime.core.node.InvalidSettingsException;
 /**
  *
  * @author gabriel
+ * @author Simon Schmid, KNIME GmbH, Konstanz, Germany
  */
-public class EntropyScorerNodeModel extends AbstractUncertaintyNodeModel {
+final class EntropyScorerNodeModel extends AbstractUncertaintyNodeModel {
+
+    private static final String DEF_COLUMN_NAME = "Entropy Score";
 
     /**
-     * {@inheritDoc} Entropy based uncertainty score.
+     * {@inheritDoc}
      */
     @Override
-    protected ColumnRearranger createResRearranger(final DataTableSpec inSpec)
-            throws InvalidSettingsException {
-        final ColumnRearranger rearranger = new ColumnRearranger(inSpec);
-        final DataColumnSpec newColSpec =
-                new DataColumnSpecCreator("Entropy Score", DoubleCell.TYPE)
-                        .createSpec();
+    protected double calculateUncertainty(final double[] values) {
+        return MathUtils.entropyWithoutDistributionCheck(values);
+    }
 
-        // utility object that performs the calculation
-        rearranger.append(new SingleCellFactory(newColSpec) {
-            private final List<Integer> m_selectedIndicies =
-                    NodeTools.getIndicesFromFilter(inSpec, m_columnFilterModel,
-                            DoubleValue.class, EntropyScorerNodeModel.class);
-
-            @Override
-            public DataCell getCell(final DataRow row) {
-                final DoubleCell cell;
-                try {
-                    cell = new DoubleCell(MathUtils.entropy(
-                            NodeTools.toDoubleArray(row, m_selectedIndicies)));
-                } catch (final ArithmeticException e) {
-                    throw new IllegalArgumentException("Error in Row: "
-                            + row.getKey() + " : " + e.getMessage());
-                }
-                return cell;
-            }
-        });
-        return rearranger;
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String getDefaultColumnName() {
+        return DEF_COLUMN_NAME;
     }
 
 }

@@ -147,10 +147,28 @@ public final class MathUtils {
     }
 
     /**
-     * Calculates the entropy of the distribution of values in an double array.
+     * Calculates the Shannon entropy of the distribution of values in an double array.
      *
-     * @param distribution
-     *            a double array containing an distribution
+     * @param distribution a double array
+     * @return the entropy of the array
+     */
+    public static final double entropyWithoutDistributionCheck(final double[] distribution) {
+        double entropy = 0;
+        for (final double d : distribution) {
+            entropy += d * log2(d);
+        }
+
+        entropy /= log2(distribution.length);
+        if (Double.isNaN(entropy)) {
+            entropy = 0;
+        }
+        if (entropy == 0) {
+            return entropy;
+        }
+        return -entropy;
+    }
+
+    /**
      *
      *
      * @return the variance of the array
@@ -165,6 +183,17 @@ public final class MathUtils {
             throw new ArithmeticException(
                     "The sum of the distribution elements is not 1");
         }
+        return VAR.evaluate(distribution);
+    }
+
+    /**
+     * Calculates the variance of the distribution of values in an double array.
+     *
+     * @param distribution a double array containing an distribution
+     *
+     * @return the variance of the array
+     */
+    public static double varianceWithoutDistributionCheck(final double[] distribution) {
         return VAR.evaluate(distribution);
     }
 }

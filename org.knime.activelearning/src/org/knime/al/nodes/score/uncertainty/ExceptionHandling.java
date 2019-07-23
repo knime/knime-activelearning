@@ -43,36 +43,61 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
  *
- * Created on 11.03.2013 by dietyc
+ * History
+ *   Jul 23, 2019 (Simon Schmid, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.al.nodes.score.uncertainty.margin;
+package org.knime.al.nodes.score.uncertainty;
 
-import java.util.Arrays;
-
-import org.knime.al.nodes.score.uncertainty.AbstractUncertaintyNodeModel;
+import org.knime.core.node.util.ButtonGroupEnumInterface;
 
 /**
- * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * Enumeration of strategies how to handle exceptions like missing values in the input.
+ *
  * @author Simon Schmid, KNIME GmbH, Konstanz, Germany
  */
-final class MarginScorerNodeModel extends AbstractUncertaintyNodeModel {
+enum ExceptionHandling implements ButtonGroupEnumInterface {
 
-    private static final String DEF_COLUMN_NAME = "Margin Score";
+        /* Fail if an exception occurs. */
+        FAIL("fail"),
+        /* Ignore and set missing value as output if an exception occurs. */
+        IGNORE("ignore and set missing value as output");
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected double calculateUncertainty(final double[] values) {
-        Arrays.sort(values);
-        return 1 - (values[values.length - 1] - values[values.length - 2]);
+    private final String m_text;
+
+    private ExceptionHandling(final String text) {
+        m_text = text;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected String getDefaultColumnName() {
-        return DEF_COLUMN_NAME;
+    public String getText() {
+        return m_text;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getActionCommand() {
+        return name();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getToolTip() {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isDefault() {
+        return FAIL.equals(this);
+    }
+
 }

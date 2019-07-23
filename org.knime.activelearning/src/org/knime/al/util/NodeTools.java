@@ -177,13 +177,26 @@ public final class NodeTools {
     }
 
     /**
-     * Transforms a row into a double array using all compatible columns.
-     * Convenience method if all double columns are needed.
+     * Transforms a row into a double array. Use the include array to specify columns that are included.
      *
-     * @param row
-     *            The data row
-     * @param spec
-     *            The spec of the table the row is part of.
+     * @param row The data row
+     * @param include The indices of columns that are included in the array
+     * @return array containing the double values from the included columns, null if one of the included data cells is a
+     *         {@link MissingCell}
+     */
+    public static double[] toDoubleArray(final DataRow row, final int... include) {
+        final double[] res = new double[include.length];
+        for (int i = 0; i < res.length; i++) {
+            final DataCell cell = row.getCell(include[i]);
+            if (cell.isMissing()) {
+                return null;
+            }
+            res[i] = ((DoubleValue)cell).getDoubleValue();
+        }
+        return res;
+    }
+
+    /**
      * @return array containing the double values from the included columns
      */
     public static double[] toDoubleArray(final DataRow row,

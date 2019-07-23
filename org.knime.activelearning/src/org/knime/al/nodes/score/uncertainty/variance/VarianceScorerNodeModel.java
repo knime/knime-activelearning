@@ -45,51 +45,33 @@
  */
 package org.knime.al.nodes.score.uncertainty.variance;
 
-import java.util.List;
-
 import org.knime.al.nodes.score.uncertainty.AbstractUncertaintyNodeModel;
 import org.knime.al.util.MathUtils;
-import org.knime.al.util.NodeTools;
-import org.knime.core.data.DataCell;
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataRow;
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.DoubleValue;
-import org.knime.core.data.container.ColumnRearranger;
-import org.knime.core.data.container.SingleCellFactory;
-import org.knime.core.data.def.DoubleCell;
-import org.knime.core.node.InvalidSettingsException;
 
 /**
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @author Simon Schmid, KNIME GmbH, Konstanz, Germany
+ * @deprecated use the {@link VarianceScorer2NodeModel} instead
  */
-public class VarianceScorerNodeModel extends AbstractUncertaintyNodeModel {
+@SuppressWarnings("javadoc")
+@Deprecated
+final class VarianceScorerNodeModel extends AbstractUncertaintyNodeModel {
+
+    private static final String DEF_COLUMN_NAME = "Variance Score";
 
     /**
-     * {@inheritDoc} Variance based score.
+     * {@inheritDoc}
      */
     @Override
-    protected ColumnRearranger createResRearranger(final DataTableSpec inSpec)
-            throws InvalidSettingsException {
-        final ColumnRearranger rearranger = new ColumnRearranger(inSpec);
-        final DataColumnSpec newColSpec =
-                new DataColumnSpecCreator("Variance Score", DoubleCell.TYPE)
-                        .createSpec();
-
-        // utility object that performs the calculation
-        rearranger.append(new SingleCellFactory(newColSpec) {
-            final List<Integer> m_selectedIndicies =
-                    NodeTools.getIndicesFromFilter(inSpec, m_columnFilterModel,
-                            DoubleValue.class, VarianceScorerNodeModel.class);
-
-            @Override
-            public DataCell getCell(final DataRow row) {
-                return new DoubleCell(MathUtils.variance(
-                        NodeTools.toDoubleArray(row, m_selectedIndicies)));
-            }
-        });
-        return rearranger;
+    protected double calculateUncertainty(final double[] values) {
+        return MathUtils.varianceWithoutDistributionCheck(values);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String getDefaultColumnName() {
+        return DEF_COLUMN_NAME;
+    }
 }

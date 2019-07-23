@@ -41,94 +41,34 @@
  *  propagated with or for interoperation with KNIME.  The owner of a Node
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
- * --------------------------------------------------------------------- *
  *
  */
-package org.knime.al.nodes.score.uncertainty;
+package org.knime.al.nodes.score.uncertainty.variance;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.knime.al.nodes.score.uncertainty.entropy.EntropyScorerNodeFactory;
-import org.knime.al.nodes.score.uncertainty.leastconfident.LeastConfidentScorerNodeFactory;
-import org.knime.al.nodes.score.uncertainty.margin.MarginScorerNodeFactory;
-import org.knime.al.nodes.score.uncertainty.variance.VarianceScorerNodeFactory;
-import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
-import org.knime.core.node.NodeSetFactory;
-import org.knime.core.node.config.ConfigRO;
+import org.knime.al.nodes.score.uncertainty.AbstractUncertaintyNodeModel;
+import org.knime.al.util.MathUtils;
 
 /**
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @author Simon Schmid, KNIME GmbH, Konstanz, Germany
  */
-public class UncertaintyNodeSetFactory implements NodeSetFactory {
+final class VarianceScorer2NodeModel extends AbstractUncertaintyNodeModel {
 
-    /**
-     *
-     */
-    private static final String CATEGORY = "/labs/activelearning/score/uncertainty";
-    private static final NodeLogger LOGGER =
-            NodeLogger.getLogger(UncertaintyNodeSetFactory.class);
-    private final Map<String, String> m_nodeFactories =
-            new HashMap<String, String>();
+    private static final String DEF_COLUMN_NAME = "Variance Score";
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ConfigRO getAdditionalSettings(final String id) {
-        return null;
+    protected double calculateUncertainty(final double[] values) {
+        return 1 - MathUtils.varianceWithoutDistributionCheck(values);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String getAfterID(final String id) {
-        return "";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getCategoryPath(final String id) {
-        return m_nodeFactories.get(id);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @SuppressWarnings("unchecked")
-    @Override
-    public Class<? extends NodeFactory<? extends NodeModel>>
-            getNodeFactory(final String id) {
-        try {
-            return (Class<? extends NodeFactory<? extends NodeModel>>) Class
-                    .forName(id);
-        } catch (final ClassNotFoundException e) {
-            LOGGER.warn("Could not load Node: " + e.getMessage());
-        }
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<String> getNodeFactoryIds() {
-        m_nodeFactories.put(
-                LeastConfidentScorerNodeFactory.class.getCanonicalName(),
-                CATEGORY);
-        m_nodeFactories.put(EntropyScorerNodeFactory.class.getCanonicalName(),
-                CATEGORY);
-        m_nodeFactories.put(MarginScorerNodeFactory.class.getCanonicalName(),
-                CATEGORY);
-        m_nodeFactories.put(VarianceScorerNodeFactory.class.getCanonicalName(),
-                CATEGORY);
-
-        return m_nodeFactories.keySet();
+    protected String getDefaultColumnName() {
+        return DEF_COLUMN_NAME;
     }
 }
