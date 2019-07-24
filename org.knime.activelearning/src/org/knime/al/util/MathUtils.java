@@ -58,13 +58,14 @@ import org.apache.commons.math3.util.FastMath;
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
  */
 public final class MathUtils {
-    // tollerance for double equality checks
-    private static final double TOLLERANCE = 1E-7;
+    // tolerance for double equality checks
+    private static final double TOLERANCE = 1E-7;
 
-    // natural log of 2
+    /** natural log of 2 */
     public static final double LOG2 = FastMath.log(2.0d);
 
     private static final Variance VAR = new Variance();
+
     private static final Sum SUM = new Sum();
 
     private MathUtils() {
@@ -74,12 +75,11 @@ public final class MathUtils {
     /**
      * Checks if the given class probability distribution is valid.
      *
-     * @param distribution
-     *            the distribution.
+     * @param distribution the distribution.
      * @return if the given distribution is valid.
      */
     public static final boolean checkDistribution(final double[] distribution) {
-        if (Math.abs(1d - SUM.evaluate(distribution)) > TOLLERANCE) {
+        if (Math.abs(1d - SUM.evaluate(distribution)) > TOLERANCE) {
             return false;
         }
         return true;
@@ -88,8 +88,7 @@ public final class MathUtils {
     /**
      * Computes the binary logarithm. (logarithm base 2)
      *
-     * @param x
-     *            the input
+     * @param x the input
      * @return the log to the base 2 of x
      */
     public static final double log2(final double x) {
@@ -103,8 +102,7 @@ public final class MathUtils {
     /**
      * Calculate the sum of an array of doubles.
      *
-     * @param array
-     *            of doubles
+     * @param array of doubles
      * @return sum of the array
      */
     public static final double sumOfArray(final double[] array) {
@@ -116,21 +114,16 @@ public final class MathUtils {
     }
 
     /**
-     * Calculates the shanon entropy of the distribution of values in an double
-     * array.
+     * Calculates the Shannon entropy of the distribution of values in an double array.
      *
-     * @param distribution
-     *            a double array
+     * @param distribution a double array
      * @return the entropy of the array
-     * @throws ArithmeticException
-     *             in case the sum of the elements of the distribution array is
-     *             not 1.
+     * @throws ArithmeticException in case the sum of the elements of the distribution array is not 1.
      */
     public static final double entropy(final double[] distribution) {
 
         if (!checkDistribution(distribution)) {
-            throw new ArithmeticException(
-                    "The sum of the distribution elements is not 1");
+            throw new ArithmeticException("The sum of the distribution elements is not 1");
         }
 
         // calculate the entropy
@@ -169,19 +162,17 @@ public final class MathUtils {
     }
 
     /**
+     * Calculates the variance of the distribution of values in an double array.
      *
+     * @param distribution a double array containing an distribution
      *
      * @return the variance of the array
-     * @throws ArithmeticException
-     *             if case the sum of the elements of the distribution array is
-     *             not 1.
+     * @throws ArithmeticException if case the sum of the elements of the distribution array is not 1.
      */
     public static double variance(final double[] distribution) {
 
-        // check if input array was a proper distribution.
         if (!checkDistribution(distribution)) {
-            throw new ArithmeticException(
-                    "The sum of the distribution elements is not 1");
+            throw new ArithmeticException("The sum of the distribution elements is not 1");
         }
         return VAR.evaluate(distribution);
     }

@@ -57,6 +57,7 @@ import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataValue;
 import org.knime.core.data.DoubleValue;
+import org.knime.core.data.MissingCell;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
@@ -74,15 +75,12 @@ public final class NodeTools {
     /**
      * Collects all columns of a given Type and returns a list of their names.
      *
-     * @param targetType
-     *            A Subclass of {@link DataValue}
-     * @param spec
-     *            the Spec of the DataTable that is searched through
+     * @param targetType A Subclass of {@link DataValue}
+     * @param spec the Spec of the DataTable that is searched through
      * @return A list of column names that match the type
      */
-    public static final List<String> collectAllColumnNamesOfType(
-            final Class<? extends DataValue> targetType,
-            final DataTableSpec spec) {
+    public static final List<String> collectAllColumnNamesOfType(final Class<? extends DataValue> targetType,
+        final DataTableSpec spec) {
         final List<String> colNames = new ArrayList<>();
 
         spec.forEach((final DataColumnSpec colSpec) -> {
@@ -96,14 +94,12 @@ public final class NodeTools {
     /**
      * Collects all columns of a given Type and returns a list of their indices.
      *
-     * @param type
-     *            A Subclass of {@link DataValue}
-     * @param spec
-     *            the Datatable spec that is searched through
+     * @param type A Subclass of {@link DataValue}
+     * @param spec the Datatable spec that is searched through
      * @return A list of column indices that match the type
      */
-    public static final List<Integer> collectAllColumnIndicesOfType(
-            final Class<? extends DataValue> type, final DataTableSpec spec) {
+    public static final List<Integer> collectAllColumnIndicesOfType(final Class<? extends DataValue> type,
+        final DataTableSpec spec) {
         final List<Integer> colIndices = new ArrayList<>();
 
         spec.forEach((final DataColumnSpec colSpec) -> {
@@ -118,14 +114,11 @@ public final class NodeTools {
     /**
      * Collects all indices for the given list of column names.
      *
-     * @param names
-     *            the list of column names to be converted
-     * @param spec
-     *            the DataTableSpec of the table
+     * @param names the list of column names to be converted
+     * @param spec the DataTableSpec of the table
      * @return list of indices
      */
-    public static final List<Integer> columnNamesToIndices(
-            final List<String> names, final DataTableSpec spec) {
+    public static final List<Integer> columnNamesToIndices(final List<String> names, final DataTableSpec spec) {
         final List<Integer> incices = new ArrayList<>();
 
         names.forEach((colName) -> incices.add(spec.findColumnIndex(colName)));
@@ -136,14 +129,11 @@ public final class NodeTools {
     /**
      * Collects all indices for the given array of column names.
      *
-     * @param names
-     *            the array of column names to be converted
-     * @param spec
-     *            the DataTableSpec of the table
+     * @param names the array of column names to be converted
+     * @param spec the DataTableSpec of the table
      * @return list of indices
      */
-    public static final List<Integer> columnNamesToIndices(final String[] names,
-            final DataTableSpec spec) {
+    public static final List<Integer> columnNamesToIndices(final String[] names, final DataTableSpec spec) {
         final List<Integer> incices = new ArrayList<>();
         for (final String name : names) {
             incices.add(spec.findColumnIndex(name));
@@ -152,26 +142,20 @@ public final class NodeTools {
     }
 
     /**
-     * Transforms a row into a double array. Use the exclude array to specify
-     * columns that are included.
+     * Transforms a row into a double array. Use the include array to specify columns that are included.
      *
-     * @param row
-     *            The data row
-     * @param include
-     *            The indices of columns that are included in the array
+     * @param row The data row
+     * @param include The indices of columns that are included in the array
      * @return array containing the double values from the included columns
      */
-    public static double[] toDoubleArray(final DataRow row,
-            final List<Integer> include) {
+    public static double[] toDoubleArray(final DataRow row, final List<Integer> include) {
         final double[] res = new double[include.size()];
         try {
             for (int i = 0; i < res.length; i++) {
-                res[i] = ((DoubleValue) row.getCell(include.get(i)))
-                        .getDoubleValue();
+                res[i] = ((DoubleValue)row.getCell(include.get(i))).getDoubleValue();
             }
         } catch (final ClassCastException e) {
-            throw new IllegalArgumentException(
-                    "Encountered missing value in row: " + row.getKey());
+            throw new IllegalArgumentException("Encountered missing value in row: " + row.getKey());
         }
         return res;
     }
@@ -197,45 +181,39 @@ public final class NodeTools {
     }
 
     /**
+     * Transforms a row into a double array using all compatible columns. Convenience method if all double columns are
+     * needed.
+     *
+     * @param row The data row
+     * @param spec The spec of the table the row is part of.
      * @return array containing the double values from the included columns
      */
-    public static double[] toDoubleArray(final DataRow row,
-            final DataTableSpec spec) {
-        final List<Integer> include =
-                collectAllColumnIndicesOfType(DoubleValue.class, spec);
+    public static double[] toDoubleArray(final DataRow row, final DataTableSpec spec) {
+        final List<Integer> include = collectAllColumnIndicesOfType(DoubleValue.class, spec);
         return toDoubleArray(row, include);
     }
 
     /**
-     * Provides a safe method to get the indices of the selected columns from a
-     * Filter Model, falls back on selecting all compatible types in case the
-     * selection is invalid.
+     * Provides a safe method to get the indices of the selected columns from a Filter Model, falls back on selecting
+     * all compatible types in case the selection is invalid.
      *
-     * @param spec
-     *            the spec of the table.
-     * @param filterModel
-     *            the filter model that specifies the selection
-     * @param valueClass
-     *            the value class selected in case the selection is invalid
-     * @param nodeModelClass
-     *            node model class to be able to set right logger message
+     * @param spec the spec of the table.
+     * @param filterModel the filter model that specifies the selection
+     * @param valueClass the value class selected in case the selection is invalid
+     * @param nodeModelClass node model class to be able to set right logger message
      *
      * @return the indices of the selected columns
      */
     public static List<Integer> getIndicesFromFilter(final DataTableSpec spec,
-            final SettingsModelColumnFilter2 filterModel,
-            final Class<? extends DataValue> valueClass,
-            final Class<? extends NodeModel> nodeModelClass) {
+        final SettingsModelColumnFilter2 filterModel, final Class<? extends DataValue> valueClass,
+        final Class<? extends NodeModel> nodeModelClass) {
 
         final FilterResult result = filterModel.applyTo(spec);
 
         // in case of an invalid selection, select all
-        if ((result.getIncludes().length == 0)
-                && (result.getExcludes().length == 0)) {
-            NodeLogger.getLogger(nodeModelClass)
-                    .warn("Invalid column selection, automatically selecting "
-                            + "all columns of the following type: "
-                            + valueClass.getSimpleName());
+        if ((result.getIncludes().length == 0) && (result.getExcludes().length == 0)) {
+            NodeLogger.getLogger(nodeModelClass).warn("Invalid column selection, automatically selecting "
+                + "all columns of the following type: " + valueClass.getSimpleName());
             return collectAllColumnIndicesOfType(valueClass, spec);
         }
         return columnNamesToIndices(result.getIncludes(), spec);
@@ -244,8 +222,7 @@ public final class NodeTools {
     /**
      * Creates an List filled by the values from the given row.
      *
-     * @param row
-     *            the row
+     * @param row the row
      * @return the row as list.
      */
     public static List<DataCell> makeListFromRow(final DataRow row) {
