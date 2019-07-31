@@ -94,7 +94,7 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
      * @return Settings Model to store the Column Filter Model
      */
     @SuppressWarnings("unchecked")
-    public static SettingsModelColumnFilter2 createColumnFilterModel() {
+    static SettingsModelColumnFilter2 createColumnFilterModel() {
         return new SettingsModelColumnFilter2("filter_string2", DoubleValue.class);
     }
 
@@ -102,7 +102,7 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
      * @param defColName the default column name to set
      * @return Settings Model to store the Column Name Model
      */
-    public static SettingsModelString createColumnNameModel(final String defColName) {
+    static SettingsModelString createColumnNameModel(final String defColName) {
         // we have to override the validation and loading methods in order to ensure backwards compatibility
         return new SettingsModelString(CFG_KEY_COLUMN_NAME, defColName) {
             @Override
@@ -125,7 +125,7 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
     /**
      * @return Settings Model to store the Exception Handling Model
      */
-    public static SettingsModelString createExceptionHandlingModel() {
+    static SettingsModelString createExceptionHandlingModel() {
         // we have to override the validation and loading methods in order to ensure backwards compatibility
         return new SettingsModelString("exception_handling", ExceptionHandling.FAIL.name()) {
             @Override
@@ -188,10 +188,10 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
                         throw new IllegalArgumentException("The row '" + row.getKey() + "' contains missing values.");
                     }
                     // set the same warning only once
-                    if (!m_hasInvalidDistribution) {
+                    if (!m_hasMissing) {
                         setWarningMessage(
                             "At least one row contains a missing value. Missing values will be in the output.");
-                        m_hasInvalidDistribution = true;
+                        m_hasMissing = true;
                     }
                     return new MissingCell("Input row contains missing values.");
                 }
@@ -201,11 +201,11 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
                             + "' is invalid as it does not sum up to 1.");
                     }
                     // set the same warning only once
-                    if (!m_hasMissing) {
+                    if (!m_hasInvalidDistribution) {
                         setWarningMessage(
                             "The distribution of at least one row is invalid as it does not sum up to 1. Missing "
                                 + "values will be in the output.");
-                        m_hasMissing = true;
+                        m_hasInvalidDistribution = true;
                     }
                     return new MissingCell("The distribution is invalid as it does not sum up to 1.");
                 }
