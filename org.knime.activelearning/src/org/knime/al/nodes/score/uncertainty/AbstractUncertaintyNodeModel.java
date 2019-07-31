@@ -54,7 +54,6 @@ import org.knime.al.util.MathUtils;
 import org.knime.al.util.NodeTools;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
@@ -68,6 +67,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.streamable.simple.SimpleStreamableFunctionNodeModel;
+import org.knime.core.util.UniqueNameGenerator;
 
 /**
  * Abstract Superclass for the node models of the Uncertainty scorers. Houses all the common methods, subclasses only
@@ -150,12 +150,10 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
      */
     protected abstract String getDefaultColumnName();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
-        if (m_columnFilterModel.applyTo(inSpecs[0]).getIncludes().length < 2) {
+    protected ColumnRearranger createColumnRearranger(final DataTableSpec inSpec) throws InvalidSettingsException {
+        // check configuration
+        if (m_columnFilterModel.applyTo(inSpec).getIncludes().length < 2) {
             throw new InvalidSettingsException("At least two columns must be included.");
         }
         if (m_columnNameModel.getStringValue().trim().isEmpty()) {
@@ -167,15 +165,11 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
             throw new InvalidSettingsException(
                 "Unknown option to handle exceptions: '" + exceptionHandlingStrategy + "'");
         }
-        return super.configure(inSpecs);
-    }
-
-    @Override
-    protected ColumnRearranger createColumnRearranger(final DataTableSpec inSpec) throws InvalidSettingsException {
-        final ColumnRearranger rearranger = new ColumnRearranger(inSpec);
         final DataColumnSpec newColSpec =
-            new DataColumnSpecCreator(m_columnNameModel.getStringValue(), DoubleCell.TYPE).createSpec();
+            new UniqueNameGenerator(inSpec).newColumn(m_columnNameModel.getStringValue(), DoubleCell.TYPE);
 
+        // create column rearranger
+        final ColumnRearranger rearranger = new ColumnRearranger(inSpec);
         rearranger.append(new SingleCellFactory(newColSpec) {
 
             final int[] m_columnIndices = inSpec.columnsToIndices(m_columnFilterModel.applyTo(inSpec).getIncludes());
