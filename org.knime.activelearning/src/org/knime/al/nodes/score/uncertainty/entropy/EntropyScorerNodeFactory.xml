@@ -11,9 +11,24 @@
 	<fullDescription>
 		<intro>
 			Calculates the entropy uncertainty score of a class probability
-			distribution. Output will be the
+			distribution. Input are rows containing class probabilities P = p1,
+			p2, ..., pn that must sum up to 1.
+			Output will be the normalized
 			<a href="https://en.wiktionary.org/wiki/Shannon_entropy">Shannon entropy</a>
-			.
+			. This is defined by E(P) = H(P) / log(n) with
+			H(P) = -
+			sum(p_i*log(p_i) for each i in 1,...,n. The logarithm with base 2 is
+			used. The
+			normalization leads always to values between 0 and 1. A
+			uniform
+			probability distribution (i.e., most uncertain as all
+			probabilities
+			are equal to each other) has an entropy value
+			of 1. If
+			one of the
+			class probabilities is 1 and the others 0, the highest
+			certainty is given and the
+			entropy value will be 0.
 		</intro>
 		<option name="Column Selection">
 			Include the columns containing the class

@@ -11,9 +11,12 @@
 	<fullDescription>
 		<intro>
 			Calculates the least confident uncertainty score of a class
-			probability distribution. The score is calculated as
-			one minus the
-			highest class probability of the data row. Notice: This method is very
+			probability distribution. Input are rows containing class
+			probabilities that must sum up to 1. The score is calculated as
+			one
+			minus the
+			highest class probability of the data row. Notice: This
+			method is very
 			sensitive to noise!
 		</intro>
 		<option name="Column Selection">

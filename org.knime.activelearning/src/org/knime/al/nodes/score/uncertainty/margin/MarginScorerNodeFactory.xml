@@ -12,10 +12,14 @@
 		<intro>
 			Calculates the margin uncertainty score of a class
 			probability
-			distribution which is one minus the difference between the two
+			distribution. Input are rows containing class
+			probabilities that must
+			sum up to 1. The score is calculated as one minus the difference
+			between the two
 			classes with the
 			highest probabilities, i.e.,
-			a low difference leads to
+			a low
+			difference leads to
 			a
 			high uncertainty.
 		</intro>

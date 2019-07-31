@@ -11,8 +11,10 @@
 		<intro>
 			Calculates the variance uncertainty score of a class
 			probability
-			distribution. The output will be
-			one minus the variance of
+			distribution. Input are rows containing class
+			probabilities that must sum up to 1. The output will be
+			one minus the
+			variance of
 			the probabilities, i.e.,
 			a lower variance means higher
 			uncertainty.
