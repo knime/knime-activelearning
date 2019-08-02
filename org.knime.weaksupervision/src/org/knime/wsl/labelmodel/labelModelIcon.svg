@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1600"
+   height="1600"
+   viewBox="0 0 423.33332 423.33335"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="labelModelIcon.svg"
+   inkscape:export-filename="C:\Users\Adrian Nembach\eclipse_workspaces\master\git\knime-activelearning\org.knime.weaksupervision\src\org\knime\wsl\labelmodel\labelModelIcon.png"
+   inkscape:export-xdpi="0.95999998"
+   inkscape:export-ydpi="0.95999998">
+  <defs
+     id="defs2">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 211.66667 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="423.33332 : 211.66667 : 1"
+       inkscape:persp3d-origin="211.66666 : 141.11112 : 1"
+       id="perspective41" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35"
+     inkscape:cx="-64.285714"
+     inkscape:cy="560"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     units="px"
+     inkscape:window-width="3840"
+     inkscape:window-height="1537"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,126.33335)">
+    <ellipse
+       style="fill:none;stroke:#000000;stroke-width:5.46629763;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path88"
+       cx="207.81355"
+       cy="-35.383221"
+       rx="53.632668"
+       ry="52.16341" />
+    <ellipse
+       style="fill:#141414;fill-opacity:0.45098039;stroke:#000000;stroke-width:5.46629763;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path88-2"
+       cx="56.133663"
+       cy="208.3177"
+       rx="53.632668"
+       ry="52.16341" />
+    <ellipse
+       style="fill:#141414;fill-opacity:0.45098039;stroke:#000000;stroke-width:5.46629763;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path88-3"
+       cx="210.32759"
+       cy="205.05748"
+       rx="53.632668"
+       ry="52.16341" />
+    <ellipse
+       style="fill:#141414;fill-opacity:0.45098039;stroke:#000000;stroke-width:5.46629763;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path88-1"
+       cx="368.71155"
+       cy="204.24243"
+       rx="53.632668"
+       ry="52.16341" />
+    <path
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:17.359;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="m 109.75295,207.184 46.95535,-0.99281"
+       id="path138"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3"
+       inkscape:connection-start="#path88-2"
+       inkscape:connection-end="#path88-3" />
+    <path
+       style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:0.28925824px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 210.32759,205.05748 v 0"
+       id="path140"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3"
+       inkscape:connection-start="#path88-3"
+       inkscape:connection-end="#path88-3" />
+    <path
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:17.359;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 209.7822,152.89732 208.35894,16.776935"
+       id="path142"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3"
+       inkscape:connection-start="#path88-3"
+       inkscape:connection-end="#path88" />
+    <path
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:17.359;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 83.90728,163.69441 180.03994,9.2400684"
+       id="path144"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3"
+       inkscape:connection-start="#path88-2"
+       inkscape:connection-end="#path88" />
+    <path
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:17.359;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       d="M 339.38608,160.56794 237.13903,8.2912623"
+       id="path146"
+       inkscape:connector-type="polyline"
+       inkscape:connector-curvature="3"
+       inkscape:connection-start="#path88-1"
+       inkscape:connection-end="#path88" />
+  </g>
+</svg>
