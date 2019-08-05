@@ -1,6 +1,9 @@
 package org.knime.wsl.labelmodel;
 
-import static org.knime.wsl.testing.TestUtil.*;
+import static org.knime.wsl.testing.TestUtil.assertMatrixEquals;
+import static org.knime.wsl.testing.TestUtil.fa;
+import static org.knime.wsl.testing.TestUtil.fm;
+import static org.knime.wsl.testing.TestUtil.ia;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +21,7 @@ import org.knime.core.data.MissingCell;
 import org.knime.core.data.RowKey;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.StringCell;
+import org.knime.core.node.ExecutionMonitor;
 
 import com.google.common.collect.Lists;
 
@@ -31,12 +35,11 @@ public class LabelMatrixReaderTest {
 
     private List<DataRow> m_rows;
 
-
     @Before
     public void init() {
         List<DataCell> classes = Stream.of("A", "B", "C").map(StringCell::new).collect(Collectors.toList());
-        m_valueToIdxMap = IntStream.range(0, classes.size()).boxed()
-            .collect(Collectors.toMap(classes::get, Function.identity()));
+        m_valueToIdxMap =
+            IntStream.range(0, classes.size()).boxed().collect(Collectors.toMap(classes::get, Function.identity()));
         final List<int[]> idxs = Lists.newArrayList(ia(0, 1, 2), ia(1, 0, 2), ia(2, 1, 0));
         m_rows = IntStream.range(0, idxs.size())
             .mapToObj(i -> new DefaultRow(RowKey.createRowKey((long)i),
@@ -48,20 +51,22 @@ public class LabelMatrixReaderTest {
     @Test
     public void testReadAndAugmentLabelMatrix() throws Exception {
         final LabelMatrixReader reader = new LabelMatrixReader(m_valueToIdxMap, 3);
-        float[][] matrix = reader.readAndAugmentLabelMatrix(m_rows.iterator(), m_rows.size());
+        float[][] matrix = reader.readAndAugmentLabelMatrix(m_rows.iterator(), m_rows.size(), new ExecutionMonitor());
         float[][] expected = fm(fa(1, 0, 0, 0, 1, 0, 0, 0, 1), fa(0, 1, 0, 1, 0, 0, 0, 0, 1),
             fa(0, 0, 1, 0, 1, 0, 1, 0, 0), fa(0, 0, 0, 1, 0, 0, 0, 0, 1));
         assertMatrixEquals(expected, matrix, 0);
     }
-    
-    @Test (expected = IllegalStateException.class)
+
+    @Test(expected = IllegalStateException.class)
     public void testFailOnUnknownLabel() throws Exception {
         m_valueToIdxMap.remove(new StringCell("C"));
-        new LabelMatrixReader(m_valueToIdxMap, 3).readAndAugmentLabelMatrix(m_rows.iterator(), m_rows.size());
+        new LabelMatrixReader(m_valueToIdxMap, 3).readAndAugmentLabelMatrix(m_rows.iterator(), m_rows.size(),
+            new ExecutionMonitor());
     }
-    
-    @Test (expected = IllegalArgumentException.class)
+
+    @Test(expected = IllegalArgumentException.class)
     public void testFailOnWrongNumberOfCells() throws Exception {
-        new LabelMatrixReader(m_valueToIdxMap, 2).readAndAugmentLabelMatrix(m_rows.iterator(), m_rows.size());
+        new LabelMatrixReader(m_valueToIdxMap, 2).readAndAugmentLabelMatrix(m_rows.iterator(), m_rows.size(),
+            new ExecutionMonitor());
     }
 }

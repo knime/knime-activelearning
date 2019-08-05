@@ -90,22 +90,20 @@ final class LabelModelNodeModel extends NodeModel {
         final DataTableSpec labelSourceSpec = inSpecs[LABEL_SOURCES_PORT];
         CheckUtils.checkSetting(
             labelSourceSpec.stream().filter(c -> c.getType().isCompatible(NominalValue.class)).count() > 1,
-            "The first input table must contain at least two nominal columns.");
+            "The input table must contain at least two nominal columns.");
+        // TODO uncomment once correlated columns are fully supported
+        //            final DataTableSpec correlationSpec = inSpecs[1];
+        //            if (correlationSpec != null) {
+        //                CheckUtils.checkSetting(
+        //                    correlationSpec.stream().filter(c -> c.getType().isCompatible(StringValue.class)).count() > 1,
+        //                    "At least two string columns must be contained in the correlation table");
+        //            }
         try (LabelModel helper = new LabelModel(m_settings, labelSourceSpec)) {
 
-            // TODO uncomment once correlated columns are fully supported
-            //            final DataTableSpec correlationSpec = inSpecs[1];
-            //            if (correlationSpec != null) {
-            //                CheckUtils.checkSetting(
-            //                    correlationSpec.stream().filter(c -> c.getType().isCompatible(StringValue.class)).count() > 1,
-            //                    "At least two string columns must be contained in the correlation table");
-            //            }
             helper.getWarnings().forEach(this::setWarningMessage);
 
             return new DataTableSpec[]{helper.createProbabilisticLabelRearranger(labelSourceSpec, null).createSpec(),
                 helper.createStatisticsSpec()};
-        } catch (InvalidSettingsException e) {
-            throw e;
         } catch (Exception e) {
             throw new InvalidSettingsException("Unexpected configuration exception.", e);
         }
@@ -126,13 +124,12 @@ final class LabelModelNodeModel extends NodeModel {
             //            if (correlationsTable != null) {
             //                helper.readCorrelationsTable(correlationsTable);
             //            }
-            helper.loadSavedModel();
-            final float[][] probabilisticLabels = helper.train(noisyLabelTable, exec.createSubProgress(0.9));
+            final float[][] probabilisticLabels = helper.train(noisyLabelTable, exec.createSubProgress(0.95));
             final BufferedDataTable statisticsTable = helper.createStatisticsTable(exec);
             helper.getWarnings().forEach(this::setWarningMessage);
             return new BufferedDataTable[]{exec.createColumnRearrangeTable(noisyLabelTable,
                 helper.createProbabilisticLabelRearranger(sourcesSpec, probabilisticLabels),
-                exec.createSilentSubProgress(0)), statisticsTable};
+                exec.createSubProgress(0.05)), statisticsTable};
         }
     }
 

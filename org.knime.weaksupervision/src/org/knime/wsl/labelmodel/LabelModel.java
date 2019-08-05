@@ -74,6 +74,7 @@ import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
+import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.util.CheckUtils;
@@ -134,7 +135,7 @@ final class LabelModel implements AutoCloseable {
             IntStream.range(0, classes.size() + 1).mapToObj(i -> DoubleCell.TYPE).toArray(DataType[]::new));
     }
 
-    void loadSavedModel() {
+    private void loadSavedModel() {
         m_labelModel = new LabelModelAdapter(SAVED_MODEL_PATH);
     }
 
@@ -165,7 +166,8 @@ final class LabelModel implements AutoCloseable {
         return container.getTable();
     }
 
-    float[][] createAugmentedLabelMatrix(final BufferedDataTable table) {
+    private float[][] createAugmentedLabelMatrix(final BufferedDataTable table, final ExecutionMonitor progress)
+        throws CanceledExecutionException {
         CheckUtils.checkArgument(table.size() <= Integer.MAX_VALUE,
             "The table has more than Integer.MAX_VALUE rows wich is currently not supported.");
         final int[] nonEmptyIndices = m_metaData.getNonEmptyIndices();
@@ -176,7 +178,7 @@ final class LabelModel implements AutoCloseable {
                 Iterators.transform(iter, r -> new FilterColumnRow(r, nonEmptyIndices));
             // the cast to int is save because we checked that table.size() is an integer
             // in the first line of this method
-            return reader.readAndAugmentLabelMatrix(filteredIterator, (int)table.size());
+            return reader.readAndAugmentLabelMatrix(filteredIterator, (int)table.size(), progress);
         }
     }
 
@@ -194,23 +196,29 @@ final class LabelModel implements AutoCloseable {
         return array;
     }
 
-    float[][] train(final BufferedDataTable table, final ExecutionMonitor monitor) {
+    float[][] train(final BufferedDataTable table, final ExecutionMonitor monitor) throws CanceledExecutionException {
         loadSavedModel();
-        final float[][] augmentedLabelMatrix = createAugmentedLabelMatrix(table);
-        final float[] classBalance = getClassBalance();
-        initialize(augmentedLabelMatrix, classBalance);
-        final int maxEpoch = m_settings.getEpochs();
-        for (int i = 0; i < maxEpoch; i++) {
-            final float loss = m_labelModel.trainStep();
-            monitor.setProgress((i + 1) / ((double)maxEpoch),
-                String.format("Finished epoch %s of %s. Loss: %s", i, maxEpoch, loss));
-        }
+        final float[][] augmentedLabelMatrix = createAugmentedLabelMatrix(table, monitor.createSubProgress(0.2));
+        monitor.setMessage("Initializing model.");
+        initialize(augmentedLabelMatrix);
+        monitor.setProgress(0.8, "Start training.");
+        train(monitor.createSubProgress(0.2));
         return m_labelModel.getProbabilities(augmentedLabelMatrix);
     }
 
-    private void initialize(final float[][] augmentedLabelMatrix, final float[] classBalance) {
+    private void train(final ExecutionMonitor monitor) throws CanceledExecutionException {
+        final int maxEpoch = m_settings.getEpochs();
+        for (int i = 0; i < maxEpoch; i++) {
+            final float loss = m_labelModel.trainStep();
+            monitor.checkCanceled();
+            monitor.setProgress((i + 1) / ((double)maxEpoch),
+                String.format("Finished epoch %s of %s. Loss: %s", i, maxEpoch, loss));
+        }
+    }
+
+    private void initialize(final float[][] augmentedLabelMatrix) {
         final boolean[][] mask = m_correlationGraphHandler.buildMask();
-        m_labelModel.initialize(augmentedLabelMatrix, mask, classBalance, getInitialPrecisions(),
+        m_labelModel.initialize(augmentedLabelMatrix, mask, getClassBalance(), getInitialPrecisions(),
             (float)m_settings.getLearningRate());
     }
 

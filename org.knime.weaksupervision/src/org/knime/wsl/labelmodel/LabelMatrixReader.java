@@ -51,6 +51,8 @@ import java.util.Map;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataRow;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.util.CheckUtils;
 
 /**
@@ -72,9 +74,12 @@ final class LabelMatrixReader {
         m_numSources = numSources;
     }
 
-    float[][] readAndAugmentLabelMatrix(final Iterator<DataRow> iter, final int size) {
+    float[][] readAndAugmentLabelMatrix(final Iterator<DataRow> iter, final int size, final ExecutionMonitor progress)
+        throws CanceledExecutionException {
         final float[][] noisyLabelMatrix = new float[size][m_numSources * m_cardinality];
         for (int i = 0; iter.hasNext(); i++) {
+            progress.checkCanceled();
+            progress.setProgress(i / ((double)size), String.format("Reading row %s of %s.", i, size));
             final DataRow row = iter.next();
             CheckUtils.checkArgument(row.getNumCells() == m_numSources, "The row %s should contain only %s cells.", row,
                 m_numSources);
