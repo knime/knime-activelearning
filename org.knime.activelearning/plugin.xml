@@ -85,9 +85,6 @@
             factory-class="org.knime.al.nodes.loop.LoopNodeSetFactory">
         </nodeset>
         <nodeset
-            factory-class="org.knime.al.nodes.score.combine.CombinerNodeSetFactory">
-        </nodeset>
-        <nodeset
               deprecated="false"
               factory-class="org.knime.al.nodes.score.novelty.NoveltyNodeSetFactory">
         </nodeset>
@@ -131,6 +128,11 @@
             category-path="/labs/activelearning/score/uncertainty"
             deprecated="false"
             factory-class="org.knime.al.nodes.score.uncertainty.leastconfident.LeastConfidentScorerNodeFactory">
+      </node>
+      <node
+            category-path="/labs/activelearning/score/combiner"
+            deprecated="true"
+            factory-class="org.knime.al.nodes.score.combine.pbac.UncertaintyDistributionScorerNodeFactory">
       </node>
       <node
             category-path="/labs/activelearning/score/combiner"

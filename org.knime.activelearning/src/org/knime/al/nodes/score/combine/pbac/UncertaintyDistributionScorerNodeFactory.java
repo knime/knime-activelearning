@@ -57,7 +57,9 @@ import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
  * Node Factory for the Entropy Scorer Node.
  *
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated use {@link UncertaintyDistributionScorer2NodeFactory} instead
  */
+@Deprecated
 public class UncertaintyDistributionScorerNodeFactory
         extends AbstractCombinerNodeFactory<AbstractCombinerNodeModel> {
 

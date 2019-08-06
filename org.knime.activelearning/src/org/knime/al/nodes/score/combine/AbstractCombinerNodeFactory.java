@@ -58,9 +58,10 @@ import org.knime.core.node.NodeView;
  *
  * @author gabriel
  * @param <T>
+ * @deprecated Do not use anymore.
  */
-public abstract class AbstractCombinerNodeFactory<T extends AbstractCombinerNodeModel>
-        extends NodeFactory<T> {
+@Deprecated
+public abstract class AbstractCombinerNodeFactory<T extends AbstractCombinerNodeModel> extends NodeFactory<T> {
 
     /**
      * {@inheritDoc}

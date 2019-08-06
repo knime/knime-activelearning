@@ -57,6 +57,7 @@ import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
+import org.knime.core.node.streamable.simple.SimpleStreamableFunctionNodeModel;
 
 /**
  * Abstract Superclass for the node models of the Exploitation scorers. Houses
@@ -64,7 +65,10 @@ import org.knime.core.node.defaultnodesettings.SettingsModel;
  * {@link #createResRearranger(DataTableSpec)} method.
  *
  * @author gabriel
+ * @deprecated Do not use anymore because it is not streamable. Use {@link SimpleStreamableFunctionNodeModel} or similar
+ *             instead.
  */
+@Deprecated
 public abstract class AbstractCombinerNodeModel extends AbstractALNodeModel {
 
     /**
