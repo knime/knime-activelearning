@@ -48,6 +48,7 @@
  */
 package org.knime.al.nodes.score.uncertainty;
 
+import org.knime.al.nodes.score.ExceptionHandling;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;

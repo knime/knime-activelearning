@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="UncertaintyDistributionScorer.png"
+	type="Manipulator" xmlns="http://knime.org/node/v2.12"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+
+	<name>Exploration/Exploitation Score Combiner</name>
+	<shortDescription>
+		Calculates a combined exploration/exploitation score.
+	</shortDescription>
+	<fullDescription>
+		<intro>
+			Calculates a combined uncertainty score given two numeric columns,
+			one
+			containing the exploitation and the
+			other containing the
+			exploration
+			scores, and an
+			exploitation factor
+			<i>x</i>
+			.
+			The score is calculated using
+			the formula
+			<i>x * eploitation score + (1 - x) * exploration score</i>
+			.
+			<br />
+			For more information see the paper by
+			<a
+				href="http://www.uni-konstanz.de/bioml/bioml2/publications/Papers2009/CeBe09.pdf">
+				Cebron
+			</a>
+			.
+		</intro>
+		<option name="Exploitation score column"> The column containing the exploitation score.
+		</option>
+		<option name="Exploration score column"> The column containing the exploration score.
+		</option>
+		<option name="Exploitation factor"> The weighting factor between the exploration and
+			exploitation scores. The exploration score is weighted with <i>(1- exploitation
+			factor)</i>.
+		</option>
+		<option name="Output column name">
+			Set the name of the appended output column.
+		</option>
+		<option name="In case of missing values...">
+			Specify the action if a data row of the input contains missing
+			values.
+			If
+			<i>fail</i>
+			is
+			selected,
+			the node will fail.
+			Otherwise, the node just gives a
+			warning
+			and puts
+			missing values in
+			the output for the corresponding
+			rows.
+		</option>
+	</fullDescription>
+
+	<ports>
+		<inPort name="Exploration and Exploitation Scores" index="0">Data
+			with
+			an exploration score column
+			and
+			an exploitation score column.
+		</inPort>
+		<outPort name="Input Data with Combined Uncertainty Score"
+			index="0">Input
+			data with an appended column that contains the combined
+			uncertainty
+			score.
+		</outPort>
+	</ports>
+</knimeNode>

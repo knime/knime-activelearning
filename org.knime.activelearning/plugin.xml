@@ -132,6 +132,11 @@
             deprecated="false"
             factory-class="org.knime.al.nodes.score.uncertainty.leastconfident.LeastConfidentScorerNodeFactory">
       </node>
+      <node
+            category-path="/labs/activelearning/score/combiner"
+            deprecated="false"
+            factory-class="org.knime.al.nodes.score.combine.pbac.UncertaintyDistributionScorer2NodeFactory">
+      </node>
    </extension>
      <extension
            point="org.knime.core.PortType">

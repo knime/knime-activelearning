@@ -46,7 +46,7 @@
  * History
  *   Jul 23, 2019 (Simon Schmid, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.al.nodes.score.uncertainty;
+package org.knime.al.nodes.score;
 
 import org.knime.core.node.util.ButtonGroupEnumInterface;
 
@@ -55,12 +55,12 @@ import org.knime.core.node.util.ButtonGroupEnumInterface;
  *
  * @author Simon Schmid, KNIME GmbH, Konstanz, Germany
  */
-enum ExceptionHandling implements ButtonGroupEnumInterface {
+public enum ExceptionHandling implements ButtonGroupEnumInterface {
 
-        /* Fail if an exception occurs. */
+        /** Fail if an exception occurs. */
         FAIL("fail"),
-        /* Ignore and set missing value as output if an exception occurs. */
-        IGNORE("ignore and set missing value as output");
+        /** Ignore and set missing value as output if an exception occurs. */
+        IGNORE("ignore and set missing values as output");
 
     private final String m_text;
 

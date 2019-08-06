@@ -50,6 +50,7 @@ package org.knime.al.nodes.score.uncertainty;
 
 import java.util.Arrays;
 
+import org.knime.al.nodes.score.ExceptionHandling;
 import org.knime.al.util.MathUtils;
 import org.knime.al.util.NodeTools;
 import org.knime.core.data.DataCell;
