@@ -49,6 +49,7 @@
 package org.knime.wsl.labelmodel;
 
 /**
+ * Contains utility methods used in the LabelModel logic.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */

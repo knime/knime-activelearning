@@ -48,7 +48,6 @@ package org.knime.wsl.labelmodel;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -106,12 +105,12 @@ final class LabelModel implements AutoCloseable {
         final String[] sourceColumnNames = m_settings.getNoisyLabelsFilter().applyTo(spec).getIncludes();
         m_metaData = new MetaData(sourceColumnNames, spec);
         m_correlationGraphHandler =
-            new CorrelationHandler(m_metaData.getNonEmptyColumns(), m_metaData.getCardinality());
+            new CorrelationHandler(m_metaData.getNonEmptyColumns(), m_metaData.getNumClasses());
     }
 
     private Set<String> getClassNames() {
         final LinkedHashSet<String> names = new LinkedHashSet<>();
-        for (DataCell possibleClass : m_metaData.getPossibleClasses()) {
+        for (DataCell possibleClass : m_metaData.getPossibleLabels()) {
             names.add(possibleClass.toString());
         }
         return names;
@@ -143,7 +142,7 @@ final class LabelModel implements AutoCloseable {
         DataTableSpec statisticsSpec = createStatisticsSpec();
         final BufferedDataContainer container = exec.createDataContainer(statisticsSpec);
         final Iterator<String> lfNames = m_metaData.getNonEmptyColumns().iterator();
-        final Set<DataCell> possibleClasses = m_metaData.getPossibleClasses();
+        final Set<DataCell> possibleClasses = m_metaData.getPossibleLabels();
         final ConditionalProbabilities cProbs = getConditionalProbabilities();
         long rowIdx = 0;
         for (int lf = 0; lf < m_metaData.getNumSources(); lf++) {
@@ -189,7 +188,7 @@ final class LabelModel implements AutoCloseable {
     }
 
     private float[] getClassBalance() {
-        final int length = m_metaData.getCardinality();
+        final int length = m_metaData.getNumClasses();
         final float[] array = new float[length];
         final float uniform = 1.0f / length;
         Arrays.fill(array, uniform);
@@ -208,10 +207,10 @@ final class LabelModel implements AutoCloseable {
 
     private void train(final ExecutionMonitor monitor) throws CanceledExecutionException {
         final int maxEpoch = m_settings.getEpochs();
-        for (int i = 0; i < maxEpoch; i++) {
+        for (int i = 1; i <= maxEpoch; i++) {
             final float loss = m_labelModel.trainStep();
             monitor.checkCanceled();
-            monitor.setProgress((i + 1) / ((double)maxEpoch),
+            monitor.setProgress(i / ((double)maxEpoch),
                 String.format("Finished epoch %s of %s. Loss: %s", i, maxEpoch, loss));
         }
     }
@@ -267,12 +266,14 @@ final class LabelModel implements AutoCloseable {
     private DataColumnSpec[] createProbabilisticLabelSpecs(final DataTableSpec labelSourceSpec) {
         final UniqueNameGenerator nameGen;
         if (m_settings.isRemoveSourceColumns()) {
-            nameGen = new UniqueNameGenerator(Collections.emptySet());
+            final ColumnRearranger cr = new ColumnRearranger(labelSourceSpec);
+            cr.remove(m_metaData.getNonEmptyIndices());
+            nameGen = new UniqueNameGenerator(cr.createSpec());
         } else {
             nameGen = new UniqueNameGenerator(labelSourceSpec);
         }
         final String classColumnName = m_settings.getLabelColumnName();
-        return m_metaData.getPossibleClasses().stream()
+        return m_metaData.getPossibleLabels().stream()
             .map(c -> nameGen.newColumn(String.format("P (%s=%s)", classColumnName, c.toString()), DoubleCell.TYPE))
             .toArray(DataColumnSpec[]::new);
     }

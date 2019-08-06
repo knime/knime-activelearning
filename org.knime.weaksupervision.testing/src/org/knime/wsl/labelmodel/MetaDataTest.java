@@ -65,7 +65,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.StringCell;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
@@ -99,12 +98,12 @@ public class MetaDataTest {
 
     @Test
     public void testGetPossibleClasses() throws Exception {
-        assertEquals(Sets.newHashSet(CLASSES), META_DATA.getPossibleClasses());
+        assertEquals(Sets.newHashSet(CLASSES), META_DATA.getPossibleLabels());
     }
 
     @Test
     public void testGetCardinality() throws Exception {
-        assertEquals(CLASSES.length, META_DATA.getCardinality());
+        assertEquals(CLASSES.length, META_DATA.getNumClasses());
     }
 
     @Test
@@ -133,7 +132,7 @@ public class MetaDataTest {
 
     @Test
     public void testGetEmptyColumns() throws Exception {
-        assertEquals(Lists.newArrayList("lfWithoutValues"), META_DATA.getEmptyColumns());
+        assertEquals(Sets.newHashSet("lfWithoutValues"), META_DATA.getEmptyColumns());
     }
 
 }

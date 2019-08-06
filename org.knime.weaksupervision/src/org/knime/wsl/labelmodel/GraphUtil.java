@@ -88,7 +88,7 @@ final class GraphUtil {
             return Collections.unmodifiableSet(m_members);
         }
 
-        double getWeight() {
+        private double getWeight() {
             return m_members.size();
         }
 

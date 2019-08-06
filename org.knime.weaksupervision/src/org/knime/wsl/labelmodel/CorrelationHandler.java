@@ -82,7 +82,7 @@ final class CorrelationHandler {
 
 	CorrelationHandler(final Set<String> sourceColumnNames, final int cardinality) {
 		m_nonEmptySources = new HashMap<>();
-		sourceColumnNames.stream().forEach(n -> m_nonEmptySources.put(n, m_nonEmptySources.size()));
+		sourceColumnNames.forEach(n -> m_nonEmptySources.put(n, m_nonEmptySources.size()));
 		m_cardinality = cardinality;
 	}
 

@@ -48,6 +48,8 @@ package org.knime.wsl.labelmodel;
 
 import java.util.Arrays;
 
+import org.knime.core.node.util.CheckUtils;
+
 /**
  * Helper class that wraps the conditional probability matrix returned by the matrix completion algorithm and allows to
  * easily retrieve the conditional probabilities.
@@ -56,48 +58,53 @@ import java.util.Arrays;
  */
 final class ConditionalProbabilities {
 
-	private final float[][] m_cProbs;
-	private final int m_cardinality;
+    private final float[][] m_cProbs;
 
-	/**
-	 * Creates a {@link ConditionalProbabilities} object by extracting the conditional probabilities from <b>mu</b>.
-	 * @param mu the parameter matrix
-	 */
-	ConditionalProbabilities(final float[][] mu) {
-		m_cardinality = mu[0].length;
-		final int nlf = mu.length / m_cardinality;
-		m_cProbs = new float[nlf * (m_cardinality + 1)][m_cardinality];
+    private final int m_cardinality;
 
-		for (int i = 0; i < nlf; i++) {
-			final int muiStart = i * m_cardinality;
-			final int muiEnd = (i + 1) * m_cardinality;
-			final int cProbsStart = i * (m_cardinality + 1) + 1;
-			for (int j = 0; j < m_cardinality; j++) {
-				System.arraycopy(mu[muiStart + j], 0, m_cProbs[cProbsStart + j], 0, m_cardinality);
-			}
-			// the 0th row corresponds to the abstains and is by the law of total probability 1 minus the sum of the
-			// other rows
-			Arrays.fill(m_cProbs[cProbsStart - 1], 1);
-			for (int j = muiStart; j < muiEnd; j++) {
-				for (int k = 0; k < m_cardinality; k++) {
-					m_cProbs[cProbsStart - 1][k] -= mu[j][k];
-				}
-			}
-		}
-	}
+    /**
+     * Creates a {@link ConditionalProbabilities} object by extracting the conditional probabilities from <b>mu</b>.
+     *
+     * @param mu the parameter matrix
+     */
+    ConditionalProbabilities(final float[][] mu) {
+        m_cardinality = mu[0].length;
+        CheckUtils.checkArgument(m_cardinality > 1, "mu's shape should be [numSources * numClasses, numClasses].");
+        CheckUtils.checkArgument(mu.length > m_cardinality && mu.length % m_cardinality == 0,
+            "mu's shape should be [numSources * numClasses, numClasses].");
+        final int nlf = mu.length / m_cardinality;
+        m_cProbs = new float[nlf * (m_cardinality + 1)][m_cardinality];
 
-	/**
-	 * Retrieves the probability P(lf=lfValue|label=labelValue). Note that <b>labelValue</b> is indexed starting from 1
-	 * (because 0 is reserved for the abstain class which the true label can't have).
-	 *
-	 * @param lf the labeling function for which to retrieve the conditional probabilities
-	 * @param lfValue the value of <b>lf</b> for which to receive the conditional probability
-	 * @param labelValue the value of the latent label, IMPORTANT: Indexing starts at 1
-	 */
-	double getConditionalProbability(final int lf, final int lfValue, final int labelValue) {
-		final int rowIdx = lf * (m_cardinality + 1) + lfValue;
-		final int colIdx = labelValue - 1;
-		return LabelModelUtil.clip(m_cProbs[rowIdx][colIdx], 0.01, 0.99);
-	}
+        for (int i = 0; i < nlf; i++) {
+            final int muiStart = i * m_cardinality;
+            final int muiEnd = (i + 1) * m_cardinality;
+            final int cProbsStart = i * (m_cardinality + 1) + 1;
+            for (int j = 0; j < m_cardinality; j++) {
+                System.arraycopy(mu[muiStart + j], 0, m_cProbs[cProbsStart + j], 0, m_cardinality);
+            }
+            // the 0th row corresponds to the abstains and is by the law of total probability 1 minus the sum of the
+            // other rows
+            Arrays.fill(m_cProbs[cProbsStart - 1], 1);
+            for (int j = muiStart; j < muiEnd; j++) {
+                for (int k = 0; k < m_cardinality; k++) {
+                    m_cProbs[cProbsStart - 1][k] -= mu[j][k];
+                }
+            }
+        }
+    }
+
+    /**
+     * Retrieves the probability P(lf=lfValue|label=labelValue). Note that <b>labelValue</b> is indexed starting from 1
+     * (because 0 is reserved for the abstain class which the true label can't have).
+     *
+     * @param lf the labeling function for which to retrieve the conditional probabilities
+     * @param lfValue the value of <b>lf</b> for which to receive the conditional probability
+     * @param labelValue the value of the latent label, IMPORTANT: Indexing starts at 1
+     */
+    double getConditionalProbability(final int lf, final int lfValue, final int labelValue) {
+        final int rowIdx = lf * (m_cardinality + 1) + lfValue;
+        final int colIdx = labelValue - 1;
+        return LabelModelUtil.clip(m_cProbs[rowIdx][colIdx], 0.01, 0.99);
+    }
 
 }

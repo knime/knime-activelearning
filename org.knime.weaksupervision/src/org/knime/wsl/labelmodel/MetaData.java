@@ -48,10 +48,8 @@
  */
 package org.knime.wsl.labelmodel;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,25 +58,27 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 
 /**
+ * Extracts and stores information from the {@link DataTableSpec} of the label sources table.
+ * This includes which label columns have possible values assigned as well as the different possible
+ * label values (i.e. the union of the possible value sets of all label source columns).
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
 final class MetaData {
 
-    private final Set<DataCell> m_possibleClasses;
+    private final Set<DataCell> m_possibleLabels;
 
-    private final int[] m_nonEmptyPossibleValues;
+    private final int[] m_nonEmptyColumnIndices;
 
-    private final List<String> m_emptyColumns;
+    private final Set<String> m_emptyColumns;
 
     private final Set<String> m_nonEmptyColumns;
 
     private final Map<DataCell, Integer> m_valueToIdxMap;
 
     MetaData(final String[] sourceColumnNames, final DataTableSpec spec) {
-        m_possibleClasses = new LinkedHashSet<>();
-        final List<Integer> nonEmptyPossibleValues = new ArrayList<>();
-        m_emptyColumns = new ArrayList<>();
+        m_possibleLabels = new LinkedHashSet<>();
+        m_emptyColumns = new LinkedHashSet<>();
         m_nonEmptyColumns = new LinkedHashSet<>();
         for (int i = 0; i < sourceColumnNames.length; i++) {
             final String name = sourceColumnNames[i];
@@ -88,16 +88,15 @@ final class MetaData {
                 m_emptyColumns.add(name);
             } else {
                 m_nonEmptyColumns.add(name);
-                m_possibleClasses.addAll(possibleValues);
-                nonEmptyPossibleValues.add(spec.findColumnIndex(name));
+                m_possibleLabels.addAll(possibleValues);
             }
         }
-        m_nonEmptyPossibleValues = nonEmptyPossibleValues.stream().mapToInt(Integer::intValue).toArray();
+        m_nonEmptyColumnIndices = m_nonEmptyColumns.stream().mapToInt(spec::findColumnIndex).toArray();
         m_valueToIdxMap = createValueToIdxMap();
     }
 
     private Map<DataCell, Integer> createValueToIdxMap() {
-        final Set<DataCell> possibleClasses = getPossibleClasses();
+        final Set<DataCell> possibleClasses = getPossibleLabels();
         final Map<DataCell, Integer> valueToIdx = new HashMap<>(possibleClasses.size());
         int idx = 0;
         for (DataCell cell : possibleClasses) {
@@ -107,15 +106,15 @@ final class MetaData {
         return valueToIdx;
     }
 
-    Set<DataCell> getPossibleClasses() {
-        return m_possibleClasses;
+    Set<DataCell> getPossibleLabels() {
+        return m_possibleLabels;
     }
 
     int[] getNonEmptyIndices() {
-        return m_nonEmptyPossibleValues;
+        return m_nonEmptyColumnIndices;
     }
 
-    List<String> getEmptyColumns() {
+    Set<String> getEmptyColumns() {
         return m_emptyColumns;
     }
 
@@ -123,8 +122,8 @@ final class MetaData {
         return m_nonEmptyColumns;
     }
 
-    int getCardinality() {
-        return m_possibleClasses.size();
+    int getNumClasses() {
+        return m_possibleLabels.size();
     }
 
     Map<DataCell, Integer> getLabelToIdxMap() {
@@ -132,6 +131,6 @@ final class MetaData {
     }
 
     int getNumSources() {
-        return m_nonEmptyPossibleValues.length;
+        return m_nonEmptyColumnIndices.length;
     }
 }

@@ -79,7 +79,8 @@ final class LabelMatrixReader {
         final float[][] noisyLabelMatrix = new float[size][m_numSources * m_cardinality];
         for (int i = 0; iter.hasNext(); i++) {
             progress.checkCanceled();
-            progress.setProgress(i / ((double)size), String.format("Reading row %s of %s.", i, size));
+            final int rowIdx = i + 1;
+            progress.setProgress(rowIdx / ((double)size), String.format("Reading row %s of %s.", rowIdx, size));
             final DataRow row = iter.next();
             CheckUtils.checkArgument(row.getNumCells() == m_numSources, "The row %s should contain only %s cells.", row,
                 m_numSources);

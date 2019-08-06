@@ -65,8 +65,7 @@ public class LabelModelAdapterTest {
         boolean[][] mask = createMask(10, 5);
         m_testInstance.initialize(AUGMENTED_LABEL_MATRIX, mask, CLASS_BALANCE, PREC_INIT, lr);
 
-        SavedModelAdapter sm = m_testInstance.getSavedModelAdapter();
-        assertEquals(lr, sm.getFloatScalar("lr"), 0);
+        assertEquals(lr, m_testInstance.getLearningRate(), 0);
 
         assertMatrixEquals(muInit, m_testInstance.getMu(), 1e-5f);
     }

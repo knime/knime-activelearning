@@ -113,13 +113,8 @@ final class LabelModelAdapter implements AutoCloseable {
 		return muInit;
 	}
 
-
-	/**
-	 * Only meant for testing purposes.
-	 * @return the underlying SavedModelAdapter
-	 */
-	SavedModelAdapter getSavedModelAdapter() {
-	    return m_savedModel;
+	float getLearningRate() {
+	    return m_savedModel.getFloatScalar("lr");
 	}
 
 	float[][] getProbabilities(final float[][] augmentedLabelMatrix) {
