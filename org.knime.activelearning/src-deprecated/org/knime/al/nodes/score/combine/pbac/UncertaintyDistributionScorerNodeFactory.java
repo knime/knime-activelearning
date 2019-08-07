@@ -47,6 +47,7 @@ package org.knime.al.nodes.score.combine.pbac;
 
 import org.knime.al.nodes.score.combine.AbstractCombinerNodeFactory;
 import org.knime.al.nodes.score.combine.AbstractCombinerNodeModel;
+import org.knime.al.nodes.score.combine.pbac.UncertaintyDistributionScorer2NodeFactory;
 import org.knime.core.data.DoubleValue;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;

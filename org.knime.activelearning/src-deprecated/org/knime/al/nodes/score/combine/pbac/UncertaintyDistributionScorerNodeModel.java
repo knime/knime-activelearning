@@ -69,6 +69,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
  * @deprecated use {@link UncertaintyDistributionScorer2NodeModel} instead
  */
+@SuppressWarnings("javadoc")
 @Deprecated
 public class UncertaintyDistributionScorerNodeModel
         extends AbstractCombinerNodeModel {
