@@ -151,4 +151,10 @@
               specSerializer="org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObjectSpec$Serializer">
         </portType>
    org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObjectSpec  </extension>
+     <extension
+           point="org.knime.core.NodeFactoryClassMapper">
+        <NodeFactoryClassMapper
+              classMapper="org.knime.al.nodes.score.combine.pbac.UncertaintyDistributionScorerNodeFactoryMapper">
+        </NodeFactoryClassMapper>
+     </extension>
 </plugin>
