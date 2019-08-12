@@ -79,6 +79,7 @@
    <extension
          point="org.knime.workbench.repository.nodesets">
          <nodeset
+               deprecated="true"
                factory-class="org.knime.al.nodes.score.density.DensityNodeSetFactory">
       </nodeset>
    		<nodeset
@@ -139,6 +140,21 @@
             deprecated="false"
             factory-class="org.knime.al.nodes.score.combine.pbac.UncertaintyDistributionScorer2NodeFactory">
       </node>
+      <node
+            category-path="/labs/activelearning/score/density"
+            deprecated="false"
+            factory-class="org.knime.al.nodes.score.density.nodepotential.PotentialInitializerNodeFactory">
+      </node>
+      <node
+            category-path="/labs/activelearning/score/density"
+            deprecated="false"
+            factory-class="org.knime.al.nodes.score.density.scorer.DensityScorerNodeFactory">
+      </node>
+      <node
+            category-path="/labs/activelearning/score/density"
+            deprecated="false"
+            factory-class="org.knime.al.nodes.score.density.graphdensity.GraphDensityInitializerNodeFactory">
+      </node>
    </extension>
      <extension
            point="org.knime.core.PortType">
@@ -149,6 +165,14 @@
               objectSerializer="org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObject$Serializer"
               specClass="org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObjectSpec"
               specSerializer="org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObjectSpec$Serializer">
+        </portType>
+        <portType
+              hidden="false"
+              name="Density Scorer Model"
+              objectClass="org.knime.al.nodes.score.density.DensityScorerPortObject"
+              objectSerializer="org.knime.al.nodes.score.density.DensityScorerPortObject$Serializer"
+              specClass="org.knime.al.nodes.score.density.DensityScorerPortObjectSpec"
+              specSerializer="org.knime.al.nodes.score.density.DensityScorerPortObjectSpec$Serializer">
         </portType>
    org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObjectSpec  </extension>
      <extension
