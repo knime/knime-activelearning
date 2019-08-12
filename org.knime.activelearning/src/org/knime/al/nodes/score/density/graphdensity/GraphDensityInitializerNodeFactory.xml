@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="graphdensityscorer.png" type="Learner"
+	xmlns="http://knime.org/node/v3.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
+	<name>Graph Density Initializer</name>
+	<shortDescription>
+		Creates a density model of a n-dimensional
+		vector
+		space, based on a kNN graph.
+	</shortDescription>
+
+	<fullDescription>
+		<intro>
+			Creates a density model of a n-dimensional
+			vector
+			space, based on a kNN graph.
+			The kNN graph is created by connecting each row with <i>k</i> rows closest (in terms of Euclidean distance) to it in the feature space (<i>k</i> is the specified number of neighbors).
+			This way each row has at least <i>k</i> edges in the kNN graph, however there are two cases in which a row may have more than <i>k</i> edges:
+			<ul>
+				<li>It is among the <i>k</i> nearest neighbors of a row that is not among its own nearest neighbors.</li>
+				<li>There are multiple rows that would be the <i>k</i>th nearest neighbor because they have the same distance to the row in question.</li>
+			</ul>
+			Each edge in the kNN graph is weighted using a Gaussian kernel over the distance of the connected rows with standard deviation <i>Sigma</i>.
+			The density of a specific row is calculated as the mean weight of all its edge weights.
+			For more details see the
+			<a href="https://www.mpi-inf.mpg.de/fileadmin/inf/d2/Research_projects_files/EbertCVPR2012.pdf">RALF Paper</a> by Ebert et al.
+		</intro>
+		<option name="Column Selection"> The columns that make up the vector space.
+		</option>
+		<option name="Number of Neighbors">The number of neighbors which are considered.
+		</option>
+		<option name="Sigma">The Sigma for the Gaussian distance weighting function.
+		</option>
+		<option name="Missing Value Handling">Missing values can't be used to build the model therefore two strategies exist to cope with missing values.
+		The node can either fail if it encounters a missing value in one of the used columns or it can ignore the row in which the missing value occurred.
+		Note that an ignored row is not part of the model and consequently the <b>Density Scorer</b> node will treat it as an unknown row.</option>
+	</fullDescription>
+
+	<ports>
+		<inPort name="Data" index="0">Table to build a density model for.
+		</inPort>
+		<outPort name="Density Scorer Model" index="0">A Density Scorer
+			Model that can be used with the Density Scorer node.
+		</outPort>
+	</ports>
+</knimeNode>
