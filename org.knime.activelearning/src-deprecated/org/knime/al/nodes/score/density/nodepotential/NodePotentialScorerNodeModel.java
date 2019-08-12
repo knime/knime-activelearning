@@ -83,7 +83,10 @@ import org.knime.core.node.workflow.FlowVariable;
 /**
  * @author dietzc, University of Konstanz
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated the Node Potential Uncertainty Scorer is replaced by a combination of the Potential Density Initializer
+ * and Density Scorer nodes.
  */
+@Deprecated
 public class NodePotentialScorerNodeModel extends AbstractALNodeModel {
 
     private static final int UNLABELED_PORT = 0;

@@ -83,7 +83,9 @@ import org.knime.core.node.workflow.FlowVariable;
 /**
  * @author dietzc, University of Konstanz
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated this node model is no longer in use
  */
+@Deprecated
 public class GraphDensityScorerNodeModel extends AbstractALNodeModel {
 
     private static final int UNLABELED_PORT = 0;

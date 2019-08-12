@@ -3,13 +3,16 @@ package org.knime.al.nodes.score.density.graphdensity;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.knime.al.nodes.score.density.graphdensity.GraphDataPoint;
+
 /**
  * Representation of a DataPoint in the feature space.
  *
  * @author dietzc
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
- *
+ * @deprecated use {@link GraphDataPoint} instead
  */
+@Deprecated
 class GraphDensityDataPoint {
 
     //

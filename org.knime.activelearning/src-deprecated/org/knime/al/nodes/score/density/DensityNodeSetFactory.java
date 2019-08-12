@@ -41,71 +41,91 @@
  *  propagated with or for interoperation with KNIME.  The owner of a Node
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
- * ---------------------------------------------------------------------
+ * --------------------------------------------------------------------- *
  *
- * Created on 11.03.2013 by dietyc
  */
-package org.knime.al.nodes.score.density.nodepotential;
+package org.knime.al.nodes.score.density;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.knime.al.nodes.score.density.graphdensity.GraphDensityScorerNodeFactory;
+import org.knime.al.nodes.score.density.nodepotential.NodePotentialScorerNodeFactory;
+import org.knime.core.node.NodeFactory;
+import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeModel;
+import org.knime.core.node.NodeSetFactory;
+import org.knime.core.node.config.ConfigRO;
 
 /**
- * Representation of a DataPoint in space.
- *
- * @author dietzc
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
- *
+ * @deprecated no longer in active use
  */
-class NodePotentialDataPoint {
-
-    // Vector containing information
-    private final double[] m_vector;
-
-    // The current potential of the data-point
-    private transient double m_potential;
+@Deprecated
+public class DensityNodeSetFactory implements NodeSetFactory {
 
     /**
-     * @param vector
-     *            the vector for this point
+     *
      */
-    NodePotentialDataPoint(final double[] vector) {
-        m_vector = vector;
+    private static final String CATEGORY = "/labs/activelearning/score/density";
+    private static final NodeLogger LOGGER =
+            NodeLogger.getLogger(DensityNodeSetFactory.class);
+    private final Map<String, String> m_nodeFactories =
+            new HashMap<String, String>();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ConfigRO getAdditionalSettings(final String id) {
+        return null;
     }
 
     /**
-     * @return the vector
+     * {@inheritDoc}
      */
-    double[] getVector() {
-        return m_vector;
+    @Override
+    public String getAfterID(final String id) {
+        return "";
     }
 
     /**
-     * @return density
+     * {@inheritDoc}
      */
-    double getPotential() {
-        return m_potential;
+    @Override
+    public String getCategoryPath(final String id) {
+        return m_nodeFactories.get(id);
     }
 
     /**
-     * @param amount
-     *            the density is decreased by
+     * {@inheritDoc}
      */
-    void decreasePotential(final double amount) {
-        m_potential = Math.max(0, m_potential - amount);
+    @SuppressWarnings("unchecked")
+    @Override
+    public Class<? extends NodeFactory<? extends NodeModel>>
+            getNodeFactory(final String id) {
+        try {
+            return (Class<? extends NodeFactory<? extends NodeModel>>) Class
+                    .forName(id);
+        } catch (final ClassNotFoundException e) {
+            LOGGER.warn("Could not load Node: " + e.getMessage());
+        }
+        return null;
     }
 
     /**
-     * @param amount
-     *            the density is increased by
+     * {@inheritDoc}
      */
-    void increasePotential(final double amount) {
-        m_potential += amount;
-    }
+    @Override
+    public Collection<String> getNodeFactoryIds() {
+        m_nodeFactories.put(
+                NodePotentialScorerNodeFactory.class.getCanonicalName(),
+                CATEGORY);
+        m_nodeFactories.put(
+                GraphDensityScorerNodeFactory.class.getCanonicalName(),
+                CATEGORY);
 
-    /**
-     * @param value
-     *            the new value for the density
-     */
-    void setPotential(final double value) {
-        m_potential = value;
+        return m_nodeFactories.keySet();
     }
-
 }

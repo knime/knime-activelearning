@@ -41,42 +41,48 @@
  *  propagated with or for interoperation with KNIME.  The owner of a Node
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
- * --------------------------------------------------------------------- *
- *
+ * ---------------------------------------------------------------------
  */
-package org.knime.al.nodes.score.density;
+package org.knime.al.nodes.score.density.graphdensity;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.knime.al.nodes.score.density.graphdensity.GraphDensityScorerNodeFactory;
-import org.knime.al.nodes.score.density.nodepotential.NodePotentialScorerNodeFactory;
+import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
-import org.knime.core.node.NodeSetFactory;
-import org.knime.core.node.config.ConfigRO;
+import org.knime.core.node.NodeView;
+import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
+import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 
 /**
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated the Graph Density Uncertainty Scorer node is replaced by a combination of
+ * the Graph Density Initializer and Density Scorer node.
  */
-public class DensityNodeSetFactory implements NodeSetFactory {
-
-    /**
-     *
-     */
-    private static final String CATEGORY = "/labs/activelearning/score/density";
-    private static final NodeLogger LOGGER =
-            NodeLogger.getLogger(DensityNodeSetFactory.class);
-    private final Map<String, String> m_nodeFactories =
-            new HashMap<String, String>();
+@Deprecated
+public class GraphDensityScorerNodeFactory
+        extends NodeFactory<GraphDensityScorerNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ConfigRO getAdditionalSettings(final String id) {
+    public int getNrNodeViews() {
+        return 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean hasDialog() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NodeView<GraphDensityScorerNodeModel> createNodeView(
+            final int viewIndex, final GraphDensityScorerNodeModel nodeModel) {
         return null;
     }
 
@@ -84,46 +90,34 @@ public class DensityNodeSetFactory implements NodeSetFactory {
      * {@inheritDoc}
      */
     @Override
-    public String getAfterID(final String id) {
-        return "";
+    public GraphDensityScorerNodeModel createNodeModel() {
+        return new GraphDensityScorerNodeModel();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String getCategoryPath(final String id) {
-        return m_nodeFactories.get(id);
-    }
+    protected NodeDialogPane createNodeDialogPane() {
+        return new DefaultNodeSettingsPane() {
+            {
+                createNewGroup("Scoring Settings");
+                setHorizontalPlacement(true);
+                addDialogComponent(new DialogComponentNumber(
+                        GraphDensityScorerNodeModel.createNumNeighborsModel(),
+                        "Number of Neighbors", 5));
 
-    /**
-     * {@inheritDoc}
-     */
-    @SuppressWarnings("unchecked")
-    @Override
-    public Class<? extends NodeFactory<? extends NodeModel>>
-            getNodeFactory(final String id) {
-        try {
-            return (Class<? extends NodeFactory<? extends NodeModel>>) Class
-                    .forName(id);
-        } catch (final ClassNotFoundException e) {
-            LOGGER.warn("Could not load Node: " + e.getMessage());
-        }
-        return null;
-    }
+                addDialogComponent(new DialogComponentNumber(
+                        GraphDensityScorerNodeModel.createSigmaModel(), "Sigma",
+                        1));
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Collection<String> getNodeFactoryIds() {
-        m_nodeFactories.put(
-                NodePotentialScorerNodeFactory.class.getCanonicalName(),
-                CATEGORY);
-        m_nodeFactories.put(
-                GraphDensityScorerNodeFactory.class.getCanonicalName(),
-                CATEGORY);
+                setHorizontalPlacement(false);
 
-        return m_nodeFactories.keySet();
+                createNewGroup("Column Selection");
+                addDialogComponent(new DialogComponentColumnFilter2(
+                        GraphDensityScorerNodeModel.createColumnFilterModel(),
+                        0));
+            }
+        };
     }
 }

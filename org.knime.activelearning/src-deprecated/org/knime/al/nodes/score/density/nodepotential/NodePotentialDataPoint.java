@@ -42,79 +42,72 @@
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
+ *
+ * Created on 11.03.2013 by dietyc
  */
-package org.knime.al.nodes.score.density.graphdensity;
-
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeView;
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+package org.knime.al.nodes.score.density.nodepotential;
 
 /**
+ * Representation of a DataPoint in space.
+ *
+ * @author dietzc
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ *
+ * @deprecated use {@link PotentialDataPoint} instead.
  */
-public class GraphDensityScorerNodeFactory
-        extends NodeFactory<GraphDensityScorerNodeModel> {
+@Deprecated
+class NodePotentialDataPoint {
+
+    // Vector containing information
+    private final double[] m_vector;
+
+    // The current potential of the data-point
+    private transient double m_potential;
 
     /**
-     * {@inheritDoc}
+     * @param vector
+     *            the vector for this point
      */
-    @Override
-    public int getNrNodeViews() {
-        return 0;
+    NodePotentialDataPoint(final double[] vector) {
+        m_vector = vector;
     }
 
     /**
-     * {@inheritDoc}
+     * @return the vector
      */
-    @Override
-    public boolean hasDialog() {
-        return true;
+    double[] getVector() {
+        return m_vector;
     }
 
     /**
-     * {@inheritDoc}
+     * @return density
      */
-    @Override
-    public NodeView<GraphDensityScorerNodeModel> createNodeView(
-            final int viewIndex, final GraphDensityScorerNodeModel nodeModel) {
-        return null;
+    double getPotential() {
+        return m_potential;
     }
 
     /**
-     * {@inheritDoc}
+     * @param amount
+     *            the density is decreased by
      */
-    @Override
-    public GraphDensityScorerNodeModel createNodeModel() {
-        return new GraphDensityScorerNodeModel();
+    void decreasePotential(final double amount) {
+        m_potential = Math.max(0, m_potential - amount);
     }
 
     /**
-     * {@inheritDoc}
+     * @param amount
+     *            the density is increased by
      */
-    @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new DefaultNodeSettingsPane() {
-            {
-                createNewGroup("Scoring Settings");
-                setHorizontalPlacement(true);
-                addDialogComponent(new DialogComponentNumber(
-                        GraphDensityScorerNodeModel.createNumNeighborsModel(),
-                        "Number of Neighbors", 5));
-
-                addDialogComponent(new DialogComponentNumber(
-                        GraphDensityScorerNodeModel.createSigmaModel(), "Sigma",
-                        1));
-
-                setHorizontalPlacement(false);
-
-                createNewGroup("Column Selection");
-                addDialogComponent(new DialogComponentColumnFilter2(
-                        GraphDensityScorerNodeModel.createColumnFilterModel(),
-                        0));
-            }
-        };
+    void increasePotential(final double amount) {
+        m_potential += amount;
     }
+
+    /**
+     * @param value
+     *            the new value for the density
+     */
+    void setPotential(final double value) {
+        m_potential = value;
+    }
+
 }

@@ -38,7 +38,10 @@ import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 
 /**
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated the Node Potential Uncertainty Scorer is replaced by a combination of the Potential Density Initializer
+ * and Density Scorer nodes.
  */
+@Deprecated
 public class NodePotentialScorerNodeFactory
         extends NodeFactory<NodePotentialScorerNodeModel> {
 
