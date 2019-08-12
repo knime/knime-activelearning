@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="nodepotentialscorer.png" type="Learner"
+	xmlns="http://knime.org/node/v3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
+
+	<name>Potential Density Initializer</name>
+	<shortDescription>
+		Initializes a density based exploration potential of a n-dimensional vector space.
+	</shortDescription>
+
+	<fullDescription>
+		<intro>
+			Creates a potential based density model of a
+			n-dimensional vector space.
+			<br />
+			In order to calculate the density at a specific row in the table, its immediate neighborhood in the vector space is considered.
+			The closer and more numerous the neighbors the higher is the density.
+			The size of the neighborhood is controlled by the <i>Radius Alpha</i> parameter and a larger value will result in a larger neighborhood.
+			
+			For more details see the <a href="http://www.inf.uni-konstanz.de/bioml2/publications/Papers2009/CeBe09.pdf">PBAC paper</a> by Cebron et. al.
+		</intro>
+		<option name="Column Selection">The columns that make up the vector space.</option>
+		<option name="Radius Alpha">Radius Alpha parameter, influences the size of the
+			neighborhood considered for the density estimation. A larger value corresponds to a larger neighborhood.
+			Note that the node will issue a warning if any of the rows in the input table has more than 20% of the table in its neighborhood because this might
+			indicate a too large <i>Radius Alpha</i> value.
+		</option>
+		<option name="Missing Value Handling">Missing values can't be used to build the model therefore two strategies exist to cope with missing values.
+		The node can either fail if it encounters a missing value in one of the used columns or it can ignore the row in which the missing value occurred.
+		Note that an ignored row is not part of the model and consequently the <b>Density Scorer</b> node will treat it as an unknown row.</option>
+	</fullDescription>
+
+	<ports>
+		<inPort name="Data" index="0">Table to build a density model for.
+		</inPort>
+		<outPort name="Density Scorer Model" index="0">Density scorer model.</outPort>
+	</ports>
+</knimeNode>
