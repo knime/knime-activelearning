@@ -26,7 +26,7 @@
 		<option name="Output column name">
 			Set the name of the appended output column.
 		</option>
-		<option name="In case of invalid input...">
+		<option name="Invalid Input Handling">
 			Specify the action if a data row of the input is invalid.
 			Invalid
 			could mean a missing value in
@@ -36,7 +36,7 @@
 			(the
 			probabilities
 			must sum up to 1). If
-			<i>fail</i>
+			<i>Fail</i>
 			is
 			selected,
 			the node will fail.

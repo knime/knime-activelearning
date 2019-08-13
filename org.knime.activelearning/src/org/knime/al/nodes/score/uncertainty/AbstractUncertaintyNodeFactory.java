@@ -127,9 +127,10 @@ public abstract class AbstractUncertaintyNodeFactory<T extends AbstractUncertain
                 // placeholder
                 addDialogComponent(new DialogComponentLabel(""));
 
+                createNewGroup("Invalid Input Handling");
                 addDialogComponent(
                     new DialogComponentButtonGroup(AbstractUncertaintyNodeModel.createExceptionHandlingModel(),
-                        "In case of invalid input...", true, ExceptionHandling.values()));
+                        null, true, ExceptionHandling.values()));
             }
 
             /**
