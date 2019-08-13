@@ -58,9 +58,12 @@ import org.knime.core.node.util.ButtonGroupEnumInterface;
 public enum ExceptionHandling implements ButtonGroupEnumInterface {
 
         /** Fail if an exception occurs. */
-        FAIL("fail"),
-        /** Ignore and set missing value as output if an exception occurs. */
-        IGNORE("ignore and set missing values as output");
+        FAIL("Fail"),
+        /**
+         * Don't fail on an exception but handle it gracefully e.g. by outputting missing values or ignoring rows during
+         * model building.
+         */
+        IGNORE("Ignore");
 
     private final String m_text;
 
@@ -97,7 +100,7 @@ public enum ExceptionHandling implements ButtonGroupEnumInterface {
      */
     @Override
     public boolean isDefault() {
-        return FAIL.equals(this);
+        return this == FAIL;
     }
 
 }

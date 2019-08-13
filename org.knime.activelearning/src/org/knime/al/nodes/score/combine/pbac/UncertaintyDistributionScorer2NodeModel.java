@@ -46,6 +46,8 @@
 package org.knime.al.nodes.score.combine.pbac;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.knime.al.nodes.score.ExceptionHandling;
 import org.knime.core.data.DataCell;
@@ -64,6 +66,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.streamable.simple.SimpleStreamableFunctionNodeModel;
+import org.knime.core.node.util.CheckUtils;
 import org.knime.core.util.UniqueNameGenerator;
 
 /**
@@ -73,6 +76,8 @@ import org.knime.core.util.UniqueNameGenerator;
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
  */
 final class UncertaintyDistributionScorer2NodeModel extends SimpleStreamableFunctionNodeModel {
+
+    static final String SAME_COLUMN_ERROR = "The exploration and exploitation score columns must not be the same.";
 
     private final SettingsModelString m_explorationColumnModel = createExplorationColumnModel();
 
@@ -89,6 +94,9 @@ final class UncertaintyDistributionScorer2NodeModel extends SimpleStreamableFunc
      */
     @Override
     protected ColumnRearranger createColumnRearranger(final DataTableSpec inSpec) throws InvalidSettingsException {
+        if (isFirstConfigure()) {
+            autoConfigure(inSpec);
+        }
         // check configurations
         checkConfiguration(inSpec);
 
@@ -134,6 +142,18 @@ final class UncertaintyDistributionScorer2NodeModel extends SimpleStreamableFunc
         return rearranger;
     }
 
+    private void autoConfigure(final DataTableSpec tableSpec) throws InvalidSettingsException {
+        final List<DataColumnSpec> doubleColumns =
+            tableSpec.stream().filter(c -> c.getType().isCompatible(DoubleValue.class)).collect(Collectors.toList());
+        CheckUtils.checkSetting(doubleColumns.size() > 1, "At least two numeric columns must be in the input table.");
+        m_exploitationColumnModel.setStringValue(doubleColumns.get(0).getName());
+        m_explorationColumnModel.setStringValue(doubleColumns.get(1).getName());
+    }
+
+    private boolean isFirstConfigure() {
+        return m_exploitationColumnModel.getStringValue() == null;
+    }
+
     private void checkConfiguration(final DataTableSpec inSpec) throws InvalidSettingsException {
         // exploration column
         final String explorationColumnName = m_explorationColumnModel.getStringValue();
@@ -164,8 +184,7 @@ final class UncertaintyDistributionScorer2NodeModel extends SimpleStreamableFunc
                 "The selected exploitation score column '" + exploitationColumnName + "' must be numeric.");
         }
         if (explorationIndex == exploitationIndex) {
-            throw new InvalidSettingsException(
-                "The selected exploration and exploitation score columns must not be the same.");
+            throw new InvalidSettingsException(SAME_COLUMN_ERROR);
         }
         // exploitation factor
         final double exploitationFactor = m_exploitationFactorModel.getDoubleValue();
@@ -179,7 +198,8 @@ final class UncertaintyDistributionScorer2NodeModel extends SimpleStreamableFunc
         }
         // missing value handling
         final String exceptionHandlingStrategy = m_missingValueHandlingModel.getStringValue();
-        if (Arrays.stream(ExceptionHandling.values()).map(e -> e.name()).noneMatch(exceptionHandlingStrategy::equals)) {
+        if (Arrays.stream(ExceptionHandling.values()).map(ExceptionHandling::name)
+            .noneMatch(exceptionHandlingStrategy::equals)) {
             throw new InvalidSettingsException(
                 "Unknown option to handle missing values: '" + exceptionHandlingStrategy + "'");
         }

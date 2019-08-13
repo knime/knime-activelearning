@@ -21,7 +21,7 @@
 			.
 			The score is calculated using
 			the formula
-			<i>x * eploitation score + (1 - x) * exploration score</i>
+			<i>x * exploitation score + (1 - x) * exploration score</i>
 			.
 			<br />
 			For more information see the paper by
@@ -42,11 +42,11 @@
 		<option name="Output column name">
 			Set the name of the appended output column.
 		</option>
-		<option name="In case of missing values...">
+		<option name="Missing value handling">
 			Specify the action if a data row of the input contains missing
 			values.
 			If
-			<i>fail</i>
+			<i>Fail</i>
 			is
 			selected,
 			the node will fail.

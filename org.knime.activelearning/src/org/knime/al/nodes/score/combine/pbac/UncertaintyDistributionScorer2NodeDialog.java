@@ -48,19 +48,21 @@
  */
 package org.knime.al.nodes.score.combine.pbac;
 
+import java.awt.Color;
+
+import javax.swing.JLabel;
+
 import org.knime.al.nodes.score.ExceptionHandling;
-import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DoubleValue;
-import org.knime.core.node.NotConfigurableException;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
+import org.knime.core.node.defaultnodesettings.DialogComponentLabel;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
-import org.knime.core.node.util.ColumnFilter;
-import org.knime.core.node.util.ColumnSelectionPanel;
-import org.knime.core.node.util.CombinedColumnFilter;
-import org.knime.core.node.util.DataValueColumnFilter;
+import org.knime.core.node.util.CheckUtils;
 
 /**
  * Node dialog for the Exploration/Exploitation Score Combiner node.
@@ -69,50 +71,32 @@ import org.knime.core.node.util.DataValueColumnFilter;
  */
 final class UncertaintyDistributionScorer2NodeDialog extends DefaultNodeSettingsPane {
 
+    private final DialogComponentColumnNameSelection m_exploitationColumn;
+
+    private final DialogComponentColumnNameSelection m_explorationColumn;
+
+    private final DialogComponentLabel m_warningLabel;
+
     @SuppressWarnings("unchecked")
     UncertaintyDistributionScorer2NodeDialog() {
-        final DialogComponentColumnNameSelection diaCompExploitationSelection = new DialogComponentColumnNameSelection(
+        m_exploitationColumn = new DialogComponentColumnNameSelection(
             UncertaintyDistributionScorer2NodeModel.createExploitationColumnModel(), "Exploitation score column", 0,
             true, DoubleValue.class);
-        addDialogComponent(diaCompExploitationSelection);
+        addDialogComponent(m_exploitationColumn);
 
-        // filters the currently selected exploitation column
-        final ColumnFilter columnFilter = new ColumnFilter() {
-
-            @Override
-            public boolean includeColumn(final DataColumnSpec colSpec) {
-                return !colSpec.getName().equals(diaCompExploitationSelection.getSelected());
-            }
-
-            @Override
-            public String allFilteredMsg() {
-                return null;
-            }
-
-        };
-        final CombinedColumnFilter combinedColumnFilter =
-            new CombinedColumnFilter(new DataValueColumnFilter(DoubleValue.class), columnFilter) {
-                @Override
-                public String allFilteredMsg() {
-                    return "At least two numeric columns must be in the input.";
-                }
-            };
-        final DialogComponentColumnNameSelection diaCompExplorationSelection = new DialogComponentColumnNameSelection(
+        m_explorationColumn = new DialogComponentColumnNameSelection(
             UncertaintyDistributionScorer2NodeModel.createExplorationColumnModel(), "Exploration score column", 0, true,
-            combinedColumnFilter);
-        addDialogComponent(diaCompExplorationSelection);
+            DoubleValue.class);
+        addDialogComponent(m_explorationColumn);
 
-        // update the exploration column list if another exploitation column is selected
-        diaCompExploitationSelection.getModel().addChangeListener(l -> {
-            try {
-                final ColumnSelectionPanel columnSelectionPanel =
-                    (ColumnSelectionPanel)diaCompExplorationSelection.getComponentPanel().getComponent(1);
-                columnSelectionPanel.update(columnSelectionPanel.getDataTableSpec(),
-                    columnSelectionPanel.getSelectedColumn());
-            } catch (NotConfigurableException ex) {
-                // should never happen
-            }
-        });
+        m_warningLabel = new DialogComponentLabel("");
+        JLabel warningLabel = (JLabel)m_warningLabel.getComponentPanel().getComponent(0);
+        warningLabel.setForeground(Color.RED);
+        addDialogComponent(m_warningLabel);
+
+        m_explorationColumn.getModel().addChangeListener(l -> updateWarning());
+
+        m_exploitationColumn.getModel().addChangeListener(l -> updateWarning());
 
         addDialogComponent(new DialogComponentNumber(
             UncertaintyDistributionScorer2NodeModel.createExploitationFactorModel(), "Exploitation factor", 0.1));
@@ -120,8 +104,35 @@ final class UncertaintyDistributionScorer2NodeDialog extends DefaultNodeSettings
         addDialogComponent(new DialogComponentString(
             UncertaintyDistributionScorer2NodeModel.createOutputColumnNameModel(), "Output column name", true, 20));
 
+        createNewGroup("Missing value handling");
         addDialogComponent(
             new DialogComponentButtonGroup(UncertaintyDistributionScorer2NodeModel.createMissingValueHandlingModel(),
-                "In case of missing values...", true, ExceptionHandling.values()));
+                null, true, ExceptionHandling.values()));
     }
+
+    private void updateWarning() {
+        if (isSelectionAvailable() && isSameColumnSelected()) {
+            m_warningLabel.setText(UncertaintyDistributionScorer2NodeModel.SAME_COLUMN_ERROR);
+        } else {
+            m_warningLabel.setText("");
+        }
+    }
+
+    private boolean isSameColumnSelected() {
+        return m_exploitationColumn.getSelected().equals(m_explorationColumn.getSelected());
+    }
+
+    private boolean isSelectionAvailable() {
+        return m_exploitationColumn.getSelected() != null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void saveAdditionalSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+        super.saveAdditionalSettingsTo(settings);
+        CheckUtils.checkSetting(!isSameColumnSelected(), UncertaintyDistributionScorer2NodeModel.SAME_COLUMN_ERROR);
+    }
+
 }
