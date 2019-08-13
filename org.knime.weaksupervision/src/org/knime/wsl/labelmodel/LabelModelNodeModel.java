@@ -89,8 +89,9 @@ final class LabelModelNodeModel extends NodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
         final DataTableSpec labelSourceSpec = inSpecs[LABEL_SOURCES_PORT];
         CheckUtils.checkSetting(
-            labelSourceSpec.stream().filter(c -> c.getType().isCompatible(NominalValue.class)).count() > 1,
-            "The input table must contain at least two nominal columns.");
+            labelSourceSpec.stream().filter(c -> c.getType().isCompatible(NominalValue.class))
+                .filter(c -> c.getDomain().hasValues()).count() > 1,
+            "The input table must contain at least two nominal columns with possible values assigned.");
         // TODO uncomment once correlated columns are fully supported
         //            final DataTableSpec correlationSpec = inSpecs[1];
         //            if (correlationSpec != null) {
@@ -99,11 +100,15 @@ final class LabelModelNodeModel extends NodeModel {
         //                    "At least two string columns must be contained in the correlation table");
         //            }
         try (LabelModel helper = new LabelModel(m_settings, labelSourceSpec)) {
+            CheckUtils.checkSetting(helper.getClassNames().size() > 1,
+                "The selected label columns contain only a single class.");
 
             helper.getWarnings().forEach(this::setWarningMessage);
 
             return new DataTableSpec[]{helper.createProbabilisticLabelRearranger(labelSourceSpec, null).createSpec(),
                 helper.createStatisticsSpec()};
+        } catch (InvalidSettingsException e) {
+            throw e;
         } catch (Exception e) {
             throw new InvalidSettingsException("Unexpected configuration exception.", e);
         }

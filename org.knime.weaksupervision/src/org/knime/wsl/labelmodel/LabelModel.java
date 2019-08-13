@@ -108,7 +108,7 @@ final class LabelModel implements AutoCloseable {
             new CorrelationHandler(m_metaData.getNonEmptyColumns(), m_metaData.getNumClasses());
     }
 
-    private Set<String> getClassNames() {
+    Set<String> getClassNames() {
         final LinkedHashSet<String> names = new LinkedHashSet<>();
         for (DataCell possibleClass : m_metaData.getPossibleLabels()) {
             names.add(possibleClass.toString());
