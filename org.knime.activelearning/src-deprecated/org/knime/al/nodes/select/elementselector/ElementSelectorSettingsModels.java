@@ -41,88 +41,103 @@
  *  propagated with or for interoperation with KNIME.  The owner of a Node
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
+ * ---------------------------------------------------------------------
  *
+ * History
+ *   2 Dec 2014 (gabriel): created
  */
 package org.knime.al.nodes.select.elementselector;
 
-import org.knime.al.nodes.select.elementselector.ElementSelectorSettingsModels.ElementSelectionStrategy;
-import org.knime.al.util.EnumUtils;
-import org.knime.core.data.DoubleValue;
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeView;
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
-import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
- * <code>NodeFactory</code> for the "ElementSelector" Node. returns the rows
- * with the top N elements in a specific column
+ * Settings Models for the Element Selector Node.
  *
- * @author Marvin Kickuth, University of Konstanz
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated The Element Selector Node has been rewritten and promoted to knime.base
  */
-public class ElementSelectorNodeFactory
-        extends NodeFactory<ElementSelectorNodeModel> {
+@Deprecated
+final class ElementSelectorSettingsModels {
+
+    /** The Constant DEFAULT_ELEMENTS. */
+    static final int DEFAULT_ELEMENTS = 5;
 
     /**
-     * {@inheritDoc}
+     * The element selection strategies.
      */
-    @Override
-    public ElementSelectorNodeModel createNodeModel() {
-        return new ElementSelectorNodeModel();
+    protected enum ElementSelectionStrategy {
+
+        /** Take the the biggest. */
+        BIGGEST("Biggest Elements"), /** Take the smallest. */
+        SMALLEST("Smallest Elements");
+
+        /** The name. */
+        private String m_name;
+
+        /**
+         * Instantiates a new element selection strategy.
+         *
+         * @param describingName
+         *            the describing name
+         */
+        private ElementSelectionStrategy(final String describingName) {
+            m_name = describingName;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString() {
+            return m_name;
+        }
     }
 
     /**
-     * {@inheritDoc}
+     * Instantiates a new element selector settings models.
      */
-    @Override
-    public int getNrNodeViews() {
-        return 0;
+    private ElementSelectorSettingsModels() {
+        // Utility class
     }
 
     /**
-     * {@inheritDoc}
+     * Creates the num elements model.
+     *
+     * @return Settings model to store the number
      */
-    @Override
-    public NodeView<ElementSelectorNodeModel> createNodeView(
-            final int viewIndex, final ElementSelectorNodeModel nodeModel) {
-        return null;
+    static SettingsModelIntegerBounded createNumElementsModel() {
+        return new SettingsModelIntegerBounded("number_of_elements",
+                DEFAULT_ELEMENTS, 1, Integer.MAX_VALUE);
     }
 
     /**
-     * {@inheritDoc}
+     * Creates the column model.
+     *
+     * @return settings model to store the selected column
      */
-    @Override
-    public boolean hasDialog() {
-        return true;
+    static SettingsModelString createColumnModel() {
+        return new SettingsModelString("columnName", "");
     }
 
     /**
-     * {@inheritDoc}
+     * Creates the select from top model.
+     *
+     * @return the settings model boolean
      */
-    @SuppressWarnings("unchecked")
-    @Override
-    public NodeDialogPane createNodeDialogPane() {
-        return new DefaultNodeSettingsPane() {
-            {
-                // nr of elements control element
-                addDialogComponent(new DialogComponentNumber(
-                        ElementSelectorSettingsModels.createNumElementsModel(),
-                        "Number of elements:", /* step */1));
-
-                addDialogComponent(new DialogComponentButtonGroup(
-                        ElementSelectorSettingsModels
-                                .createElementSelectionStrategyModel(),
-                        false, "Selection Strategy",
-                        EnumUtils.getStringListFromToString(
-                                ElementSelectionStrategy.values())));
-                // column to use
-                addDialogComponent(new DialogComponentColumnNameSelection(
-                        ElementSelectorSettingsModels.createColumnModel(),
-                        "Column to use", 0, DoubleValue.class));
-            }
-        };
+    static SettingsModelBoolean createSelectFromTopModel() {
+        return new SettingsModelBoolean("select_from_top", true);
     }
+
+    /**
+     * Creates the element selection strategy model.
+     *
+     * @return the settings model string
+     */
+    static SettingsModelString createElementSelectionStrategyModel() {
+        return new SettingsModelString("element_selection_mode",
+                ElementSelectionStrategy.BIGGEST.toString());
+    }
+
 }

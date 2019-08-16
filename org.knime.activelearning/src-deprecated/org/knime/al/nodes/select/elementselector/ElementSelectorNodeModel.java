@@ -75,8 +75,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  *
  * @author Marvin Kickuth, University of Konstanz
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated The Element Selector Node has been rewritten and promoted to knime.base
  */
-
+@Deprecated
 public class ElementSelectorNodeModel extends AbstractALNodeModel {
 
     private static final NodeLogger LOGGER =
