@@ -51,6 +51,8 @@ package org.knime.al.nodes.score.density;
 import org.knime.core.data.RowKey;
 
 /**
+ * Abstract implementation of a {@link DensityDataPoint}.
+ * Manages the feature vector, the density, as well as the key.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  * @param <V> the type of {@link DensityDataPoint}
@@ -59,7 +61,7 @@ public abstract class AbstractDensityDataPoint <V extends AbstractDensityDataPoi
 
     private final double[] m_vector;
 
-    private double m_potential;
+    private double m_density;
 
     private final RowKey m_key;
 
@@ -76,7 +78,7 @@ public abstract class AbstractDensityDataPoint <V extends AbstractDensityDataPoi
      * {@inheritDoc}
      */
     @Override
-    public RowKey getKey() {
+    public final RowKey getKey() {
         return m_key;
     }
 
@@ -93,7 +95,7 @@ public abstract class AbstractDensityDataPoint <V extends AbstractDensityDataPoi
      */
     @Override
     public final double getDensity() {
-        return m_potential;
+        return m_density;
     }
 
     /**
@@ -101,7 +103,7 @@ public abstract class AbstractDensityDataPoint <V extends AbstractDensityDataPoi
      */
     @Override
     public final void increaseDensity(final double amount) {
-        m_potential += amount;
+        m_density += amount;
     }
 
     /**
@@ -109,7 +111,7 @@ public abstract class AbstractDensityDataPoint <V extends AbstractDensityDataPoi
      */
     @Override
     public final void setDensity(final double value) {
-        m_potential = value;
+        m_density = value;
     }
 
 }

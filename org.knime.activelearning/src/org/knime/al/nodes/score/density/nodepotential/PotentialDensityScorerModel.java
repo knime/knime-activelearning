@@ -69,11 +69,22 @@ final class PotentialDensityScorerModel extends AbstractDensityScorerModel<Poten
 
     private static final long serialVersionUID = 8548979519353936648L;
 
+    /**
+     * Stores the squared distances for all neighboring data points. In order to save memory, each data point only
+     * stores the distances of neighbors with a larger index than itself. Example: For neighboring data points with
+     * indices i, j and i < j m_squaredDistances[i] contains the distance between i and j, while m_squaredDistances[j]
+     * does not. The distances are stored in ascending order of the neighboring indices.
+     */
     private double[][] m_squaredDistances;
 
-    private double m_beta;
-
+    /**
+     * Stores for each data point the neighborhood-index of the first data point with a larger index. The neighborhoods
+     * are stored in {@link AbstractDensityScorerModel} as arrays of indices in ascending order. They are accessible via
+     * the getNeighbors(index).
+     */
     private int[] m_idxOfFirstLargerNeighbor;
+
+    private double m_beta;
 
     PotentialDensityScorerModel(final List<PotentialDataPoint> dataPoints, final double beta) {
         super(dataPoints);
@@ -152,12 +163,15 @@ final class PotentialDensityScorerModel extends AbstractDensityScorerModel<Poten
         }
     }
 
-    private double getSquaredDistance(final int idx1, final int idx2) {
-        CheckUtils.checkArgument(idx1 != idx2, "A data point can't be its own neighbor.");
-        if (idx1 < idx2) {
-            return getSquaredDistanceOrdered(idx1, idx2);
+    private double getSquaredDistance(final int current, final int idxInNeighborhood) {
+        final int neighbor = getNeighbors(current)[idxInNeighborhood];
+        CheckUtils.checkState(current != neighbor, "A data point can't be its own neighbor.");
+        if (current < neighbor) {
+            // the distance is stored by current
+            return m_squaredDistances[current][idxInNeighborhood - m_idxOfFirstLargerNeighbor[current]];
         } else {
-            return getSquaredDistanceOrdered(idx2, idx1);
+            // the distance is stored by the neighbor
+            return getSquaredDistanceOrdered(neighbor, current);
         }
     }
 

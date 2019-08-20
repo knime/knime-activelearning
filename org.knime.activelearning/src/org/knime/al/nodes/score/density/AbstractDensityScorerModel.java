@@ -70,9 +70,6 @@ import org.knime.core.node.util.CheckUtils;
  */
 public abstract class AbstractDensityScorerModel<V extends DensityDataPoint<V>> implements DensityScorerModel {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1774893723409655259L;
 
     private Map<String, Integer> m_keyToIdx;
@@ -138,8 +135,10 @@ public abstract class AbstractDensityScorerModel<V extends DensityDataPoint<V>> 
     public final void updateNeighbors(final RowKey key) throws UnknownRowException {
         final int idx = getIdx(key);
         final double potential = getPotential(idx);
-        for (int neighbor : getNeighbors(idx)) {
-            final double decrement = potential * calculateDecrementWeight(idx, neighbor);
+        final int[] neighbors = getNeighbors(idx);
+        for (int i = 0; i < neighbors.length; i++) {
+            final int neighbor = neighbors[i];
+            final double decrement = potential * calculateDecrementWeight(idx, i);
             decreasePotential(neighbor, decrement);
         }
         decreasePotential(idx, potential);
@@ -147,7 +146,7 @@ public abstract class AbstractDensityScorerModel<V extends DensityDataPoint<V>> 
 
     /**
      * @param idx of the update data point
-     * @param neighborIdx idx of the neighbor
+     * @param neighborIdx idx of the current neighbor in the neighborhood of <b>idx</b>
      * @return the weight for the potential of the data point at <b>idx</b> in the update of the data point at
      *         <b>neighborIdx</b>
      */

@@ -44,88 +44,76 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Aug 6, 2019 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
+ *   Aug 7, 2019 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
  */
-package org.knime.al.nodes.score.density.nodepotential;
+package org.knime.al.nodes.score.density.graphdensity;
 
 import java.util.List;
 
-import org.knime.al.nodes.score.density.AbstractDensityScorerModelBuilder;
+import org.knime.al.nodes.score.density.AbstractDensityScorerModelCreator;
 import org.knime.al.nodes.score.density.DensityScorerModel;
 import org.knime.base.util.kdtree.KDTree;
 import org.knime.base.util.kdtree.NearestNeighbour;
 import org.knime.core.data.RowKey;
 
 /**
- * Builder for PotentialDensityScorerModels.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-final class PotentialDensityScorerModelBuilder extends AbstractDensityScorerModelBuilder<PotentialDataPoint> {
+final class GraphDensityScorerModelCreator extends AbstractDensityScorerModelCreator<GraphDataPoint> {
+
+    private final double m_sigmaSquared;
+
+    private final int m_nrNeighbors;
 
     /**
-     * Threshold for a warning regarding neighborhood sizes. More precisely, if the ratio between the neighborhood of a
-     * data point and the full dataset exceeds this threshold, a warning is displayed during the execution of the
-     * intializer node.
+     * @param nrFeatures the number of features used to calculate distances
+     * @param sigma for Gaussian kernel
+     * @param nrNeighbors number of nearest neighbors to consider
      */
-    private static final double WARNING_THRESHOLD = 0.2;
-
-    private final double m_radiusAlpha;
-
-    private final double m_alpha;
-
-    private final double m_beta;
-
-    private static final double FACTOR_RB = 1.25d;
-
-    PotentialDensityScorerModelBuilder(final int numFeatures, final double radiusAlpha) {
-        super(numFeatures);
-        m_radiusAlpha = radiusAlpha;
-        m_alpha = 4.0 / (radiusAlpha * radiusAlpha);
-        final double rb = radiusAlpha * FACTOR_RB;
-        m_beta = 4.0 / (rb * rb);
+    public GraphDensityScorerModelCreator(final int nrFeatures, final double sigma, final int nrNeighbors) {
+        super(nrFeatures);
+        m_sigmaSquared = sigma * sigma;
+        m_nrNeighbors = nrNeighbors;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected PotentialDataPoint createDataPoint(final RowKey key, final double[] vector) {
-        return new PotentialDataPoint(key, vector);
+    protected GraphDataPoint createDataPoint(final RowKey key, final double[] vector) {
+        return new GraphDataPoint(key, vector);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void initializeUnnormalizedPotential(final KDTree<PotentialDataPoint> kdTree,
-        final PotentialDataPoint dataPoint) {
-        final List<NearestNeighbour<PotentialDataPoint>> neighbors =
-            kdTree.getMaxDistanceNeighbours(dataPoint.getVector(), m_radiusAlpha * FACTOR_RB);
-        if (neighbors.size() / ((double)getNumberOfDataPoints()) > 0.2) {
-            setWarning(String.format("Some rows have more than %s%% of the dataset in their neighborhood. "
-                + "Consider reducing the radius alpha.", WARNING_THRESHOLD * 100));
-        }
-
-        for (final NearestNeighbour<PotentialDataPoint> nn : neighbors) {
-            // don't compare to itself
-            if (nn.getData() == dataPoint) {
+    protected void initializeUnnormalizedPotential(final KDTree<GraphDataPoint> kdTree,
+        final GraphDataPoint dataPoint) {
+        // we get the m_nrNeighbors + 1 because the data point itself will also be among the nearest neighbors
+        final List<NearestNeighbour<GraphDataPoint>> nearestNeighbors =
+            kdTree.getKNearestNeighbours(dataPoint.getVector(), m_nrNeighbors + 1);
+        for (final NearestNeighbour<GraphDataPoint> neighbor : nearestNeighbors) {
+            // the datapoint itself should not add to the density
+            if (neighbor.getData() == dataPoint) {
                 continue;
             }
-            dataPoint.registerNeighbor(nn);
-            final double dist = nn.getDistance();
-            if (dist <= m_radiusAlpha) {
-                dataPoint.increaseDensity(Math.exp(dist * dist * -m_alpha));
-            }
+            final double d = neighbor.getDistance();
+            final double weight = Math.exp(-d / (2 * m_sigmaSquared));
+            final GraphDataPoint ndp = neighbor.getData();
+            dataPoint.registerNeighbor(ndp, weight);
+            ndp.registerNeighbor(dataPoint, weight);
         }
+
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected DensityScorerModel buildModel(final List<PotentialDataPoint> dataPoints) {
-        return new PotentialDensityScorerModel(dataPoints, m_beta);
+    protected DensityScorerModel buildModel(final List<GraphDataPoint> dataPoints) {
+        return new GraphDensityScorerModel(dataPoints);
     }
 
 }

@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.knime.al.nodes.score.density.AbstractDensityInitializerNodeModel;
-import org.knime.al.nodes.score.density.DensityScorerModelBuilder;
+import org.knime.al.nodes.score.density.DensityScorerModelCreator;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
@@ -62,6 +62,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.util.CheckUtils;
 
 /**
+ * Node model of the Graph Density Initializer node.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
@@ -89,8 +90,8 @@ final class GraphDensityInitializerNodeModel extends AbstractDensityInitializerN
      * {@inheritDoc}
      */
     @Override
-    protected DensityScorerModelBuilder createBuilder(final int nrFeatures) {
-        return new GraphDensityScorerModelBuilder(nrFeatures, m_sigma.getDoubleValue(), m_nrNeighbors.getIntValue());
+    protected DensityScorerModelCreator createBuilder(final int nrFeatures) {
+        return new GraphDensityScorerModelCreator(nrFeatures, m_sigma.getDoubleValue(), m_nrNeighbors.getIntValue());
     }
 
     /**

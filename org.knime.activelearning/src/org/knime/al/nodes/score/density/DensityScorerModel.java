@@ -60,6 +60,10 @@ import org.knime.core.data.RowKey;
 public interface DensityScorerModel extends Externalizable {
 
     /**
+     * Decreases the density of all rows in the neighborhood of the row identified by <b>key</b>.
+     * The exact update as well as the notion of neighborhood depend on the underlying
+     * algorithm.
+     *
      * @param key the {@link RowKey} of the row whose neighborhood needs to be updated
      * @throws UnknownRowException if an unknown row is encountered
      */

@@ -132,8 +132,6 @@ public abstract class AbstractDensityInitializerNodeModel extends AbstractALNode
      */
     @Override
     protected final PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
-
-
         // Init data structures and potentials
         BufferedDataTable unlabeledTable = (BufferedDataTable)inData[DATA_PORT];
         CheckUtils.checkSetting(unlabeledTable.size() > 0, "The input table is empty.");
@@ -156,18 +154,18 @@ public abstract class AbstractDensityInitializerNodeModel extends AbstractALNode
 
     private DensityScorerModel initialize(final BufferedDataTable unlabeledTable, final ExecutionMonitor progress)
         throws CanceledExecutionException {
-        final DensityScorerModelBuilder builder = createBuilder(unlabeledTable, progress.createSubProgress(0.5));
+        final DensityScorerModelCreator builder = createBuilder(unlabeledTable, progress.createSubProgress(0.5));
         final DensityScorerModel model =  builder.buildModel(progress.createSubProgress(0.5));
         builder.getWarning().ifPresent(this::setWarningMessage);
         return model;
     }
 
-    private DensityScorerModelBuilder createBuilder(final BufferedDataTable unlabeledTable,
+    private DensityScorerModelCreator createBuilder(final BufferedDataTable unlabeledTable,
         final ExecutionMonitor progress) throws CanceledExecutionException {
         final List<Integer> selectedIndices = NodeTools.getIndicesFromFilter(unlabeledTable.getSpec(),
             m_columnFilterModel, DoubleValue.class, this.getClass());
         final int[] idxs = selectedIndices.stream().mapToInt(Integer::intValue).toArray();
-        final DensityScorerModelBuilder builder = createBuilder(idxs.length);
+        final DensityScorerModelCreator builder = createBuilder(idxs.length);
         builder.setMissingValueHandling(ExceptionHandling.valueOf(m_missingValueHandling.getStringValue()));
         final long size = unlabeledTable.size();
         try (final CloseableRowIterator iter = unlabeledTable.filter(TableFilter.materializeCols(idxs)).iterator()) {
@@ -190,9 +188,9 @@ public abstract class AbstractDensityInitializerNodeModel extends AbstractALNode
 
     /**
      * @param nrFeatures the number of features used
-     * @return a {@link DensityScorerModelBuilder} corresponding to the current node configuration
+     * @return a {@link DensityScorerModelCreator} corresponding to the current node configuration
      */
-    protected abstract DensityScorerModelBuilder createBuilder(final int nrFeatures);
+    protected abstract DensityScorerModelCreator createBuilder(final int nrFeatures);
 
     /**
      * {@inheritDoc}

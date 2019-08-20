@@ -59,9 +59,6 @@ public final class UnknownRowException extends Exception {
 
     private final String m_unknownKey;
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
 
     /**

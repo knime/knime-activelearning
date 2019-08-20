@@ -60,7 +60,7 @@ import org.knime.core.node.ExecutionMonitor;
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-public interface DensityScorerModelBuilder {
+public interface DensityScorerModelCreator {
 
     /**
      * Adds a row to the model.
@@ -70,7 +70,7 @@ public interface DensityScorerModelBuilder {
     void addRow(DataRow row);
 
     /**
-     * Builds the model based on all rows added via {@link DensityScorerModelBuilder#addRow(DataRow)}.
+     * Builds the model based on all rows added via {@link DensityScorerModelCreator#addRow(DataRow)}.
      *
      * @param monitor used to monitor the progress
      * @return the {@link DensityScorerModel}

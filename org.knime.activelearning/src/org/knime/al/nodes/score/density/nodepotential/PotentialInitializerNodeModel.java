@@ -51,7 +51,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.knime.al.nodes.score.density.AbstractDensityInitializerNodeModel;
-import org.knime.al.nodes.score.density.DensityScorerModelBuilder;
+import org.knime.al.nodes.score.density.DensityScorerModelCreator;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
@@ -76,8 +76,8 @@ final class PotentialInitializerNodeModel extends AbstractDensityInitializerNode
      * {@inheritDoc}
      */
     @Override
-    protected DensityScorerModelBuilder createBuilder(final int nrFeatures) {
-        return new PotentialDensityScorerModelBuilder(nrFeatures, m_radiusAlphaModel.getDoubleValue());
+    protected DensityScorerModelCreator createBuilder(final int nrFeatures) {
+        return new PotentialDensityScorerModelCreator(nrFeatures, m_radiusAlphaModel.getDoubleValue());
     }
 
     /**
@@ -93,8 +93,7 @@ final class PotentialInitializerNodeModel extends AbstractDensityInitializerNode
      */
     @Override
     protected void checkInputTable(final BufferedDataTable table) throws InvalidSettingsException {
-        // TODO Auto-generated method stub
-
+        // nothing to check
     }
 
 }

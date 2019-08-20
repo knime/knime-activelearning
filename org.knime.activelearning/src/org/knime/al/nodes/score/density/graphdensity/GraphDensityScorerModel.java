@@ -60,21 +60,17 @@ import org.knime.al.nodes.score.density.AbstractDensityScorerModel;
  */
 final class GraphDensityScorerModel extends AbstractDensityScorerModel<GraphDataPoint> {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1603562183501522630L;
-
 
     /**
      * @param dataPoints
      */
-    public GraphDensityScorerModel(final List<GraphDataPoint> dataPoints) {
+    GraphDensityScorerModel(final List<GraphDataPoint> dataPoints) {
         super(dataPoints);
     }
 
     /**
-     *
+     * Serialization constructor. Do not use in normal application code.
      */
     public GraphDensityScorerModel() {
         // no op serialization constructor

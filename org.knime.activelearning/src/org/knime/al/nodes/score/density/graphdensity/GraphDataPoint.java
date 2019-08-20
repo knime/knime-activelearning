@@ -21,7 +21,8 @@ final class GraphDataPoint extends AbstractDensityDataPoint<GraphDataPoint> {
     private boolean m_isNormalized = false;
 
     /**
-     * @param vector the vector of this datapoint's location in the featurespace.
+     * @param key the {@link RowKey} of the datapoint
+     * @param vector the vector of this datapoint's location in the featurespace
      */
     GraphDataPoint(final RowKey key, final double[] vector) {
         super(key, vector);
@@ -46,6 +47,7 @@ final class GraphDataPoint extends AbstractDensityDataPoint<GraphDataPoint> {
      */
     void registerNeighbor(final GraphDataPoint dataPoint, final double weight) {
         CheckUtils.checkArgument(dataPoint != this, "A data point must not be its own neighbor.");
+        CheckUtils.checkNotNull(dataPoint);
         if (m_neighbors.add(dataPoint)) {
             increaseDensity(weight);
         }

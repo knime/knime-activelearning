@@ -66,14 +66,14 @@ import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.util.CheckUtils;
 
 /**
- * Abstract implementation of a {@link DensityScorerModelBuilder} that performs data reading, progress monitoring and
+ * Abstract implementation of a {@link DensityScorerModelCreator} that performs data reading, progress monitoring and
  * potential normalization.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  * @param <V> The type of {@link DensityDataPoint}
  */
-public abstract class AbstractDensityScorerModelBuilder<V extends DensityDataPoint<V>>
-    implements DensityScorerModelBuilder {
+public abstract class AbstractDensityScorerModelCreator<V extends DensityDataPoint<V>>
+    implements DensityScorerModelCreator {
 
     private final List<V> m_dataPoints = new ArrayList<>();
 
@@ -90,7 +90,7 @@ public abstract class AbstractDensityScorerModelBuilder<V extends DensityDataPoi
     /**
      * @param nrFeatures the number of features used to calculate distances
      */
-    public AbstractDensityScorerModelBuilder(final int nrFeatures) {
+    public AbstractDensityScorerModelCreator(final int nrFeatures) {
         m_kdTreeBuilder = new KDTreeBuilder<>(nrFeatures);
         m_nrFeatures = nrFeatures;
     }
@@ -124,10 +124,6 @@ public abstract class AbstractDensityScorerModelBuilder<V extends DensityDataPoi
      */
     protected abstract DensityScorerModel buildModel(final List<V> dataPoints);
 
-    private List<V> getDataPoints() {
-        return m_dataPoints;
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -143,14 +139,14 @@ public abstract class AbstractDensityScorerModelBuilder<V extends DensityDataPoi
     /**
      * @param warning the warning message
      */
-    protected void setWarning(final String warning) {
+    protected final void setWarning(final String warning) {
         m_warning = warning;
     }
 
     /**
-     * @return the number of data points added via {@link AbstractDensityScorerModelBuilder#addRow(DataRow)}
+     * @return the number of data points added via {@link AbstractDensityScorerModelCreator#addRow(DataRow)}
      */
-    protected int getNumberOfDataPoints() {
+    protected final int getNumberOfDataPoints() {
         return m_dataPoints.size();
     }
 
@@ -177,12 +173,17 @@ public abstract class AbstractDensityScorerModelBuilder<V extends DensityDataPoi
     @Override
     public final DensityScorerModel buildModel(final ExecutionMonitor monitor) throws CanceledExecutionException {
         initializeUnnormalizedPotentials(monitor.createSubProgress(0.5));
-        normalizePotentials(monitor);
-        return buildModel(getDataPoints());
+        normalizePotentials(monitor.createSubProgress(0.5));
+        return buildModel(m_dataPoints);
     }
 
     private void initializeUnnormalizedPotentials(final ExecutionMonitor monitor) throws CanceledExecutionException {
         final KDTree<V> kdTree = m_kdTreeBuilder.buildTree(monitor.createSubProgress(0.2));
+        initializeUnnormalizedPotentials(monitor.createSubProgress(0.8), kdTree);
+    }
+
+    private void initializeUnnormalizedPotentials(final ExecutionMonitor monitor, final KDTree<V> kdTree)
+        throws CanceledExecutionException {
         final Iterator<V> iter = m_dataPoints.iterator();
         final int size = m_dataPoints.size();
         for (int i = 1; iter.hasNext(); i++) {
@@ -196,8 +197,8 @@ public abstract class AbstractDensityScorerModelBuilder<V extends DensityDataPoi
         double min = Double.MAX_VALUE;
         double max = -Double.MAX_VALUE;
         final ExecutionMonitor minMaxProgress = monitor.createSubProgress(0.5);
-        Iterator<V> iter = getDataPoints().iterator();
-        final int size = getDataPoints().size();
+        Iterator<V> iter = m_dataPoints.iterator();
+        final int size = m_dataPoints.size();
         for (int i = 1; iter.hasNext(); i++) {
             final DensityDataPoint<V> p = iter.next();
             minMaxProgress.checkCanceled();
@@ -226,8 +227,8 @@ public abstract class AbstractDensityScorerModelBuilder<V extends DensityDataPoi
 
     private void normalize(final ExecutionMonitor normalizerProgress, final DoubleUnaryOperator normalizer)
         throws CanceledExecutionException {
-        final Iterator<V> iter = getDataPoints().iterator();
-        final int size = getDataPoints().size();
+        final Iterator<V> iter = m_dataPoints.iterator();
+        final int size = m_dataPoints.size();
         for (int i = 1; iter.hasNext(); i++) {
             normalizerProgress.checkCanceled();
             normalizerProgress.setProgress(i / ((double)size),
