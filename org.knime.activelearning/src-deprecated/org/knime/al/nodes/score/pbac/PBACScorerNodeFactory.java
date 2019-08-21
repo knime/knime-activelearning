@@ -56,7 +56,10 @@ import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 
 /**
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated The PBAC Scorer node has been deprecated as of KNIME AP 4.1.0 the same behavior can be achieved using a
+ *             KNIME Workflow
  */
+@Deprecated
 public class PBACScorerNodeFactory extends NodeFactory<PBACScorerNodeModel> {
 
     /**

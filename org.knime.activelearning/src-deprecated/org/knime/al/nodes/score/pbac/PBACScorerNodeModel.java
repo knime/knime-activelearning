@@ -91,7 +91,10 @@ import org.knime.core.util.MutableDouble;
 /**
  * @author dietzc, University of Konstanz
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated The PBAC Scorer node has been deprecated as of KNIME AP 4.1.0 the same behavior can be achieved using a
+ *             KNIME Workflow
  */
+@Deprecated
 public class PBACScorerNodeModel extends NodeModel {
 
     private static final double FACTOR_RB = 1.25d;

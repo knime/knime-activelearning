@@ -10,7 +10,10 @@ import org.knime.core.data.RowKey;
  *
  * @author dietzc
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated The PBAC Scorer node has been deprecated as of KNIME AP 4.1.0 the same behavior can be achieved using a
+ *             KNIME Workflow
  */
+@Deprecated
 public class DataPoint {
 
     // Vector containing information
@@ -62,8 +65,7 @@ public class DataPoint {
     /**
      * Sets the label.
      *
-     * @param label
-     *            the new label
+     * @param label the new label
      */
     public void setLabel(final String label) {
         m_label = label;
@@ -79,8 +81,7 @@ public class DataPoint {
     /**
      * Increases the potential by the given amount.
      *
-     * @param amount
-     *            the amount.
+     * @param amount the amount.
      */
     public void increasePotential(final double amount) {
         m_potential += amount;
@@ -89,8 +90,7 @@ public class DataPoint {
     /**
      * sets the potential to the given amount.
      *
-     * @param potential
-     *            the desired potential
+     * @param potential the desired potential
      *
      */
     public void setPotential(final double potential) {
@@ -100,8 +100,7 @@ public class DataPoint {
     /**
      * Decreases the potential by the given amount.
      *
-     * @param amount
-     *            the amount.
+     * @param amount the amount.
      */
     public void decreasePotential(final double amount) {
         m_potential = Math.max(0, m_potential - amount);
@@ -110,8 +109,7 @@ public class DataPoint {
     /**
      * Sets the score.
      *
-     * @param score
-     *            the score
+     * @param score the score
      */
     public void setScore(final double score) {
         m_score = score;
@@ -129,8 +127,7 @@ public class DataPoint {
     /**
      * Sets the entropy of the point.
      *
-     * @param entropy
-     *            the entropy
+     * @param entropy the entropy
      */
     public void setEntropy(final double entropy) {
         m_entropy = entropy;
@@ -150,8 +147,7 @@ public class DataPoint {
      */
     @Override
     public String toString() {
-        return "DataPoint [key=" + m_key + ", label=" + m_label + ", score="
-                + m_score + ", prob=" + m_prob + "]";
+        return "DataPoint [key=" + m_key + ", label=" + m_label + ", score=" + m_score + ", prob=" + m_prob + "]";
     }
 
 }

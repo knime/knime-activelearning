@@ -99,6 +99,7 @@
          point="org.knime.workbench.repository.nodes">
       <node
             category-path="/labs/activelearning/score/allinone"
+            deprecated="true"
             factory-class="org.knime.al.nodes.score.pbac.PBACScorerNodeFactory">
       </node>
       <node
