@@ -10,6 +10,9 @@
 
 	<fullDescription>
 		<intro>
+			This node has been replaced by the Top k Selector which can be found in the category
+			Manipulation->Row->Transform. <br/>
+		
 			Returns the n rows with the highest or lowest values in a specific column.
 		</intro>
 
