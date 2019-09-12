@@ -13,14 +13,11 @@
 		<intro>
 			Calculates density scores for the input table given a density model.
 			Note that the model can only be applied to the data it was initialized with in the corresponding initializer node (<b>Potential Density Initializer</b> or <b>Graph Density Initializer</b>).
-			If the optional second input table with newly labeled data is connected, the model is updated before the scores are calculated.
-			The update is performed by reducing the densities in the neighborhoods of all newly labeled data points according to the used density estimation algorithm.
 		</intro>
 		<option name="Output Column Name">Name of the appended density score column.
 		</option>
-		<option name="Unknown Row Handling">There are two ways to deal with unknown rows. The first applies to both the scoring as well as the update and simply fails whenever an unknown row is encountered.
-		The second strategy is to ignore unknown rows in either of the input table. For the rows a density score is assigned to this means that an unknown row gets a missing value as density score.
-		In case a row from the optional second input table is missing, it will simply be skipped during the update process.</option>
+		<option name="Unknown Row Handling">If this setting is set to ignore, unknown rows (i.e. rows that were not used for the creation of the density model) receive a missing value as density score.
+		Otherwise the node will fail if it encounters such a row.</option>
 	</fullDescription>
 
 	<ports>
@@ -28,15 +25,7 @@
 		</inPort>
 		<inPort name="Scoring Data" index="1">Table containing rows for which the current density score is required. 
 		</inPort>
-		<inPort name="Update Data" index="2" optional="true">
-		Table containing rows whose density in the model needs to be reduced prior to scoring the first input table.
-		In an active learning setting these would be the rows that were freshly labeled by the user.
-		The update is omitted if this port is not connected.
-		</inPort>
-		<outPort name="Updated Density Scorer Model" index="0">The updated
-			model i.e. decreased densities in the neighborhood of
-			rows in the second input table.</outPort>
-		<outPort name="Density Score Table" index="1">The input table with
+		<outPort name="Density Score Table" index="0">The input table with
 			an appended density score column. The name of the column can be
 			specified via the Output Column Name option.</outPort>
 	</ports>

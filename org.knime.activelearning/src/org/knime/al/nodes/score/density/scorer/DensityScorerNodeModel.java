@@ -49,7 +49,6 @@
 package org.knime.al.nodes.score.density.scorer;
 
 import java.util.List;
-import java.util.UUID;
 
 import org.knime.al.nodes.AbstractALNodeModel;
 import org.knime.al.nodes.score.ExceptionHandling;
@@ -62,16 +61,11 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.MissingCell;
-import org.knime.core.data.RowKey;
-import org.knime.core.data.container.CloseableRowIterator;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.container.SingleCellFactory;
-import org.knime.core.data.container.filter.TableFilter;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -84,16 +78,15 @@ import org.knime.core.util.UniqueNameGenerator;
 import com.google.common.collect.Lists;
 
 /**
+ * Node model for the Density Scorer node.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
 final class DensityScorerNodeModel extends AbstractALNodeModel {
 
-    private static final String UNKNOWN_ROW_TEMPLATE = "Unknown row %s in %s input table.";
+    private static final String UNKNOWN_ROW_TEMPLATE = "Unknown row %s in input table.";
 
     private static final MissingCell MISSING_CELL = new MissingCell("Unknown row.");
-
-    private static final int NEWLY_LABELED_INPORT = 2;
 
     private static final int UNLABELED_INPORT = 1;
 
@@ -114,8 +107,8 @@ final class DensityScorerNodeModel extends AbstractALNodeModel {
     /**
      */
     protected DensityScorerNodeModel() {
-        super(new PortType[]{DensityScorerPortObject.TYPE, BufferedDataTable.TYPE, BufferedDataTable.TYPE_OPTIONAL},
-            new PortType[]{DensityScorerPortObject.TYPE, BufferedDataTable.TYPE});
+        super(new PortType[]{DensityScorerPortObject.TYPE, BufferedDataTable.TYPE},
+            new PortType[]{BufferedDataTable.TYPE});
     }
 
     /**
@@ -125,14 +118,10 @@ final class DensityScorerNodeModel extends AbstractALNodeModel {
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final DensityScorerPortObjectSpec modelSpec = (DensityScorerPortObjectSpec)inSpecs[MODEL_INPORT];
         final DataTableSpec unlabeledSpec = (DataTableSpec)inSpecs[UNLABELED_INPORT];
-        final DataTableSpec newlyLabeledSpec = (DataTableSpec)inSpecs[NEWLY_LABELED_INPORT];
         // not really necessary but if the features don't match it's unlikely the key will be correct
         final DataTableSpec featureSpec = modelSpec.getFeatureSpec();
-        checkSpecsCompatible(featureSpec, unlabeledSpec, "unlabeled");
-        if (newlyLabeledSpec != null) {
-            checkSpecsCompatible(featureSpec, newlyLabeledSpec, "newly labeled");
-        }
-        return new PortObjectSpec[]{modelSpec, createRearranger(unlabeledSpec, null).createSpec()};
+        checkSpecsCompatible(featureSpec, unlabeledSpec, "input");
+        return new PortObjectSpec[]{createRearranger(unlabeledSpec, null).createSpec()};
     }
 
     @SuppressWarnings("null") // we explicitly check that tableCol is not null
@@ -162,7 +151,7 @@ final class DensityScorerNodeModel extends AbstractALNodeModel {
                     } catch (UnknownRowException e) {
                         if (m_failOnUnknown) {
                             throw new IllegalArgumentException(
-                                String.format(UNKNOWN_ROW_TEMPLATE, e.getUnknownKey(), "first"), e);
+                                String.format(UNKNOWN_ROW_TEMPLATE, e.getUnknownKey()), e);
                         } else {
                             setWarningMessage(String.format(
                                 "The output for row %s is a missing value because it is unknown to the model.",
@@ -183,54 +172,10 @@ final class DensityScorerNodeModel extends AbstractALNodeModel {
         final DensityScorerPortObject densityScorerPortObject = (DensityScorerPortObject)inData[MODEL_INPORT];
         final DensityScorerModel model = densityScorerPortObject.getModel();
         final BufferedDataTable unlabeledData = (BufferedDataTable)inData[UNLABELED_INPORT];
-        final BufferedDataTable newlyLabeledData = (BufferedDataTable)inData[NEWLY_LABELED_INPORT];
-        double appendingProgress = 1.0;
-        DensityScorerPortObject outputPo = densityScorerPortObject;
-        if (newlyLabeledData != null) {
-            updateModel(model, newlyLabeledData, exec.createSubProgress(0.5));
-            outputPo = DensityScorerPortObject.createPortObject(densityScorerPortObject.getSpec(), model,
-                exec.createFileStore(UUID.randomUUID().toString()));
-            appendingProgress = 0.5;
-        }
-
         final ColumnRearranger rearranger = createRearranger(unlabeledData.getDataTableSpec(), model);
         final BufferedDataTable outputTable =
-            exec.createColumnRearrangeTable(unlabeledData, rearranger, exec.createSubProgress(appendingProgress));
-        return new PortObject[]{outputPo, outputTable};
-    }
-
-    private void updateModel(final DensityScorerModel model, final BufferedDataTable newlyLabeledData,
-        final ExecutionMonitor monitor) throws CanceledExecutionException {
-        final boolean failOnUnknown = failOnMissing();
-        int unknownRows = 0;
-        try (CloseableRowIterator iter = newlyLabeledData.filter(TableFilter.materializeCols()).iterator()) {
-            final long size = newlyLabeledData.size();
-            for (long i = 1; iter.hasNext(); i++) {
-                final RowKey key = iter.next().getKey();
-                monitor.checkCanceled();
-                monitor.setProgress(i / ((double)size),
-                    String.format("Updating model with newly labeled row %s (%s of %s).", key, i, size));
-                try {
-                    model.updateNeighbors(key);
-                } catch (UnknownRowException e) {
-                    if (failOnUnknown) {
-                        throw new IllegalArgumentException(
-                            String.format(UNKNOWN_ROW_TEMPLATE, e.getUnknownKey(), "second"), e);
-                    } else {
-                        // row is ignored
-                        unknownRows++;
-                    }
-                }
-            }
-        }
-        if (unknownRows > 0) {
-            final boolean single = unknownRows == 1;
-            final String personalPronoun = single ? "it" : "they";
-            final String verb = single ? "is" : "are";
-            setWarningMessage(String.format(
-                "%s row%s of the second table %s ignored during the update because %s %s unknown to the model.",
-                unknownRows, single ? "" : "s", verb, personalPronoun, verb));
-        }
+            exec.createColumnRearrangeTable(unlabeledData, rearranger, exec);
+        return new PortObject[]{outputTable};
     }
 
     /**
@@ -249,9 +194,6 @@ final class DensityScorerNodeModel extends AbstractALNodeModel {
         return Lists.newArrayList(m_outputColumnName, m_unknownRowHandling);
     }
 
-    /**
-     * @return
-     */
     private boolean failOnMissing() {
         return ExceptionHandling.valueOf(m_unknownRowHandling.getStringValue()) == ExceptionHandling.FAIL;
     }
