@@ -157,6 +157,11 @@
             deprecated="false"
             factory-class="org.knime.al.nodes.score.density.graphdensity.GraphDensityInitializerNodeFactory">
       </node>
+      <node
+            category-path="/labs/activelearning/score/density"
+            deprecated="false"
+            factory-class="org.knime.al.nodes.score.density.updater.DensityUpdaterNodeFactory">
+      </node>
    </extension>
      <extension
            point="org.knime.core.PortType">

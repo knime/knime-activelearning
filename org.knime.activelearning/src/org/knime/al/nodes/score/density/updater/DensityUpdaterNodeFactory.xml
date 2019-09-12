@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="nodepotential.png" type="Predictor"
+	xmlns="http://knime.org/node/v3.1"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
+
+	<name>Density Updater</name>
+	<shortDescription>
+		Updates a density model.
+	</shortDescription>
+
+	<fullDescription>
+		<intro>
+			Updates a density model.
+			Note that the model can only be updated with
+			the data it was initialized with in the corresponding initializer
+			node (
+			<b>Potential Density Initializer</b>
+			or
+			<b>Graph Density Initializer</b>
+			).
+			The update is performed by reducing the densities in the
+			neighborhoods of all newly labeled data points according to the used
+			density estimation algorithm.
+		</intro>
+		<option name="Unknown Row Handling">Depending on this setting, the node either ignores
+			unknown rows (i.e. rows that were not used for the model creation) or
+			fails if it encounters one.</option>
+	</fullDescription>
+
+	<ports>
+		<inPort name="Density Scorer Model" index="0">
+			Density scorer model created with either the
+			<b>Potential Density Initializer</b>
+			or the
+			<b>Graph Density Initializer</b>
+			node.
+		</inPort>
+		<inPort name="Update Data" index="1" optional="true">
+			Table containing rows whose density in the model needs to be reduced prior
+			to scoring the first input table.
+			In an active learning setting these would be the rows that were freshly
+			labeled by the user.
+			The update is omitted if this port is not connected.
+		</inPort>
+		<outPort name="Updated Density Scorer Model" index="0">The updated
+			model i.e. decreased densities in the neighborhood of
+			rows in the
+			second input table.
+		</outPort>
+	</ports>
+</knimeNode>
