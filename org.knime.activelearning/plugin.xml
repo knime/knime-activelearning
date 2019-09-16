@@ -46,18 +46,11 @@
             path="/labs/activelearning/score">
       </category>
 	  <category
-            icon="icons/AL-Loop.png"
+            icon="icons/al_loop_category.png"
             level-id="loop"
             locked="false"
             name="Loop"
             path="/labs/activelearning">
-      </category>
-       <category
-            icon="icons/AL-Loop-end.png"
-            level-id="end"
-            locked="false"
-            name="End"
-            path="/labs/activelearning/loop">
       </category>
 	  <category
             icon="icons/missing.gif"
@@ -89,6 +82,10 @@
         <nodeset
               deprecated="false"
               factory-class="org.knime.al.nodes.score.novelty.NoveltyNodeSetFactory">
+        </nodeset>
+        <nodeset
+              deprecated="false"
+              factory-class="org.knime.al.nodes.loop.ActiveLearningLoopNodeSetFactory">
         </nodeset>
        <!-- <nodeset
             factory-class="org.knime.al.nodes.score.novelty.NoveltyNodeSetFactory">

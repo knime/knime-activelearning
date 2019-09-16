@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="al_loop_start.png" type="LoopStart" xmlns="http://knime.org/node/v3.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v3.6 http://knime.org/node/v3.6.xsd">
+    <name>Active Learning Loop Start</name>
+    
+    <shortDescription>
+    The loop start node for an active learning loop.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro> 
+           <p>
+               The Active Learning Loop is an extension to the regular Recursive Loop with an additional model port. It enables
+               passing of a data table and an arbitrary model from the Active Learning Loop End back to the Active Learning Loop Start.
+           </p>
+           <p>
+               The Loop Start requires an initialized table and model, which will be output by the Active Learning Loop Start in 
+               the first iteration of the loop.
+           </p>
+           <p>
+               The table and model received by the corresponding Active Learning Loop End is passed back to the Active Learning Loop Start node.
+               Starting with the second iteration, the Active Learning Loop Start node outputs the table and model as received by the 
+               Active Learning Loop End.
+           </p>
+        </intro>
+
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="Initialization model">The model used for the first iteration.</inPort>
+        <inPort index="1" name="Initialization table">The data table used for the first iteration.</inPort>
+        <outPort index="0" name="Recursion model">The model from the loop end connected to its recursion model input.</outPort>
+        <outPort index="1" name="Recursion table">The table from the loop end connected to its recursion table input.</outPort>
+    </ports>   
+</knimeNode>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="al_loop_end.png" type="LoopEnd" xmlns="http://knime.org/node/v3.6" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v3.6 http://knime.org/node/v3.6.xsd">
+    <name>Active Learning Loop End</name>
+    
+    <shortDescription>
+    The loop end node for an active learning loop.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>
+           <p>
+               The Active Learning Loop is an extension to the regular Recursive Loop with an additional model port. It enables
+               passing of a data table and an arbitrary model from the Active Learning Loop End back to the Active Learning Loop Start.
+           </p>
+           <p>
+               The Loop Start requires an initialized table and model, which will be output by the Active Learning Loop Start in 
+               the first iteration of the loop.
+           </p>
+           <p>
+               The table and model received by the corresponding Active Learning Loop End is passed back to the Active Learning Loop Start node.
+               Starting with the second iteration, the Active Learning Loop Start node outputs the table and model as received by the 
+               Active Learning Loop End.
+           </p>
+        
+           <p>
+               The loop runs until one of the three stopping criteria is met:
+               <ul>
+                    <li>Maximum number of iterations: to ensure no endless loop is
+                        created, the loop will end after the set number of iterations.</li>
+                    <li>Minimal number of rows: to ensure enough rows are present for processing, 
+                        the loop stops if its input contains less rows than the set minimum.</li>
+                    <li>End loop with variable: the loop ends if the option is enabled and the value 
+                        of the selected variable equals "true"</li>
+               </ul>
+           </p>
+           <p>
+                The recursion model output (1) will always output the model from the last iteration connected to the recursion model
+                input (1). While the loop is running, the model will be returned to the Active Learning Loop Start node. 
+                The table passed to the collecting table input (2) is collected and passed to the collected table output port (2). 
+                The table passed to the recursion table input (3) is returned to the Recursive Loop Start node during the iteration.
+           </p>
+        </intro>
+        
+        <option name="Maximal number of iterations">The maximum number of iterations the loop will run.</option>
+        <option name="Minimal number of rows">The minimal number of rows required to continue iterating.</option>
+        <option name="End Loop with Variable">Whether the node execution is controlled by a variable, when enabled allows 
+        choosing the Flow Variable that ends the loop if it's value equals "true".</option>   
+        <option name="Collect data from last iteration only">If this option is checked only the last table passed to the collecting 
+        table input is passed through to the collected table output (2). Hence, the data of earlier iterations is discarded. If this
+        option is enabled, the "Add iteration column" will be ignored.</option>  
+        <option name="Add iteration column">Allows you to add a column containing the iteration number to the output table if rows
+        should be collected in each loop iteration.</option>
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="Recursion model input">Model to be passed back to loop start.</inPort>
+        <inPort index="1" name="Collecting table input">Data (Rows) to be collected.</inPort>
+        <inPort index="2" name="Recursion table input">Table to be passed back to loop start.</inPort>
+        <outPort index="0" name="Recursion model output">The recursion model from the last iteration. </outPort>
+        <outPort index="1" name="Collected table output">The rows collected from collecting table input (1).</outPort>
+    </ports>
+</knimeNode>
