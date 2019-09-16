@@ -1,3 +1,5 @@
+package org.knime.al.nodes.loop.dbg;
+
 /*
  * ------------------------------------------------------------------------
  *
@@ -46,31 +48,31 @@
  * History
  *   Jan 30, 2013 (hornm): created
  */
-package org.knime.al.nodes.loop.end;
 
-import org.knime.core.data.DataValue;
 import org.knime.core.data.StringValue;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
-import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
+import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 
 /**
  *
- * @author hornm, dietzc University of Konstanz
+ * @author dietzc University of Konstanz
+ * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  */
-public class ActiveLearnLoopEndNodeFactory
-        extends NodeFactory<ActiveLearnLoopEndNodeModel> {
+@Deprecated
+public class DBGActiveLearnLoopEndNodeFactory
+        extends NodeFactory<DBGActiveLearnLoopEndNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ActiveLearnLoopEndNodeModel createNodeModel() {
-        return new ActiveLearnLoopEndNodeModel();
+    public DBGActiveLearnLoopEndNodeModel createNodeModel() {
+        return new DBGActiveLearnLoopEndNodeModel();
     }
 
     /**
@@ -78,16 +80,17 @@ public class ActiveLearnLoopEndNodeFactory
      */
     @Override
     protected int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public NodeView<ActiveLearnLoopEndNodeModel> createNodeView(
-            final int viewIndex, final ActiveLearnLoopEndNodeModel nodeModel) {
-        return new ActiveLearnLoopEndNodeView(nodeModel);
+    public NodeView<DBGActiveLearnLoopEndNodeModel> createNodeView(
+            final int viewIndex,
+            final DBGActiveLearnLoopEndNodeModel nodeModel) {
+        return null;
     }
 
     /**
@@ -107,23 +110,16 @@ public class ActiveLearnLoopEndNodeFactory
         return new DefaultNodeSettingsPane() {
             {
                 addDialogComponent(new DialogComponentColumnNameSelection(
-                        ActiveLearnLoopEndSettingsModels.createRepColumnModel(),
-                        "Representative Column", 0, DataValue.class));
+                        DBGActiveLearnLoopEndNodeModel
+                                .createGroundTruthClassColumnModel(),
+                        "Ground Truth Class Column",
+                        DBGActiveLearnLoopEndNodeModel.LABELED_PORT,
+                        StringValue.class));
 
-                addDialogComponent(new DialogComponentColumnNameSelection(
-                        ActiveLearnLoopEndSettingsModels
-                                .createClassColumnModel(),
-                        "Class  Column", 0, StringValue.class));
-
-                addDialogComponent(new DialogComponentOptionalString(
-                        ActiveLearnLoopEndSettingsModels
-                                .createDefaultClassModel(),
-                        "Automatically label rows with default class:"));
-
-                addDialogComponent(new DialogComponentBoolean(
-                        ActiveLearnLoopEndSettingsModels
-                                .createAutoTerminateModel(),
-                        "Automatically terminate when no unlabeled rows are left"));
+                addDialogComponent(new DialogComponentNumber(
+                        DBGActiveLearnLoopEndNodeModel
+                                .createMaxIterationsModel(),
+                        "Number of Iterations", 1));
             }
         };
     }

@@ -58,11 +58,13 @@ import javax.swing.table.AbstractTableModel;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.RowKey;
 
-/*
+/**
  * Table model for the hiliteTable
  *
  * @author Jonathan Hale
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  */
+@Deprecated
 class ClassViewerTable extends AbstractTableModel {
     /**
      *

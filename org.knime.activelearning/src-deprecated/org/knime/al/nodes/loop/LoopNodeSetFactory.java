@@ -41,21 +41,95 @@
  *  propagated with or for interoperation with KNIME.  The owner of a Node
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
- * ---------------------------------------------------------------------
+ * --------------------------------------------------------------------- *
  *
- * History
- *   1 Dec 2014 (gabriel): created
  */
 package org.knime.al.nodes.loop;
 
-/**
- *
- * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
- */
-public class ActiveLearnLoopUtils {
-    public static final String AL_STEP = "AL_ITERATION";
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-    public enum NodeModelState {
-        EXECUTING, CONFIGURED, SUSPENDED, TERMINATED;
+import org.knime.al.nodes.loop.dbg.DBGActiveLearnLoopEndNodeFactory;
+import org.knime.al.nodes.loop.end.ActiveLearnLoopEndNodeFactory;
+import org.knime.al.nodes.loop.start.ActiveLearnLoopStartNodeFactory;
+import org.knime.core.node.NodeFactory;
+import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeModel;
+import org.knime.core.node.NodeSetFactory;
+import org.knime.core.node.config.ConfigRO;
+
+/**
+ * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
+ */
+@Deprecated
+public class LoopNodeSetFactory implements NodeSetFactory {
+
+    /**
+     *
+     */
+    private static final String CATEGORY_PREFIX = "/labs/activelearning/loop";
+    private static final NodeLogger LOGGER =
+            NodeLogger.getLogger(LoopNodeSetFactory.class);
+    private final Map<String, String> m_nodeFactories =
+            new HashMap<String, String>();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ConfigRO getAdditionalSettings(final String id) {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getAfterID(final String id) {
+        return "";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getCategoryPath(final String id) {
+        return m_nodeFactories.get(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public Class<? extends NodeFactory<? extends NodeModel>>
+            getNodeFactory(final String id) {
+        try {
+            return (Class<? extends NodeFactory<? extends NodeModel>>) Class
+                    .forName(id);
+        } catch (final ClassNotFoundException e) {
+            LOGGER.warn("Could not load Node: " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Collection<String> getNodeFactoryIds() {
+        m_nodeFactories.put(
+                ActiveLearnLoopStartNodeFactory.class.getCanonicalName(),
+                CATEGORY_PREFIX);
+        m_nodeFactories.put(
+                DBGActiveLearnLoopEndNodeFactory.class.getCanonicalName(),
+                CATEGORY_PREFIX + "/end");
+        m_nodeFactories.put(
+                ActiveLearnLoopEndNodeFactory.class.getCanonicalName(),
+                CATEGORY_PREFIX + "/end");
+
+        return m_nodeFactories.keySet();
     }
 }

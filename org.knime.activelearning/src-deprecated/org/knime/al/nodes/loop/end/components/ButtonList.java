@@ -1,30 +1,30 @@
 package org.knime.al.nodes.loop.end.components;
 
-import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JToggleButton;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 
 /**
- * ToggleButtonList
+ * ButtonList
  *
- * A single-selection, no-duplicates list of toggle buttons for quick selection
- * of an item.
+ * A single-selection, no-duplicates list of buttons for quick selection of an
+ * item.
  *
  * Used in ActiveLearnLoopEndNodeViewPanel
  *
  * @author Jonathan Hale
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  *
  */
-public class ToggleButtonList extends JPanel
+@Deprecated
+public class ButtonList extends JPanel
         implements ActionListener, ListDataListener {
 
     private static final long serialVersionUID = 987049663025341598L;
@@ -36,10 +36,10 @@ public class ToggleButtonList extends JPanel
     private final int m_maxRows;
 
     private final List<JPanel> m_panels;
-    private final List<JToggleButton> m_buttons;
+    private final List<JButton> m_buttons;
     private JPanel m_lastPanel;
 
-    private String m_defaultText = " ";
+    private String m_defaultText = "default";
 
     /**
      * Constructor.
@@ -47,7 +47,7 @@ public class ToggleButtonList extends JPanel
      * @param maxRows
      *            maximum number of buttons in a column
      */
-    public ToggleButtonList(final int maxRows) {
+    public ButtonList(final int maxRows) {
         super();
 
         m_maxRows = maxRows;
@@ -69,7 +69,7 @@ public class ToggleButtonList extends JPanel
      * @param maxRows
      *            maximum number of buttons per column
      */
-    public ToggleButtonList(final ClassModel classModel, final int maxRows) {
+    public ButtonList(final ClassModel classModel, final int maxRows) {
         super();
 
         m_maxRows = maxRows;
@@ -92,43 +92,6 @@ public class ToggleButtonList extends JPanel
         return m_selectedItem;
     }
 
-    /**
-     * setSelectedItem - sets the ToggleButtonLists selected button.
-     *
-     * Iterates through all buttons deselecting the ones whoes getText() doesn't
-     * match the itemName given in the parameter. If the Item does not match any
-     * in the List, selection won't change.
-     *
-     * @param itemName
-     */
-    public void setSelectedItem(final String itemName) {
-        // To avoid not having anything selected at the end
-        if (!m_classModel.containsClass(itemName)) {
-            return;
-        }
-
-        m_selectedItem = itemName;
-
-        String sel;
-        if (itemName.equals(ClassModel.NO_CLASS)) {
-            sel = m_defaultText;
-        } else {
-            sel = itemName;
-        }
-
-        // iterate through all buttons
-        for (final JToggleButton btn : m_buttons) {
-            // check whether text matches itemName
-            if (btn.getText().equals(sel)) {
-                btn.setSelected(true); // it is our item, so select it
-            } else {
-                btn.setSelected(false); // deselect everything else
-            }
-            revalidate();
-        }
-
-    }
-
     /*
      * Completely recreate button list from scratch
      */
@@ -141,7 +104,7 @@ public class ToggleButtonList extends JPanel
             panel.removeAll();
         }
 
-        for (final JToggleButton btn : m_buttons) {
+        for (final JButton btn : m_buttons) {
             btn.removeActionListener(this);
         }
 
@@ -152,19 +115,14 @@ public class ToggleButtonList extends JPanel
 
         // create an initial button for the start.
         for (final String name : m_classModel.getDefinedClasses()) {
-            final JToggleButton btn = addButton(name);
-            if (name.equals(m_selectedItem)) {
-                btn.setSelected(true);
-            } else {
-                btn.setSelected(false);
-            }
+            addButton(name);
         }
     }
 
     /*
      * Helper function to add buttons
      */
-    private JToggleButton addButton(final String value) {
+    private JButton addButton(final String value) {
         final int numBtns = m_buttons.size();
 
         if (numBtns >= (m_maxRows * m_panels.size())) {
@@ -177,7 +135,7 @@ public class ToggleButtonList extends JPanel
             m_lastPanel = panel;
         }
         // createButton and add this as itemListener
-        final JToggleButton btn = new CustomToggleButton(value);
+        final JButton btn = new JButton(value);
         btn.addActionListener(this);
 
         if (value.equals(ClassModel.NO_CLASS)) {
@@ -242,20 +200,19 @@ public class ToggleButtonList extends JPanel
     public void actionPerformed(final ActionEvent e) {
         final Object source = e.getSource();
 
-        if (!(source instanceof JToggleButton)) {
+        if (!(source instanceof JButton)) {
             return;
         }
 
         // only dealing with the toggleButtons
-        final JToggleButton btn = (JToggleButton) source;
+        final JButton btn = (JButton) source;
 
-        String sel = btn.getText(); // future selection
+        m_selectedItem = btn.getText(); // future selection
 
-        if (sel.equals(m_defaultText)) {
-            sel = ClassModel.NO_CLASS;
+        if (m_selectedItem.equals(m_defaultText)) {
+            m_selectedItem = ClassModel.NO_CLASS;
         }
 
-        setSelectedItem(sel);
         fireActionEvent(new ActionEvent(btn, (int) (Math.random() * 12312),
                 m_actionCommand));
     }
@@ -307,28 +264,5 @@ public class ToggleButtonList extends JPanel
     @Override
     public void intervalRemoved(final ListDataEvent arg0) {
         recreateButtonList();
-    }
-
-    private class CustomToggleButton extends JToggleButton {
-        /**
-         *
-         */
-        private static final long serialVersionUID = -390311905442686674L;
-
-        public CustomToggleButton(final String caption) {
-            super(caption);
-        }
-
-        @Override
-        public void paint(final Graphics g) {
-            super.paint(g);
-
-            if (isSelected()) {
-                g.setColor(new Color(65, 128, 64));
-                final int x = getWidth() - 14;
-                final int y = (getHeight() / 2) - 4;
-                g.fillRect(x, y, 8, 8);
-            }
-        }
     }
 }

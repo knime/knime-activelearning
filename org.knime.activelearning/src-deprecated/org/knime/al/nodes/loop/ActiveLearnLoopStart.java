@@ -43,23 +43,25 @@
  *  when such Node is propagated with or for interoperation with KNIME.
  * ---------------------------------------------------------------------
  *
- * Created on 12.03.2013 by dietyc
+ * History
+ *   Jun 25, 2015 (gabriel): created
  */
 package org.knime.al.nodes.loop;
 
-import java.util.Map;
+import java.util.Set;
 
-import org.knime.core.data.RowKey;
-import org.knime.core.node.workflow.LoopEndNode;
+import org.knime.core.node.workflow.LoopStartNode;
 
 /**
- * @author dietzc
+ *
+ * @author gabriel
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  */
-public interface ActiveLearnLoopEnd extends LoopEndNode {
+@Deprecated
+public interface ActiveLearnLoopStart extends LoopStartNode {
 
     /**
-     * @return The row keys of the rows labeled in the last iteration as well as
-     *         their class labels.
+     * @return The classes defined in the AL process.
      */
-    Map<RowKey, String> getNewlyLabeledRows();
+    Set<String> getDefinedClassLabels();
 }

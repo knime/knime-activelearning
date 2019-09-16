@@ -58,7 +58,9 @@ import org.knime.core.node.NodeView;
  *
  * @author Christian Dietz, Jonathan Hale
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  */
+@Deprecated
 public class ActiveLearnLoopEndNodeView
         extends NodeView<ActiveLearnLoopEndNodeModel> {
 

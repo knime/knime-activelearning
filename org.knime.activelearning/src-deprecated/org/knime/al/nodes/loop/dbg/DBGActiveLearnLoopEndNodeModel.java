@@ -27,7 +27,9 @@ import org.knime.core.node.port.PortType;
  *
  * @author dietzc University of Konstanz
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  */
+@Deprecated
 public class DBGActiveLearnLoopEndNodeModel extends AbstractALNodeModel
         implements ActiveLearnLoopEnd {
 

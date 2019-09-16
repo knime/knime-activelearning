@@ -44,50 +44,20 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   16 Dec 2014 (gabriel): created
+ *   1 Dec 2014 (gabriel): created
  */
-package org.knime.al.nodes.loop.start;
-
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
+package org.knime.al.nodes.loop;
 
 /**
- * Settings models for the ActiveLearnLoopStartNode.
  *
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  */
-class ActiveLearnLoopStartSettingsModels {
+@Deprecated
+public class ActiveLearnLoopUtils {
+    public static final String AL_STEP = "AL_ITERATION";
 
-    protected ActiveLearnLoopStartSettingsModels() {
-        // NB: utility class
-    }
-
-    /**
-     * @return Settings model to store if the class column is to be created
-     *         automatically or manually selected.
-     */
-    static final SettingsModelBoolean createAppendClassColumnModel() {
-        return new SettingsModelBoolean("create_class_column", false);
-    }
-
-    /**
-     * @return Settings Model to store the column for the class label.
-     */
-    static final SettingsModelString createClassLabelColumnModel() {
-        return new SettingsModelString("class_label_column", "");
-    }
-
-    /**
-     * @return Settings Model to store a custom name for the class column
-     */
-    static final SettingsModelString createCustomClassColumnNameModel() {
-        return new SettingsModelString("custom_class_column_name", "class");
-    }
-
-    /**
-     * @return Settings Model to store if the iteration is appended
-     */
-    static final SettingsModelBoolean createAppendIterationModel() {
-        return new SettingsModelBoolean("append_iteration", true);
+    public enum NodeModelState {
+        EXECUTING, CONFIGURED, SUSPENDED, TERMINATED;
     }
 }

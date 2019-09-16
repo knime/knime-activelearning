@@ -78,7 +78,9 @@ import org.knime.al.nodes.loop.end.components.ButtonList;
  * ActiveLearnLoopEndNodeView.
  *
  * @author Jonathan Hale
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  */
+@Deprecated
 public class ActiveLearnLoopEndNodeViewPanel extends JPanel {
 
     /**

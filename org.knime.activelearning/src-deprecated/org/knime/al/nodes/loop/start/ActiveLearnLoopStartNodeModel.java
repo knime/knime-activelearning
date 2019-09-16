@@ -95,7 +95,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  *
  * @author dietzc, hornm, University of Konstanz
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  */
+@Deprecated
 public class ActiveLearnLoopStartNodeModel extends NodeModel
         implements ActiveLearnLoopStart {
 

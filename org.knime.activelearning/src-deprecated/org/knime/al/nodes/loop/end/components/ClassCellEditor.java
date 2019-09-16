@@ -17,8 +17,10 @@ import javax.swing.table.TableCellEditor;
  * ClassCellRenderer as cell renderer.
  *
  * @author Jonathan Hale
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  *
  */
+@Deprecated
 public class ClassCellEditor extends AbstractCellEditor
         implements TableCellEditor, ItemListener {
 

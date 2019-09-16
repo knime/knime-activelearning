@@ -1,5 +1,3 @@
-package org.knime.al.nodes.loop.dbg;
-
 /*
  * ------------------------------------------------------------------------
  *
@@ -40,85 +38,47 @@ package org.knime.al.nodes.loop.dbg;
  *  License, the License does not apply to Nodes, you are not required to
  *  license Nodes under the License, and you are granted a license to
  *  prepare and propagate Nodes, in each case even if such Nodes are
- *  propagated with or for interoperation with KNIME. The owner of a Node
+ *  propagated with or for interoperation with KNIME.  The owner of a Node
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
- * ------------------------------------------------------------------------
+ * ---------------------------------------------------------------------
  *
  * History
- *   Jan 30, 2013 (hornm): created
+ *   29 Nov 2014 (gabriel): created
  */
+package org.knime.al.nodes.loop.end;
 
-import org.knime.core.data.StringValue;
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeView;
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
+ * Settings models for the Active Learning Loop End.
  *
- * @author dietzc University of Konstanz
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  */
-public class DBGActiveLearnLoopEndNodeFactory
-        extends NodeFactory<DBGActiveLearnLoopEndNodeModel> {
+@Deprecated
+public final class ActiveLearnLoopEndSettingsModels {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public DBGActiveLearnLoopEndNodeModel createNodeModel() {
-        return new DBGActiveLearnLoopEndNodeModel();
+    private ActiveLearnLoopEndSettingsModels() {
+        // NB: disallow instantiation.
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected int getNrNodeViews() {
-        return 0;
+    public static SettingsModelString createRepColumnModel() {
+        return new SettingsModelString("representative_column", "");
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NodeView<DBGActiveLearnLoopEndNodeModel> createNodeView(
-            final int viewIndex,
-            final DBGActiveLearnLoopEndNodeModel nodeModel) {
-        return null;
+    public static SettingsModelString createClassColumnModel() {
+        return new SettingsModelString("class_column", "");
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean hasDialog() {
-        return true;
+    public static SettingsModelOptionalString createDefaultClassModel() {
+        return new SettingsModelOptionalString("default_class_name", "DEFAULT",
+                false);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @SuppressWarnings("unchecked")
-    @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new DefaultNodeSettingsPane() {
-            {
-                addDialogComponent(new DialogComponentColumnNameSelection(
-                        DBGActiveLearnLoopEndNodeModel
-                                .createGroundTruthClassColumnModel(),
-                        "Ground Truth Class Column",
-                        DBGActiveLearnLoopEndNodeModel.LABELED_PORT,
-                        StringValue.class));
-
-                addDialogComponent(new DialogComponentNumber(
-                        DBGActiveLearnLoopEndNodeModel
-                                .createMaxIterationsModel(),
-                        "Number of Iterations", 1));
-            }
-        };
+    public static SettingsModelBoolean createAutoTerminateModel() {
+        return new SettingsModelBoolean("auto_terminate", false);
     }
 }

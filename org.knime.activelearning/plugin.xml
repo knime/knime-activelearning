@@ -83,7 +83,8 @@
                factory-class="org.knime.al.nodes.score.density.DensityNodeSetFactory">
       </nodeset>
    		<nodeset
-            factory-class="org.knime.al.nodes.loop.LoopNodeSetFactory">
+           deprecated="true"
+           factory-class="org.knime.al.nodes.loop.LoopNodeSetFactory">
         </nodeset>
         <nodeset
               deprecated="false"

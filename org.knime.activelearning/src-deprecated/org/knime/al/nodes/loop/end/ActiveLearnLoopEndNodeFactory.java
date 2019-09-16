@@ -38,74 +38,95 @@
  *  License, the License does not apply to Nodes, you are not required to
  *  license Nodes under the License, and you are granted a license to
  *  prepare and propagate Nodes, in each case even if such Nodes are
- *  propagated with or for interoperation with KNIME.  The owner of a Node
+ *  propagated with or for interoperation with KNIME. The owner of a Node
  *  may freely choose the license terms applicable to such Node, including
  *  when such Node is propagated with or for interoperation with KNIME.
- * ---------------------------------------------------------------------
+ * ------------------------------------------------------------------------
  *
  * History
- *   16 Dec 2014 (gabriel): created
+ *   Jan 30, 2013 (hornm): created
  */
-package org.knime.al.nodes.loop.start;
+package org.knime.al.nodes.loop.end;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
+import org.knime.core.data.DataValue;
 import org.knime.core.data.StringValue;
+import org.knime.core.node.NodeDialogPane;
+import org.knime.core.node.NodeFactory;
+import org.knime.core.node.NodeView;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
-import org.knime.core.node.defaultnodesettings.DialogComponentString;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
 
 /**
- * Dialog for the AL Loop start.
  *
- * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @author hornm, dietzc University of Konstanz
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  */
-public class ActiveLearnLoopStartNodeDialog extends DefaultNodeSettingsPane {
+@Deprecated
+public class ActiveLearnLoopEndNodeFactory
+        extends NodeFactory<ActiveLearnLoopEndNodeModel> {
 
     /**
-     * Constructor for the Dialog.
+     * {@inheritDoc}
+     */
+    @Override
+    public ActiveLearnLoopEndNodeModel createNodeModel() {
+        return new ActiveLearnLoopEndNodeModel();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected int getNrNodeViews() {
+        return 1;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public NodeView<ActiveLearnLoopEndNodeModel> createNodeView(
+            final int viewIndex, final ActiveLearnLoopEndNodeModel nodeModel) {
+        return new ActiveLearnLoopEndNodeView(nodeModel);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean hasDialog() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
-    public ActiveLearnLoopStartNodeDialog() {
+    @Override
+    protected NodeDialogPane createNodeDialogPane() {
+        return new DefaultNodeSettingsPane() {
+            {
+                addDialogComponent(new DialogComponentColumnNameSelection(
+                        ActiveLearnLoopEndSettingsModels.createRepColumnModel(),
+                        "Representative Column", 0, DataValue.class));
 
-        // Class column selection
-        final SettingsModelBoolean appendClassColumnModel =
-                ActiveLearnLoopStartSettingsModels
-                        .createAppendClassColumnModel();
-        final SettingsModelString classLabelColumnModel =
-                ActiveLearnLoopStartSettingsModels
-                        .createClassLabelColumnModel();
-        final SettingsModelString customClassColumnNameModel =
-                ActiveLearnLoopStartSettingsModels
-                        .createCustomClassColumnNameModel();
-        final SettingsModelBoolean appendIterationModel =
-                ActiveLearnLoopStartSettingsModels.createAppendIterationModel();
+                addDialogComponent(new DialogComponentColumnNameSelection(
+                        ActiveLearnLoopEndSettingsModels
+                                .createClassColumnModel(),
+                        "Class  Column", 0, StringValue.class));
 
-        appendClassColumnModel.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(final ChangeEvent e) {
-                classLabelColumnModel
-                        .setEnabled(!appendClassColumnModel.getBooleanValue());
-                customClassColumnNameModel
-                        .setEnabled(appendClassColumnModel.getBooleanValue());
+                addDialogComponent(new DialogComponentOptionalString(
+                        ActiveLearnLoopEndSettingsModels
+                                .createDefaultClassModel(),
+                        "Automatically label rows with default class:"));
+
+                addDialogComponent(new DialogComponentBoolean(
+                        ActiveLearnLoopEndSettingsModels
+                                .createAutoTerminateModel(),
+                        "Automatically terminate when no unlabeled rows are left"));
             }
-        });
-        // class column settings
-        addDialogComponent(new DialogComponentBoolean(appendClassColumnModel,
-                "Append Class Column"));
-        addDialogComponent(new DialogComponentString(customClassColumnNameModel,
-                "Class Column name", true, 30));
-        addDialogComponent(new DialogComponentBoolean(appendIterationModel,
-                "Add Iteration Column."));
-
-        createNewGroup("Class Column Selection");
-        addDialogComponent(new DialogComponentColumnNameSelection(
-                classLabelColumnModel, "Class Label Column", 0, false, false,
-                StringValue.class));
-        classLabelColumnModel.setEnabled(false);
+        };
     }
 }

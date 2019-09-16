@@ -14,8 +14,10 @@ import javax.swing.event.ListDataListener;
  *
  * @author Jonathan Hale
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  *
  */
+@Deprecated
 public class ClassModel implements ListModel<String> {
 
     /**

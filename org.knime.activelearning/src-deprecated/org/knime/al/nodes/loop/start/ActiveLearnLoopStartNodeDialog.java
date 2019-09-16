@@ -44,39 +44,70 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   29 Nov 2014 (gabriel): created
+ *   16 Dec 2014 (gabriel): created
  */
-package org.knime.al.nodes.loop.end;
+package org.knime.al.nodes.loop.start;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import org.knime.core.data.StringValue;
+import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
+import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
- * Settings models for the Active Learning Loop End.
+ * Dialog for the AL Loop start.
  *
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  */
-public final class ActiveLearnLoopEndSettingsModels {
+@Deprecated
+public class ActiveLearnLoopStartNodeDialog extends DefaultNodeSettingsPane {
 
-    private ActiveLearnLoopEndSettingsModels() {
-        // NB: disallow instantiation.
-    }
+    /**
+     * Constructor for the Dialog.
+     */
+    @SuppressWarnings("unchecked")
+    public ActiveLearnLoopStartNodeDialog() {
 
-    public static SettingsModelString createRepColumnModel() {
-        return new SettingsModelString("representative_column", "");
-    }
+        // Class column selection
+        final SettingsModelBoolean appendClassColumnModel =
+                ActiveLearnLoopStartSettingsModels
+                        .createAppendClassColumnModel();
+        final SettingsModelString classLabelColumnModel =
+                ActiveLearnLoopStartSettingsModels
+                        .createClassLabelColumnModel();
+        final SettingsModelString customClassColumnNameModel =
+                ActiveLearnLoopStartSettingsModels
+                        .createCustomClassColumnNameModel();
+        final SettingsModelBoolean appendIterationModel =
+                ActiveLearnLoopStartSettingsModels.createAppendIterationModel();
 
-    public static SettingsModelString createClassColumnModel() {
-        return new SettingsModelString("class_column", "");
-    }
+        appendClassColumnModel.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(final ChangeEvent e) {
+                classLabelColumnModel
+                        .setEnabled(!appendClassColumnModel.getBooleanValue());
+                customClassColumnNameModel
+                        .setEnabled(appendClassColumnModel.getBooleanValue());
+            }
+        });
+        // class column settings
+        addDialogComponent(new DialogComponentBoolean(appendClassColumnModel,
+                "Append Class Column"));
+        addDialogComponent(new DialogComponentString(customClassColumnNameModel,
+                "Class Column name", true, 30));
+        addDialogComponent(new DialogComponentBoolean(appendIterationModel,
+                "Add Iteration Column."));
 
-    public static SettingsModelOptionalString createDefaultClassModel() {
-        return new SettingsModelOptionalString("default_class_name", "DEFAULT",
-                false);
-    }
-
-    public static SettingsModelBoolean createAutoTerminateModel() {
-        return new SettingsModelBoolean("auto_terminate", false);
+        createNewGroup("Class Column Selection");
+        addDialogComponent(new DialogComponentColumnNameSelection(
+                classLabelColumnModel, "Class Label Column", 0, false, false,
+                StringValue.class));
+        classLabelColumnModel.setEnabled(false);
     }
 }

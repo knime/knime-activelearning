@@ -10,8 +10,10 @@ import javax.swing.event.ListDataListener;
  * supposed to contain defined classes held in an ClassModel.
  *
  * @author Jonathan Hale
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  *
  */
+@Deprecated
 public class ClassListModel implements MutableComboBoxModel<String> {
 
     private Object m_selectedItem;

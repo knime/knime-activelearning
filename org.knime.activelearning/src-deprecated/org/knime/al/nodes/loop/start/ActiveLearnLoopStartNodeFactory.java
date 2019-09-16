@@ -55,7 +55,9 @@ import org.knime.core.node.NodeView;
 /**
  *
  * @author hornm, dietzc, University of Konstanz
+ * @deprecated Retired in favor of new active learning loop based on standard recursive loop.
  */
+@Deprecated
 public class ActiveLearnLoopStartNodeFactory
         extends NodeFactory<ActiveLearnLoopStartNodeModel> {
 
