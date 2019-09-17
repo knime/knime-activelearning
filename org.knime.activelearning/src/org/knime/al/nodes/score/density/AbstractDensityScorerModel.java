@@ -173,7 +173,7 @@ public abstract class AbstractDensityScorerModel<V extends DensityDataPoint<V>> 
      * @param idx the internal idx of the row
      * @param decrement the amount by which the potential needs to be reduced
      */
-    protected final void decreasePotential(final int idx, final double decrement) {
+    private void decreasePotential(final int idx, final double decrement) {
         CheckUtils.checkArgument(decrement >= 0, "The decrement must be >= 0 but was %s.", decrement);
         final double potential = getPotential(idx);
         m_potentials[idx] = Math.max(0, potential - decrement);

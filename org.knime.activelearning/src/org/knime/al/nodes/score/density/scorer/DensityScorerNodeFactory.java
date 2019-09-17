@@ -56,7 +56,7 @@ import org.knime.core.node.NodeView;
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-public class DensityScorerNodeFactory extends NodeFactory<DensityScorerNodeModel> {
+public final class DensityScorerNodeFactory extends NodeFactory<DensityScorerNodeModel> {
 
     /**
      * {@inheritDoc}

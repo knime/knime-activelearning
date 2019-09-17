@@ -23,7 +23,7 @@
 	<ports>
 		<inPort name="Density Scorer Model" index="0">Density scorer model created with either the <b>Potential Density Initializer</b> or the <b>Graph Density Initializer</b> node.
 		</inPort>
-		<inPort name="Scoring Data" index="1">Table containing rows for which the current density score is required. 
+		<inPort name="Scoring Data" index="1">Table containing rows for which the current density score has to be computed. 
 		</inPort>
 		<outPort name="Density Score Table" index="0">The input table with
 			an appended density score column. The name of the column can be

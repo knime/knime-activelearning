@@ -154,12 +154,4 @@ public class AbstractDensityScorerModelTest {
         assertEquals(m_points.size(), m_testInstance.getNrRows());
     }
 
-    @Test
-    public void testDecreasePotential() throws Exception {
-        m_testInstance.decreasePotential(0, 0.5);
-        assertEquals(0.5, m_testInstance.getPotential(0), 0);
-        m_testInstance.decreasePotential(0, 1);
-        assertEquals(0, m_testInstance.getPotential(0), 0);
-    }
-
 }

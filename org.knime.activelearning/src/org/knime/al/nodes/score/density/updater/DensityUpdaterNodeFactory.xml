@@ -37,16 +37,13 @@
 			node.
 		</inPort>
 		<inPort name="Update Data" index="1" optional="true">
-			Table containing rows whose density in the model needs to be reduced prior
-			to scoring the first input table.
+			Table containing rows in whose neighborhoods the density in the model needs to be reduced.
 			In an active learning setting these would be the rows that were freshly
 			labeled by the user.
-			The update is omitted if this port is not connected.
 		</inPort>
 		<outPort name="Updated Density Scorer Model" index="0">The updated
 			model i.e. decreased densities in the neighborhood of
-			rows in the
-			second input table.
+			rows in the input table.
 		</outPort>
 	</ports>
 </knimeNode>

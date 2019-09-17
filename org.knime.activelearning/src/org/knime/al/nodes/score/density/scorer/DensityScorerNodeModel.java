@@ -57,7 +57,6 @@ import org.knime.al.nodes.score.density.DensityScorerPortObject;
 import org.knime.al.nodes.score.density.DensityScorerPortObjectSpec;
 import org.knime.al.nodes.score.density.UnknownRowException;
 import org.knime.core.data.DataCell;
-import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.MissingCell;
@@ -72,7 +71,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.util.CheckUtils;
 import org.knime.core.util.UniqueNameGenerator;
 
 import com.google.common.collect.Lists;
@@ -119,22 +117,8 @@ final class DensityScorerNodeModel extends AbstractALNodeModel {
         final DensityScorerPortObjectSpec modelSpec = (DensityScorerPortObjectSpec)inSpecs[MODEL_INPORT];
         final DataTableSpec unlabeledSpec = (DataTableSpec)inSpecs[UNLABELED_INPORT];
         // not really necessary but if the features don't match it's unlikely the key will be correct
-        final DataTableSpec featureSpec = modelSpec.getFeatureSpec();
-        checkSpecsCompatible(featureSpec, unlabeledSpec, "input");
+        modelSpec.checkCompatibility(unlabeledSpec);
         return new PortObjectSpec[]{createRearranger(unlabeledSpec, null).createSpec()};
-    }
-
-    @SuppressWarnings("null") // we explicitly check that tableCol is not null
-    private static void checkSpecsCompatible(final DataTableSpec featureSpec, final DataTableSpec tableSpec,
-        final String tableName) throws InvalidSettingsException {
-        for (final DataColumnSpec featureCol : featureSpec) {
-            final DataColumnSpec tableCol = tableSpec.getColumnSpec(featureCol.getName());
-            CheckUtils.checkSetting(tableCol != null, "The %s table does not contain the required feature column %s.",
-                tableName, featureCol);
-            CheckUtils.checkSetting(featureCol.getType().isASuperTypeOf(tableCol.getType()),
-                "The %s table contains a column with incompatible type for feature %s. Expected %s but received %s.",
-                tableName, featureCol.getName(), featureCol.getType(), tableCol.getType());
-        }
     }
 
     private ColumnRearranger createRearranger(final DataTableSpec unlabeledSpec, final DensityScorerModel model) {

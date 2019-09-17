@@ -48,15 +48,18 @@
  */
 package org.knime.al.nodes.score.density;
 
+import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContentRO;
 import org.knime.core.node.ModelContentWO;
 import org.knime.core.node.port.AbstractSimplePortObjectSpec;
+import org.knime.core.node.util.CheckUtils;
 
 /**
- * Spec for a {@link DensityScorerPortObject}.
- * Holds a {@link DataTableSpec} specifying the columns used to create the underlying model.
+ * Spec for a {@link DensityScorerPortObject}. Holds a {@link DataTableSpec} specifying the columns used to create the
+ * underlying model.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
@@ -91,6 +94,26 @@ public final class DensityScorerPortObjectSpec extends AbstractSimplePortObjectS
      */
     public DataTableSpec getFeatureSpec() {
         return m_featureSpec;
+    }
+
+    /**
+     * Checks whether {@link DataTableSpec tableSpec} is compatible with this model spec i.e. all feature columns are
+     * contained and have the correct type.
+     *
+     * @param tableSpec the spec of the table on which to apply the density model
+     * @throws InvalidSettingsException if any feature column is missing or of the wrong type
+     */
+    public void checkCompatibility(final DataTableSpec tableSpec) throws InvalidSettingsException {
+        for (final DataColumnSpec featureCol : m_featureSpec) {
+            final DataColumnSpec tableCol = tableSpec.getColumnSpec(featureCol.getName());
+            CheckUtils.checkSetting(tableCol != null,
+                "The input table does not contain the required feature column %s.", featureCol);
+            @SuppressWarnings("null") // tableCol is explicitly checked to NOT be null above
+            DataType type = tableCol.getType();
+            CheckUtils.checkSetting(featureCol.getType().isASuperTypeOf(type),
+                "The input table contains a column with incompatible type for feature %s. Expected %s but received %s.",
+                featureCol.getName(), featureCol.getType(), type);
+        }
     }
 
     /**
