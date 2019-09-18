@@ -13,7 +13,7 @@ import java.util.Scanner;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Path;
-import org.knime.wsl.labelmodel.SavedModelAdapterTest;
+import org.knime.wsl.weaklabelmodel.SavedModelAdapterTest;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
@@ -88,7 +88,7 @@ public final class TestUtil {
     public static void assertMatrixEquals(final float[][] expected, final float[][] actual, final float delta) {
         assertEquals(expected.length, actual.length);
         for (int i = 0; i < expected.length; i++) {
-            assertArrayEquals(expected[i], actual[i], delta);
+            assertArrayEquals("Wrong value in row " + i, expected[i], actual[i], delta);
         }
     }
 
@@ -98,7 +98,6 @@ public final class TestUtil {
             assertArrayEquals(expected[i], actual[i]);
         }
     }
-
 
     public static float[][] readFloatMatrixFromCSV(final File csv) throws FileNotFoundException {
         List<float[]> rows = new ArrayList<>();

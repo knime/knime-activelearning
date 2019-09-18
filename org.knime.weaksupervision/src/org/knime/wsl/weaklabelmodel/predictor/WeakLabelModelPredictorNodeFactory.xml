@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="labelModelPredictorIcon.png" type="Predictor"
+	xmlns="http://knime.org/node/v2.12"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+
+	<name>Weak Label Model Predictor</name>
+	<shortDescription>
+		Applies a Weak Label Model to data.
+	</shortDescription>
+	<fullDescription>
+		<intro>
+			Applies a weak label model learned with the Weak Label Model Learner to data.
+			For each row, it appends the probability distribution over the class values as predicted
+			by the weak label model.
+			This node is a key component for the
+			realization of weak supervision approaches as popularized by
+			<a href="https://hazyresearch.github.io/snorkel/">Snorkel</a>
+			. For more information, please see the Weak Label Model Learner.
+		</intro>
+		<option name="Class column name">
+			The name of the label (or class) column that the
+			labels provided by the label sources belong to.
+			This value is used to
+			create the column names for the probability columns in the output.
+		</option>
+		<option name="Append individual class probabilities">
+			Select this option if you want to append the class probabilities as individual columns in addition
+			to the class probability distribution column.
+		</option>
+		<option name="Remove source columns">
+			Select if you want to remove the label source
+			columns from the output table.
+		</option>
+	</fullDescription>
+
+	<ports>
+		<inPort name="Weak Label Model" index="0">
+			A weak label model trained with the Weak Label Model Learner.
+		</inPort>
+		<inPort name="Data" index="1">
+			The data on which to apply the weak label model.
+		</inPort>
+		<outPort name="Probabilistic Labels" index="0">
+			The input table with a probability distribution over the possible classes appended.
+		</outPort>
+	</ports>
+</knimeNode>

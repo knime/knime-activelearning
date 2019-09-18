@@ -6,7 +6,12 @@
     <node
           category-path="/labs/weaksupervision/"
           deprecated="false"
-          factory-class="org.knime.wsl.labelmodel.LabelModelNodeFactory">
+          factory-class="org.knime.wsl.weaklabelmodel.learner.WeakLabelModelLearnerNodeFactory">
+    </node>
+    <node
+          category-path="/labs/weaksupervision/"
+          deprecated="false"
+          factory-class="org.knime.wsl.weaklabelmodel.predictor.WeakLabelModelPredictorNodeFactory">
     </node>
    </extension>
  <extension
@@ -21,4 +26,15 @@
           path="/labs/">
     </category>
  </extension>
+ <extension
+           point="org.knime.core.PortType">
+           <portType
+              hidden="false"
+              name="Weak Label Model"
+              objectClass="org.knime.wsl.weaklabelmodel.WeakLabelModelPortObject"
+              objectSerializer="org.knime.wsl.weaklabelmodel.WeakLabelModelPortObject$Serializer"
+              specClass="org.knime.wsl.weaklabelmodel.WeakLabelModelPortObjectSpec"
+              specSerializer="org.knime.wsl.weaklabelmodel.WeakLabelModelPortObjectSpec$Serializer">
+        </portType>
+         </extension>
 </plugin>

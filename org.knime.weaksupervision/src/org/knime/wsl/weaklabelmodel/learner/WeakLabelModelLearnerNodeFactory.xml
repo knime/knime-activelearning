@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="labelModelIcon.png" type="Learner"
+	xmlns="http://knime.org/node/v2.12"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+
+	<name>Weak Label Model Learner</name>
+	<shortDescription>
+		Learns a generative label model from the provided noisy label sources.
+	</shortDescription>
+	<fullDescription>
+		<intro>
+			Learns a generative label
+			model
+			from the provided label source columns.
+			This node is a key component for the
+			realization of weak supervision approaches as popularized by
+			<a href="https://hazyresearch.github.io/snorkel/">Snorkel</a>
+			.
+			The idea in weak supervision is that it is often possible to create
+			a number of simple inaccurate models (e.g. simple rules or existing
+			models for slightly different tasks) that can label unlabeled data
+			and that the agreements and disagreements of these simple models can
+			be analyzed to infer information on the true label.
+			Our implementation
+			is a TensorFlow based adaptation of the matrix completion approach
+			proposed in
+			this
+			<a href="https://arxiv.org/pdf/1810.02840.pdf">paper</a>
+			by the Snorkel team.
+			We refer to the publication for details on the
+			strategy.
+		</intro>
+		<option name="Label sources">
+			Select the columns which act as label sources i.e.
+			that contain noisy
+			labels for some of the rows in the first input
+			table.
+			It is assumed
+			that a missing value means that the respective
+			label source did not
+			label the corresponding row.
+		</option>
+		<option name="Epochs">
+			The number of optimization steps to perform. More
+			epochs can result in better results but also directly translate into
+			a longer runtime.
+		</option>
+		<option name="Learning rate">
+			The learning rate dictates how much a single
+			training epoch changes the learned model. A smaller learning rate
+			requires more epochs to reach convergence
+			while a large learning rate
+			might lead to divergence of the algorithm.
+		</option>
+	</fullDescription>
+
+	<ports>
+		<inPort name="Label Sources" index="0">Table containing label
+			sources. A label source is either a nominal or a probability distribution column.
+			Note that missing values in a label source are interpreted as abstains i.e. it is
+			assumed that a missing value indicates that the label source did
+			decide not to label the corresponding row. In case of nominal columns, label sources without a
+			set of possible values assigned are ignored during the computation
+			and a corresponding warning is displayed on the node.
+		</inPort>
+		<outPort name="Weak Label Model" index="0">
+			A weak label model that can be applied to data with the Weak Label Model Predictor.
+		</outPort>
+		<outPort name="Source Statistics" index="1">
+			Each row in
+			this table gives the conditional probabilities
+			that the
+			label source displayed in the
+			<i>Label Source</i>
+			column takes on a specific value given the true label
+			displayed in the
+			<i>Latent Label</i>
+			column.
+		</outPort>
+	</ports>
+</knimeNode>
