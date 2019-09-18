@@ -22,6 +22,7 @@ lr_init = tf.placeholder(tf.float32, [], name="learning_rate")
 l_aug = tf.placeholder(tf.float32, name="l_aug")
 mu_init = tf.placeholder(tf.float32, name="mu_init")
 p_init = tf.placeholder(tf.float32, [None], name='p_init')
+o_ph = tf.placeholder(tf.float32, name='o_init')
 
 mask_init = tf.placeholder(tf.bool, shape=[None, None], name='mask_init')
 
@@ -36,6 +37,8 @@ o_init = tf.matmul(tf.transpose(l_aug), l_aug) / n
 
 
 o_initialized = tf.assign(o, o_init, validate_shape=False, name='o_initialized')
+
+o_setter = tf.assign(o, o_ph, validate_shape=False, name='o_setter')
 
 o_diag = tf.diag_part(o, name='o_diag')
 
