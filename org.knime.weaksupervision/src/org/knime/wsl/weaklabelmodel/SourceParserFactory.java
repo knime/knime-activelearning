@@ -75,7 +75,7 @@ public final class SourceParserFactory {
     /**
      * @param labelIdxMap associates the string representation of a label with its index used inside the model
      */
-    public SourceParserFactory(final Map<String, Integer> labelIdxMap) {
+    SourceParserFactory(final Map<String, Integer> labelIdxMap) {
         m_labelIdxMap = labelIdxMap;
     }
 
@@ -98,7 +98,7 @@ public final class SourceParserFactory {
      * @return a {@link SourceParser} for {@link DataColumnSpec columnSpec}
      * @throws IllegalArgumentException if {@link DataColumnSpec columnSpec} is of an unsupported type
      */
-    public SourceParser create(final DataColumnSpec columnSpec) {
+    SourceParser create(final DataColumnSpec columnSpec) {
         final DataType type = columnSpec.getType();
         if (type.isCompatible(NominalValue.class)) {
             return this::parseNominalSource;

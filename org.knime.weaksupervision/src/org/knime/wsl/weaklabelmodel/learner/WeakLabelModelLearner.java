@@ -52,7 +52,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -132,10 +131,9 @@ final class WeakLabelModelLearner {
     private SourceParser[] createSourceParsers(final DataTableSpec tableSpec) {
         final ColumnRearranger cr = new ColumnRearranger(tableSpec);
         cr.keepOnly(m_metaData.getNonEmptyIndices());
-        final SourceParserFactory factory = new SourceParserFactory(m_metaData.getLabelToIdxMap().entrySet().stream()
-            .collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue)));
         final DataTableSpec filtered = cr.createSpec();
-        return filtered.stream().map(factory::create).toArray(SourceParser[]::new);
+        return SourceParserFactory.createParsers(filtered, m_metaData.getPossibleLabels().stream()
+            .map(DataCell::toString).collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
     Set<String> getClassNames() {
@@ -167,7 +165,6 @@ final class WeakLabelModelLearner {
         lma.initialize(covarianceMatrix, mask, getClassBalance(), getInitialPrecisions(),
             (float)m_settings.getLearningRate());
     }
-
 
     private float[] getClassBalance() {
         final int length = m_metaData.getNumClasses();

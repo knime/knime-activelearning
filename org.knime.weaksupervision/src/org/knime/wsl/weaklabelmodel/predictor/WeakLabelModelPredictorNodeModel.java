@@ -76,6 +76,7 @@ import org.knime.wsl.weaklabelmodel.WeakLabelModelPortObject;
 import org.knime.wsl.weaklabelmodel.WeakLabelModelPortObjectSpec;
 
 /**
+ * Node model for the Weak Label Model Predictor.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */

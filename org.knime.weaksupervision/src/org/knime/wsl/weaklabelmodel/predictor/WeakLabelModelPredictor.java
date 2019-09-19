@@ -68,6 +68,8 @@ import org.knime.wsl.weaklabelmodel.WeakLabelModelPortObject;
 import org.knime.wsl.weaklabelmodel.WeakLabelModelPortObjectSpec;
 
 /**
+ * Holds the TensorFlow model, which is used by all the {@link CellFactory CellFactories} created by
+ * this class.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */

@@ -80,6 +80,9 @@ public final class LabelMatrixReader {
     }
 
     /**
+     * Reads the rows in {@link Iterator iter}, extracts the probabilities and calculates
+     * the covariance matrix on-the-fly.
+     *
      * @param iter an {@link Iterator} of {@link DataRow rows}
      * @param size the number of rows in {@link Iterator iter}
      * @param progress monitor
