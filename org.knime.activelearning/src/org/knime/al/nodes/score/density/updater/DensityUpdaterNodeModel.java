@@ -121,8 +121,8 @@ final class DensityUpdaterNodeModel extends AbstractALNodeModel {
         final DensityScorerModel model = densityScorerPortObject.getModel();
         final BufferedDataTable newlyLabeledData = (BufferedDataTable)inData[NEWLY_LABELED_INPORT];
         updateModel(model, newlyLabeledData, exec);
-        final DensityScorerPortObject outputPo = DensityScorerPortObject.createPortObject(
-            densityScorerPortObject.getSpec(), model, exec.createFileStore(UUID.randomUUID().toString()));
+        final DensityScorerPortObject outputPo = DensityScorerPortObject.createUpdatedPortObject(
+            densityScorerPortObject, model, exec.createFileStore(UUID.randomUUID().toString()));
         return new PortObject[]{outputPo};
     }
 
@@ -141,8 +141,7 @@ final class DensityUpdaterNodeModel extends AbstractALNodeModel {
                     model.updateNeighbors(key);
                 } catch (UnknownRowException e) {
                     if (failOnUnknown) {
-                        throw new IllegalArgumentException(
-                            String.format(UNKNOWN_ROW_TEMPLATE, e.getUnknownKey()), e);
+                        throw new IllegalArgumentException(String.format(UNKNOWN_ROW_TEMPLATE, e.getUnknownKey()), e);
                     } else {
                         // row is ignored
                         unknownRows++;
@@ -159,8 +158,7 @@ final class DensityUpdaterNodeModel extends AbstractALNodeModel {
         final boolean single = unknownRows == 1;
         final String personalPronoun = single ? "it" : "they";
         final String verb = single ? "is" : "are";
-        setWarningMessage(String.format(
-            "%s row%s %s ignored during the update because %s %s unknown to the model.",
+        setWarningMessage(String.format("%s row%s %s ignored during the update because %s %s unknown to the model.",
             unknownRows, single ? "" : "s", verb, personalPronoun, verb));
     }
 

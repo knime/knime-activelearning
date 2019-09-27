@@ -48,6 +48,8 @@
  */
 package org.knime.al.nodes.score.density;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -55,7 +57,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.ref.WeakReference;
-import java.util.Collections;
+import java.util.Optional;
+import java.util.UUID;
 
 import javax.swing.JComponent;
 
@@ -72,6 +75,8 @@ import org.knime.core.node.port.PortObjectZipOutputStream;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
 
+import com.google.common.collect.Lists;
+
 /**
  * PortObject that encapsulate a {@link DensityScorerModel}.
  *
@@ -79,12 +84,23 @@ import org.knime.core.node.port.PortTypeRegistry;
  */
 public final class DensityScorerPortObject extends FileStorePortObject {
 
+    private static final int POTENTIALS_FILESTORE_IDX = 1;
+
+    private static final int NEIGHBORHOOD_FILE_STORE_IDX = 0;
+
+    private static final MemoryAlertAwareGuavaCache CACHE = new MemoryAlertAwareGuavaCache();
+
     /**
      * Serializer for {@link DensityScorerPortObject}.
      *
      * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
      */
     public static final class Serializer extends PortObjectSerializer<DensityScorerPortObject> {
+
+        /**
+         *
+         */
+        private static final String CFG_NEIGHBORHOOD_ID = "neighborhoodId";
 
         /**
          * {@inheritDoc}
@@ -95,6 +111,7 @@ public final class DensityScorerPortObject extends FileStorePortObject {
             ModelContent mc = new ModelContent(CFG_MODELCONTENT);
             mc.addInt(CFG_NUM_FEATURES, portObject.m_nrFeatures);
             mc.addInt(CFG_NUM_DATA_POINTS, portObject.m_nrRows);
+            mc.addString(CFG_NEIGHBORHOOD_ID, portObject.m_neighborhoodId.toString());
             mc.saveToXML(out);
         }
 
@@ -111,6 +128,7 @@ public final class DensityScorerPortObject extends FileStorePortObject {
             try {
                 portObject.m_nrFeatures = mc.getInt(CFG_NUM_FEATURES);
                 portObject.m_nrRows = mc.getInt(CFG_NUM_DATA_POINTS);
+                portObject.m_neighborhoodId = UUID.fromString(mc.getString(CFG_NEIGHBORHOOD_ID));
             } catch (InvalidSettingsException ise) {
                 IOException ioe = new IOException("Unable to restore meta information: " + ise.getMessage());
                 ioe.initCause(ise);
@@ -118,6 +136,10 @@ public final class DensityScorerPortObject extends FileStorePortObject {
             }
             return portObject;
         }
+    }
+
+    private FileStore getNeighborhoodFileStore() {
+        return getFileStore(NEIGHBORHOOD_FILE_STORE_IDX);
     }
 
     /**
@@ -134,7 +156,9 @@ public final class DensityScorerPortObject extends FileStorePortObject {
 
     private DensityScorerPortObjectSpec m_spec;
 
-    private WeakReference<DensityScorerModel> m_modelRef;
+    private WeakReference<double[]> m_modelRef;
+
+    private UUID m_neighborhoodId;
 
     private int m_nrFeatures;
 
@@ -144,12 +168,13 @@ public final class DensityScorerPortObject extends FileStorePortObject {
      *
      */
     private DensityScorerPortObject(final DensityScorerPortObjectSpec spec, final DensityScorerModel model,
-        final FileStore fileStore) {
-        super(Collections.singletonList(fileStore));
+        final FileStore neighborhoodFilestore, final FileStore potentialsFilestore) {
+        super(Lists.newArrayList(neighborhoodFilestore, potentialsFilestore));
         m_spec = spec;
-        m_modelRef = new WeakReference<>(model);
+        m_modelRef = new WeakReference<>(model.getPotentials());
         m_nrFeatures = spec.getFeatureSpec().getNumColumns();
         m_nrRows = model.getNrRows();
+        m_neighborhoodId = model.getNeighborhoodModel().getId();
     }
 
     /**
@@ -162,16 +187,39 @@ public final class DensityScorerPortObject extends FileStorePortObject {
     /**
      * @param spec the model spec
      * @param model the {@link DensityScorerModel}
-     * @param fileStore to store <b>model</b> in
+     * @param neighborhoodFilestore {@link FileStore} for the static neighborhood model
+     * @param potentialsFilestore {@link FileStore} for the potentials
      * @return a {@link DensityScorerPortObject} that wraps <b>model</b>
      */
     public static DensityScorerPortObject createPortObject(final DensityScorerPortObjectSpec spec,
-        final DensityScorerModel model, final FileStore fileStore) {
-        final DensityScorerPortObject po = new DensityScorerPortObject(spec, model, fileStore);
+        final DensityScorerModel model, final FileStore neighborhoodFilestore, final FileStore potentialsFilestore) {
+        final DensityScorerPortObject po =
+            new DensityScorerPortObject(spec, model, neighborhoodFilestore, potentialsFilestore);
         try {
-            serialize(model, fileStore);
+            serialize(model, neighborhoodFilestore, potentialsFilestore);
         } catch (IOException e) {
             throw new IllegalStateException("Model serialization failed.", e);
+        }
+        final NeighborhoodModel neighborhoodModel = model.getNeighborhoodModel();
+        CACHE.put(neighborhoodModel.getId(), neighborhoodModel);
+        return po;
+    }
+
+    /**
+     * @param oldPo the {@link DensityScorerPortObject} that needs to be updated
+     * @param updatedModel the updated model
+     * @param newPotentialFileStore the {@link FileStore} for the updated potentials
+     * @return a {@link DensityScorerPortObject} with the static neighborhood model of <b>oldPo</b> and the
+     * updated potentials of <b>updatedModel</b>
+     */
+    public static DensityScorerPortObject createUpdatedPortObject(final DensityScorerPortObject oldPo,
+        final DensityScorerModel updatedModel, final FileStore newPotentialFileStore) {
+        final DensityScorerPortObject po = new DensityScorerPortObject(oldPo.getSpec(), updatedModel,
+            oldPo.getNeighborhoodFileStore(), newPotentialFileStore);
+        try {
+            serializePotentials(newPotentialFileStore, updatedModel.getPotentials());
+        } catch (IOException e) {
+            throw new IllegalStateException("Potential serialization failed.", e);
         }
         return po;
     }
@@ -180,28 +228,75 @@ public final class DensityScorerPortObject extends FileStorePortObject {
      * @return the {@link DensityScorerModel}
      */
     public synchronized DensityScorerModel getModel() {
-        DensityScorerModel model = m_modelRef.get();
-        if (model == null) {
+        double[] potentials = m_modelRef.get();
+        if (potentials == null) {
             try {
-                model = deserialize();
-            } catch (IOException | ClassNotFoundException e) {
+                potentials = deserializePotentials();
+            } catch (IOException e) {
                 throw new IllegalStateException("Deserialization failed.", e);
             }
-            m_modelRef = new WeakReference<>(model);
+            m_modelRef = new WeakReference<>(potentials);
         }
-        return model;
+        return new DefaultDensityScorerModel(potentials, retrieveNeighborhoodModel());
     }
 
-    private DensityScorerModel deserialize() throws IOException, ClassNotFoundException {
-        final File file = getFileStore(0).getFile();
-        try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(file))) {
-            return (DensityScorerModel)input.readObject();
+    private NeighborhoodModel retrieveNeighborhoodModel() {
+        final Optional<NeighborhoodModel> optionalNeighborhoodModel =
+            CACHE.get(m_neighborhoodId, NeighborhoodModel.class);
+        if (optionalNeighborhoodModel.isPresent()) {
+            return optionalNeighborhoodModel.get();
+        } else {
+            final NeighborhoodModel neighborhoodModel;
+            try {
+                neighborhoodModel = deserializeNeighborhoodModel();
+            } catch (ClassNotFoundException | IOException ex) {
+                throw new IllegalStateException("The neighborhood model can't be deserialized.", ex);
+            }
+            assert neighborhoodModel.getId().equals(m_neighborhoodId);
+            CACHE.put(neighborhoodModel.getId(), neighborhoodModel);
+            return neighborhoodModel;
         }
     }
 
-    private static void serialize(final DensityScorerModel model, final FileStore fileStore)
+    private double[] deserializePotentials() throws IOException {
+        final File file = getFileStore(POTENTIALS_FILESTORE_IDX).getFile();
+        try (DataInputStream in = new DataInputStream(new FileInputStream(file))) {
+            final int nRows = in.readInt();
+            final double[] potentials = new double[nRows];
+            for (int i = 0; i < nRows; i++) {
+                potentials[i] = in.readDouble();
+            }
+            return potentials;
+        }
+    }
+
+    private NeighborhoodModel deserializeNeighborhoodModel() throws IOException, ClassNotFoundException {
+        final File file = getFileStore(NEIGHBORHOOD_FILE_STORE_IDX).getFile();
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
+            return (NeighborhoodModel)in.readObject();
+        }
+    }
+
+    private static void serialize(final DensityScorerModel model, final FileStore neighborhoodFilestore,
+        final FileStore potentialsFilestore) throws IOException {
+        serializeNeighborhoodModel(model.getNeighborhoodModel(), neighborhoodFilestore);
+        serializePotentials(potentialsFilestore, model.getPotentials());
+    }
+
+    private static void serializePotentials(final FileStore potentialsFilestore, final double[] potentials)
         throws IOException {
-        final File file = fileStore.getFile();
+        final File potentialsFile = potentialsFilestore.getFile();
+        try (DataOutputStream out = new DataOutputStream(new FileOutputStream(potentialsFile))) {
+            out.writeInt(potentials.length);
+            for (double potential : potentials) {
+                out.writeDouble(potential);
+            }
+        }
+    }
+
+    private static void serializeNeighborhoodModel(final NeighborhoodModel model, final FileStore neighborhoodFilestore)
+        throws IOException {
+        final File file = neighborhoodFilestore.getFile();
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file))) {
             out.writeObject(model);
         }

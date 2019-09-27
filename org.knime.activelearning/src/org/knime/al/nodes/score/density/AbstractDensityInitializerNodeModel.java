@@ -48,6 +48,7 @@
  */
 package org.knime.al.nodes.score.density;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -61,6 +62,7 @@ import org.knime.core.data.DoubleValue;
 import org.knime.core.data.container.CloseableRowIterator;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.container.filter.TableFilter;
+import org.knime.core.data.filestore.FileStore;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -138,10 +140,16 @@ public abstract class AbstractDensityInitializerNodeModel extends AbstractALNode
         checkInputTable(unlabeledTable);
         exec.setProgress("Init data structures and density");
         final DensityScorerModel model = initialize(unlabeledTable, exec);
+        final FileStore neighborhoodFileStore = createFileStore(exec);
+        final FileStore potentialsFilestore = createFileStore(exec);
         final DensityScorerPortObject po =
             DensityScorerPortObject.createPortObject(createSpec(unlabeledTable.getDataTableSpec()), model,
-                exec.createFileStore(UUID.randomUUID().toString()));
+                neighborhoodFileStore, potentialsFilestore);
         return new PortObject[]{po};
+    }
+
+    private static FileStore createFileStore(final ExecutionContext exec) throws IOException {
+        return exec.createFileStore(UUID.randomUUID().toString());
     }
 
     /**
@@ -154,8 +162,8 @@ public abstract class AbstractDensityInitializerNodeModel extends AbstractALNode
 
     private DensityScorerModel initialize(final BufferedDataTable unlabeledTable, final ExecutionMonitor progress)
         throws CanceledExecutionException {
-        final DensityScorerModelCreator builder = createBuilder(unlabeledTable, progress.createSubProgress(0.5));
-        final DensityScorerModel model =  builder.buildModel(progress.createSubProgress(0.5));
+        final DensityScorerModelCreator builder = createBuilder(unlabeledTable, progress.createSubProgress(0.1));
+        final DensityScorerModel model = builder.buildModel(progress.createSubProgress(0.9));
         builder.getWarning().ifPresent(this::setWarningMessage);
         return model;
     }
