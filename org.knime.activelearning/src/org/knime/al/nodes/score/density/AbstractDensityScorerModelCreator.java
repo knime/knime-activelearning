@@ -120,9 +120,12 @@ public abstract class AbstractDensityScorerModelCreator<V extends DensityDataPoi
      * This method is called once all potentials have been calculated and normalized.
      *
      * @param dataPoints a list of the dataPoints
+     * @param monitor for reporting progress
      * @return the final model
+     * @throws CanceledExecutionException if the node execution is canceled
      */
-    protected abstract DensityScorerModel buildModel(final List<V> dataPoints);
+    protected abstract NeighborhoodModel buildModel(final List<V> dataPoints, final ExecutionMonitor monitor)
+        throws CanceledExecutionException;
 
     /**
      * {@inheritDoc}
@@ -172,9 +175,11 @@ public abstract class AbstractDensityScorerModelCreator<V extends DensityDataPoi
      */
     @Override
     public final DensityScorerModel buildModel(final ExecutionMonitor monitor) throws CanceledExecutionException {
-        initializeUnnormalizedPotentials(monitor.createSubProgress(0.5));
-        normalizePotentials(monitor.createSubProgress(0.5));
-        return buildModel(m_dataPoints);
+        initializeUnnormalizedPotentials(monitor.createSubProgress(0.3));
+        normalizePotentials(monitor.createSubProgress(0.3));
+        final NeighborhoodModel neighborhoodModel = buildModel(m_dataPoints, monitor.createSubProgress(0.4));
+        final double[] potentials = m_dataPoints.stream().mapToDouble(DensityDataPoint::getDensity).toArray();
+        return new DefaultDensityScorerModel(potentials, neighborhoodModel);
     }
 
     private void initializeUnnormalizedPotentials(final ExecutionMonitor monitor) throws CanceledExecutionException {
@@ -187,8 +192,7 @@ public abstract class AbstractDensityScorerModelCreator<V extends DensityDataPoi
         final Iterator<V> iter = m_dataPoints.iterator();
         final int size = m_dataPoints.size();
         for (int i = 1; iter.hasNext(); i++) {
-            monitor.checkCanceled();
-            monitor.setProgress(i / ((double)size), String.format("Initializing potential for row %s of %s", i, size));
+            updateProgress(monitor, "Initializing potential for row %s of %s", size, i);
             initializeUnnormalizedPotential(kdTree, iter.next());
         }
     }
@@ -201,9 +205,7 @@ public abstract class AbstractDensityScorerModelCreator<V extends DensityDataPoi
         final int size = m_dataPoints.size();
         for (int i = 1; iter.hasNext(); i++) {
             final DensityDataPoint<V> p = iter.next();
-            minMaxProgress.checkCanceled();
-            minMaxProgress.setProgress(i / ((double)size),
-                String.format("Searching for min and max potentials in row %s of %s.", i, size));
+            updateProgress(minMaxProgress, "Searching for min and max potentials in row %s of %s.", size, i);
             p.normalizeDensity();
             min = Math.min(min, p.getDensity());
             max = Math.max(max, p.getDensity());
@@ -230,12 +232,16 @@ public abstract class AbstractDensityScorerModelCreator<V extends DensityDataPoi
         final Iterator<V> iter = m_dataPoints.iterator();
         final int size = m_dataPoints.size();
         for (int i = 1; iter.hasNext(); i++) {
-            normalizerProgress.checkCanceled();
-            normalizerProgress.setProgress(i / ((double)size),
-                String.format("Normalizing potential in row %s of %s.", i, size));
+            updateProgress(normalizerProgress, "Normalizing potential in row %s of %s.", size, i);
             final DensityDataPoint<V> p = iter.next();
             p.setDensity(normalizer.applyAsDouble(p.getDensity()));
         }
+    }
+
+    private static void updateProgress(final ExecutionMonitor monitor, final String template, final int size,
+        final int currentIteration) throws CanceledExecutionException {
+        monitor.checkCanceled();
+        monitor.setProgress(currentIteration / ((double)size), () -> String.format(template, currentIteration, size));
     }
 
     private double[] toVector(final DataRow row) {

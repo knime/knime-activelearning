@@ -44,49 +44,65 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Aug 7, 2019 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
+ *   Sep 19, 2019 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
  */
 package org.knime.al.nodes.score.density;
 
 import org.knime.core.data.RowKey;
 
 /**
- * A model for density based acquisition functions in an active learning setting.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-public interface DensityScorerModel {
+final class DefaultDensityScorerModel implements DensityScorerModel {
+
+    private final PotentialUpdater m_potentialUpdater;
+
+    private final NeighborhoodModel m_neighborhoodModel;
+
+    DefaultDensityScorerModel(final double[] potentials, final NeighborhoodModel neighborhoodModel) {
+        m_potentialUpdater = new PotentialUpdater(potentials);
+        m_neighborhoodModel = neighborhoodModel;
+    }
 
     /**
-     * Decreases the density of all rows in the neighborhood of the row identified by <b>key</b>.
-     * The exact update as well as the notion of neighborhood depend on the underlying
-     * algorithm.
-     *
-     * @param key the {@link RowKey} of the row whose neighborhood needs to be updated
-     * @throws UnknownRowException if an unknown row is encountered
+     * {@inheritDoc}
      */
-    void updateNeighbors(RowKey key) throws UnknownRowException;
+    @Override
+    public void updateNeighbors(final RowKey key) throws UnknownRowException {
+        m_neighborhoodModel.updateNeighbors(m_potentialUpdater, key);
+    }
 
     /**
-     * @param key the {@link RowKey} of the row whose potential is required
-     * @return the potential of the row corresponding to {@link RowKey key}
-     * @throws UnknownRowException if an unknown row is encountered
+     * {@inheritDoc}
      */
-    double getPotential(RowKey key) throws UnknownRowException;
+    @Override
+    public double getPotential(final RowKey key) throws UnknownRowException {
+        return m_potentialUpdater.getPotential(m_neighborhoodModel.getIndex(key));
+    }
 
     /**
-     * @return the number of rows contained in the model
+     * {@inheritDoc}
      */
-    int getNrRows();
+    @Override
+    public int getNrRows() {
+        return m_neighborhoodModel.getNrRows();
+    }
 
     /**
-     * @return the static {@link NeighborhoodModel}
+     * {@inheritDoc}
      */
-    NeighborhoodModel getNeighborhoodModel();
+    @Override
+    public NeighborhoodModel getNeighborhoodModel() {
+        return m_neighborhoodModel;
+    }
 
     /**
-     * @return the potentials
+     * {@inheritDoc}
      */
-    double[] getPotentials();
+    @Override
+    public double[] getPotentials() {
+        return m_potentialUpdater.getUpdatedPotentials();
+    }
 
 }

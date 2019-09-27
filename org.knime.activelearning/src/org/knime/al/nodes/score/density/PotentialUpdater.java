@@ -44,49 +44,37 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Aug 7, 2019 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
+ *   Sep 19, 2019 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
  */
 package org.knime.al.nodes.score.density;
 
-import org.knime.core.data.RowKey;
+import org.knime.core.node.util.CheckUtils;
 
 /**
- * A model for density based acquisition functions in an active learning setting.
+ * Wraps the potentials array and performs updates on it.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-public interface DensityScorerModel {
+final class PotentialUpdater {
 
-    /**
-     * Decreases the density of all rows in the neighborhood of the row identified by <b>key</b>.
-     * The exact update as well as the notion of neighborhood depend on the underlying
-     * algorithm.
-     *
-     * @param key the {@link RowKey} of the row whose neighborhood needs to be updated
-     * @throws UnknownRowException if an unknown row is encountered
-     */
-    void updateNeighbors(RowKey key) throws UnknownRowException;
+    private final double[] m_potentials;
 
-    /**
-     * @param key the {@link RowKey} of the row whose potential is required
-     * @return the potential of the row corresponding to {@link RowKey key}
-     * @throws UnknownRowException if an unknown row is encountered
-     */
-    double getPotential(RowKey key) throws UnknownRowException;
+    PotentialUpdater(final double[] potentials) {
+        m_potentials = potentials.clone();
+    }
 
-    /**
-     * @return the number of rows contained in the model
-     */
-    int getNrRows();
+    void decreasePotential(final int idx, final double decrement) {
+        CheckUtils.checkArgument(decrement >= 0, "The decrement (%s) must be non-negative.", decrement);
+        final double newPotential = m_potentials[idx] - decrement;
+        m_potentials[idx] = Math.max(0.0, newPotential);
+    }
 
-    /**
-     * @return the static {@link NeighborhoodModel}
-     */
-    NeighborhoodModel getNeighborhoodModel();
+    double[] getUpdatedPotentials() {
+        return m_potentials.clone();
+    }
 
-    /**
-     * @return the potentials
-     */
-    double[] getPotentials();
+    double getPotential(final int idx) {
+        return m_potentials[idx];
+    }
 
 }

@@ -51,12 +51,17 @@ package org.knime.al.nodes.score.density.graphdensity;
 import java.util.List;
 
 import org.knime.al.nodes.score.density.AbstractDensityScorerModelCreator;
-import org.knime.al.nodes.score.density.DensityScorerModel;
+import org.knime.al.nodes.score.density.KeyMap;
+import org.knime.al.nodes.score.density.NeighborhoodModel;
+import org.knime.al.nodes.score.density.NeighborhoodStructure;
 import org.knime.base.util.kdtree.KDTree;
 import org.knime.base.util.kdtree.NearestNeighbour;
 import org.knime.core.data.RowKey;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionMonitor;
 
 /**
+ * Used to create DensityScorerModels based on graph density.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
@@ -112,8 +117,12 @@ final class GraphDensityScorerModelCreator extends AbstractDensityScorerModelCre
      * {@inheritDoc}
      */
     @Override
-    protected DensityScorerModel buildModel(final List<GraphDataPoint> dataPoints) {
-        return new GraphDensityScorerModel(dataPoints);
+    protected NeighborhoodModel buildModel(final List<GraphDataPoint> dataPoints, final ExecutionMonitor monitor)
+        throws CanceledExecutionException {
+        final KeyMap keyMap = KeyMap.create(dataPoints, monitor.createSubProgress(0.4));
+        final NeighborhoodStructure neighborhoods =
+            NeighborhoodStructure.create(keyMap, false, dataPoints, monitor.createSubProgress(0.6));
+        return new GraphNeighborhoodModel(keyMap, neighborhoods);
     }
 
 }

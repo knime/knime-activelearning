@@ -51,13 +51,17 @@ package org.knime.al.nodes.score.density.nodepotential;
 import java.util.List;
 
 import org.knime.al.nodes.score.density.AbstractDensityScorerModelCreator;
-import org.knime.al.nodes.score.density.DensityScorerModel;
+import org.knime.al.nodes.score.density.KeyMap;
+import org.knime.al.nodes.score.density.NeighborhoodModel;
+import org.knime.al.nodes.score.density.NeighborhoodStructure;
 import org.knime.base.util.kdtree.KDTree;
 import org.knime.base.util.kdtree.NearestNeighbour;
 import org.knime.core.data.RowKey;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionMonitor;
 
 /**
- * Builder for PotentialDensityScorerModels.
+ * Creator for PotentialDensityScorerModels.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
@@ -122,10 +126,16 @@ final class PotentialDensityScorerModelCreator extends AbstractDensityScorerMode
 
     /**
      * {@inheritDoc}
+     *
      */
     @Override
-    protected DensityScorerModel buildModel(final List<PotentialDataPoint> dataPoints) {
-        return new PotentialDensityScorerModel(dataPoints, m_beta);
+    protected NeighborhoodModel buildModel(final List<PotentialDataPoint> dataPoints, final ExecutionMonitor monitor)
+        throws CanceledExecutionException {
+        final KeyMap keyMap = KeyMap.create(dataPoints, monitor.createSubProgress(0.1));
+        final NeighborhoodStructure neighborhoods =
+            NeighborhoodStructure.create(keyMap, true, dataPoints, monitor.createSubProgress(0.45));
+        return PotentialNeighborhoodModel.create(keyMap, neighborhoods, m_beta, dataPoints,
+            monitor.createSubProgress(0.45));
     }
 
 }

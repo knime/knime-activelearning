@@ -48,9 +48,9 @@
  */
 package org.knime.al.nodes.score.density.graphdensity;
 
-import java.util.List;
-
-import org.knime.al.nodes.score.density.AbstractDensityScorerModel;
+import org.knime.al.nodes.score.density.AbstractNeighborhoodModel;
+import org.knime.al.nodes.score.density.KeyMap;
+import org.knime.al.nodes.score.density.NeighborhoodStructure;
 
 /**
  * Model for the graph density based measure proposed in
@@ -58,27 +58,23 @@ import org.knime.al.nodes.score.density.AbstractDensityScorerModel;
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-final class GraphDensityScorerModel extends AbstractDensityScorerModel<GraphDataPoint> {
+final class GraphNeighborhoodModel extends AbstractNeighborhoodModel {
 
     private static final long serialVersionUID = 1603562183501522630L;
 
     /**
-     * @param dataPoints
      */
-    GraphDensityScorerModel(final List<GraphDataPoint> dataPoints) {
-        super(dataPoints);
+    GraphNeighborhoodModel(final KeyMap keyMap, final NeighborhoodStructure neighborhoods) {
+        super(keyMap, neighborhoods);
     }
 
     /**
      * Serialization constructor. Do not use in normal application code.
      */
-    public GraphDensityScorerModel() {
+    public GraphNeighborhoodModel() {
         // no op serialization constructor
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected double calculateDecrementWeight(final int idx, final int neighborIdx) {
         return 1.0;

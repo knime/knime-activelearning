@@ -44,49 +44,43 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Aug 7, 2019 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
+ *   Sep 19, 2019 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
  */
 package org.knime.al.nodes.score.density;
+
+import java.io.Externalizable;
+import java.util.UUID;
 
 import org.knime.core.data.RowKey;
 
 /**
- * A model for density based acquisition functions in an active learning setting.
+ * Represents the static part of a {@link DensityScorerModel} that doesn't change after it has been initialized.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-public interface DensityScorerModel {
+public interface NeighborhoodModel extends Externalizable {
 
     /**
-     * Decreases the density of all rows in the neighborhood of the row identified by <b>key</b>.
-     * The exact update as well as the notion of neighborhood depend on the underlying
-     * algorithm.
-     *
-     * @param key the {@link RowKey} of the row whose neighborhood needs to be updated
-     * @throws UnknownRowException if an unknown row is encountered
+     * @return the id of this neighborhood (for caching)
      */
-    void updateNeighbors(RowKey key) throws UnknownRowException;
+    UUID getId();
 
     /**
-     * @param key the {@link RowKey} of the row whose potential is required
-     * @return the potential of the row corresponding to {@link RowKey key}
-     * @throws UnknownRowException if an unknown row is encountered
+     * @param potentialUpdater used to reduce the potentials in the neighborhood of <b>row</b>
+     * @param row the {@link RowKey} of the row for which the potentials have to be updated
+     * @throws UnknownRowException if {@link RowKey} row is unknown to the model
      */
-    double getPotential(RowKey key) throws UnknownRowException;
+    void updateNeighbors(PotentialUpdater potentialUpdater, final RowKey row) throws UnknownRowException;
 
     /**
-     * @return the number of rows contained in the model
+     * @param key the {@link RowKey} of the row for which the index is required
+     * @return the index of the row with {@link RowKey key} in this neighborhood model
+     * @throws UnknownRowException if {@link RowKey key} is unknown to the model
+     */
+    int getIndex(final RowKey key) throws UnknownRowException;
+
+    /**
+     * @return the number of rows in this neighborhood model
      */
     int getNrRows();
-
-    /**
-     * @return the static {@link NeighborhoodModel}
-     */
-    NeighborhoodModel getNeighborhoodModel();
-
-    /**
-     * @return the potentials
-     */
-    double[] getPotentials();
-
 }

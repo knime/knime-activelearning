@@ -44,49 +44,96 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Aug 7, 2019 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
+ *   Sep 27, 2019 (Adrian Nembach, KNIME GmbH, Konstanz, Germany): created
  */
 package org.knime.al.nodes.score.density;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.knime.core.data.RowKey;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionMonitor;
 
 /**
- * A model for density based acquisition functions in an active learning setting.
+ * Maps from {@link RowKey RowKeys} to integer indices.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-public interface DensityScorerModel {
+public final class KeyMap implements Externalizable {
+
+    private Map<String, Integer> m_keyMap;
 
     /**
-     * Decreases the density of all rows in the neighborhood of the row identified by <b>key</b>.
-     * The exact update as well as the notion of neighborhood depend on the underlying
-     * algorithm.
      *
-     * @param key the {@link RowKey} of the row whose neighborhood needs to be updated
-     * @throws UnknownRowException if an unknown row is encountered
      */
-    void updateNeighbors(RowKey key) throws UnknownRowException;
+    private KeyMap(final Map<String, Integer> keyMap) {
+        m_keyMap = keyMap;
+    }
 
     /**
-     * @param key the {@link RowKey} of the row whose potential is required
-     * @return the potential of the row corresponding to {@link RowKey key}
-     * @throws UnknownRowException if an unknown row is encountered
+     * Framework constructor for serialization.
+     *
+     * @noreference Not intended for use in client code
      */
-    double getPotential(RowKey key) throws UnknownRowException;
+    public KeyMap() {
+    }
 
     /**
-     * @return the number of rows contained in the model
+     * @param dataPoints to create a KeyMap for
+     * @param monitor for reporting progress
+     * @return a {@link KeyMap} containing the keys of the data points in <b>dataPoints</b>
+     * @throws CanceledExecutionException
      */
-    int getNrRows();
+    public static KeyMap create(final Collection<? extends DensityDataPoint<?>> dataPoints,
+        final ExecutionMonitor monitor) throws CanceledExecutionException {
+        final Map<String, Integer> keyMap = new LinkedHashMap<>(dataPoints.size());
+        ProcessingUtil.collectWithProgress(dataPoints, (i, p) -> keyMap.put(p.getKey().getString(), i),
+            ProcessingUtil.progressWithTemplate(monitor, "Reading key for row %s of %s."));
+        return new KeyMap(keyMap);
+    }
 
     /**
-     * @return the static {@link NeighborhoodModel}
+     * @param key the {@link RowKey} for which the index is required
+     * @return the index for {@link RowKey key}
+     * @throws UnknownRowException if {@link RowKey key} is unknown
      */
-    NeighborhoodModel getNeighborhoodModel();
+    public int getIndex(final RowKey key) throws UnknownRowException {
+        final Integer index = m_keyMap.get(key.toString());
+        if (index == null) {
+            throw new UnknownRowException(key);
+        }
+        return index.intValue();
+    }
 
     /**
-     * @return the potentials
+     * @return the number of stored keys
      */
-    double[] getPotentials();
+    public int size() {
+        return m_keyMap.size();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        @SuppressWarnings("unchecked")
+        final Map<String, Integer> keyMap = (Map<String, Integer>)in.readObject();
+        m_keyMap = keyMap;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        out.writeObject(m_keyMap);
+    }
 
 }
