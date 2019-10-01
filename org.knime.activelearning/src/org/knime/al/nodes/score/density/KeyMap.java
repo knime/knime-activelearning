@@ -69,9 +69,6 @@ public final class KeyMap implements Externalizable {
 
     private Map<String, Integer> m_keyMap;
 
-    /**
-     *
-     */
     private KeyMap(final Map<String, Integer> keyMap) {
         m_keyMap = keyMap;
     }
@@ -114,7 +111,7 @@ public final class KeyMap implements Externalizable {
     /**
      * @return the number of stored keys
      */
-    public int size() {
+    int size() {
         return m_keyMap.size();
     }
 

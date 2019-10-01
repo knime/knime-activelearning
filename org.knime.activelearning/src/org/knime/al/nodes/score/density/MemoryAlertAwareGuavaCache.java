@@ -97,7 +97,9 @@ final class MemoryAlertAwareGuavaCache {
      * @param key
      * @param value
      */
-    void put(final UUID key, final Object value) {
+    synchronized void put(final UUID key, final Object value) {
+        CheckUtils.checkState(m_cache.getIfPresent(key) == null, "There is already a value stored for the key '%s'.",
+            key);
         m_cache.put(key, value);
     }
 
@@ -108,7 +110,7 @@ final class MemoryAlertAwareGuavaCache {
      * @param key
      * @return the value associated with key
      */
-    Optional<Object> get(final UUID key) {
+    private Optional<Object> get(final UUID key) {
         final Object o = m_cache.getIfPresent(key);
         return o == null ? Optional.empty() : Optional.of(o);
     }

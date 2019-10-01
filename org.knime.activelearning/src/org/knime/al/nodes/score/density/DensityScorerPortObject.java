@@ -57,8 +57,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.ref.WeakReference;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JComponent;
 
@@ -98,7 +98,7 @@ public final class DensityScorerPortObject extends FileStorePortObject {
     public static final class Serializer extends PortObjectSerializer<DensityScorerPortObject> {
 
         /**
-         *
+         * Configuration id for the neighborhood id
          */
         private static final String CFG_NEIGHBORHOOD_ID = "neighborhoodId";
 
@@ -209,8 +209,8 @@ public final class DensityScorerPortObject extends FileStorePortObject {
      * @param oldPo the {@link DensityScorerPortObject} that needs to be updated
      * @param updatedModel the updated model
      * @param newPotentialFileStore the {@link FileStore} for the updated potentials
-     * @return a {@link DensityScorerPortObject} with the static neighborhood model of <b>oldPo</b> and the
-     * updated potentials of <b>updatedModel</b>
+     * @return a {@link DensityScorerPortObject} with the static neighborhood model of <b>oldPo</b> and the updated
+     *         potentials of <b>updatedModel</b>
      */
     public static DensityScorerPortObject createUpdatedPortObject(final DensityScorerPortObject oldPo,
         final DensityScorerModel updatedModel, final FileStore newPotentialFileStore) {
@@ -241,21 +241,14 @@ public final class DensityScorerPortObject extends FileStorePortObject {
     }
 
     private NeighborhoodModel retrieveNeighborhoodModel() {
-        final Optional<NeighborhoodModel> optionalNeighborhoodModel =
-            CACHE.get(m_neighborhoodId, NeighborhoodModel.class);
-        if (optionalNeighborhoodModel.isPresent()) {
-            return optionalNeighborhoodModel.get();
-        } else {
-            final NeighborhoodModel neighborhoodModel;
-            try {
-                neighborhoodModel = deserializeNeighborhoodModel();
-            } catch (ClassNotFoundException | IOException ex) {
-                throw new IllegalStateException("The neighborhood model can't be deserialized.", ex);
-            }
-            assert neighborhoodModel.getId().equals(m_neighborhoodId);
-            CACHE.put(neighborhoodModel.getId(), neighborhoodModel);
-            return neighborhoodModel;
+        NeighborhoodModel neighborhoodModel;
+        try {
+            neighborhoodModel = CACHE.get(m_neighborhoodId, this::deserializeNeighborhoodModel);
+        } catch (ExecutionException ex) {
+            throw new IllegalStateException("Couldn't load the neighborhood model.");
         }
+        assert neighborhoodModel.getId().equals(m_neighborhoodId);
+        return neighborhoodModel;
     }
 
     private double[] deserializePotentials() throws IOException {

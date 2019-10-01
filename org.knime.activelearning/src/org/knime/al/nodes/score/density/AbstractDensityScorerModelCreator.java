@@ -49,11 +49,11 @@
 package org.knime.al.nodes.score.density;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
 
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.knime.al.nodes.score.ExceptionHandling;
 import org.knime.base.util.kdtree.KDTree;
 import org.knime.base.util.kdtree.KDTreeBuilder;
@@ -189,27 +189,20 @@ public abstract class AbstractDensityScorerModelCreator<V extends DensityDataPoi
 
     private void initializeUnnormalizedPotentials(final ExecutionMonitor monitor, final KDTree<V> kdTree)
         throws CanceledExecutionException {
-        final Iterator<V> iter = m_dataPoints.iterator();
-        final int size = m_dataPoints.size();
-        for (int i = 1; iter.hasNext(); i++) {
-            updateProgress(monitor, "Initializing potential for row %s of %s", size, i);
-            initializeUnnormalizedPotential(kdTree, iter.next());
-        }
+        ProcessingUtil.collectWithProgress(m_dataPoints, p -> initializeUnnormalizedPotential(kdTree, p),
+            ProcessingUtil.progressWithTemplate(monitor, "Initializing potential for row %s of %s"));
     }
 
     private void normalizePotentials(final ExecutionMonitor monitor) throws CanceledExecutionException {
-        double min = Double.MAX_VALUE;
-        double max = -Double.MAX_VALUE;
+        final SummaryStatistics stats = new SummaryStatistics();
         final ExecutionMonitor minMaxProgress = monitor.createSubProgress(0.5);
-        Iterator<V> iter = m_dataPoints.iterator();
-        final int size = m_dataPoints.size();
-        for (int i = 1; iter.hasNext(); i++) {
-            final DensityDataPoint<V> p = iter.next();
-            updateProgress(minMaxProgress, "Searching for min and max potentials in row %s of %s.", size, i);
+        ProcessingUtil.collectWithProgress(m_dataPoints, p -> {
             p.normalizeDensity();
-            min = Math.min(min, p.getDensity());
-            max = Math.max(max, p.getDensity());
-        }
+            stats.addValue(p.getDensity());
+        }, ProcessingUtil.progressWithTemplate(minMaxProgress,
+            "Searching for min and max potentials in row %s of %s."));
+        final double min = stats.getMin();
+        final double max = stats.getMax();
         if (min == max) {
             monitor.setProgress(1.0);
             return;
@@ -229,19 +222,9 @@ public abstract class AbstractDensityScorerModelCreator<V extends DensityDataPoi
 
     private void normalize(final ExecutionMonitor normalizerProgress, final DoubleUnaryOperator normalizer)
         throws CanceledExecutionException {
-        final Iterator<V> iter = m_dataPoints.iterator();
-        final int size = m_dataPoints.size();
-        for (int i = 1; iter.hasNext(); i++) {
-            updateProgress(normalizerProgress, "Normalizing potential in row %s of %s.", size, i);
-            final DensityDataPoint<V> p = iter.next();
-            p.setDensity(normalizer.applyAsDouble(p.getDensity()));
-        }
-    }
-
-    private static void updateProgress(final ExecutionMonitor monitor, final String template, final int size,
-        final int currentIteration) throws CanceledExecutionException {
-        monitor.checkCanceled();
-        monitor.setProgress(currentIteration / ((double)size), () -> String.format(template, currentIteration, size));
+        ProcessingUtil.collectWithProgress(m_dataPoints,
+            p -> p.setDensity(normalizer.applyAsDouble(p.getDensity())),
+            ProcessingUtil.progressWithTemplate(normalizerProgress, "Normalizing potential in row %s of %s."));
     }
 
     private double[] toVector(final DataRow row) {

@@ -142,6 +142,17 @@ public final class ProcessingUtil {
     }
 
     /**
+     * @param collection elements to consume
+     * @param consumer that accepts elements
+     * @param progress for monitoring
+     * @throws CanceledExecutionException if the execution is canceled
+     */
+    public static <T> void collectWithProgress(final Collection<T> collection, final Consumer<T> consumer,
+        final Progress progress) throws CanceledExecutionException {
+        collectWithProgress(collection, (i, t) -> consumer.accept(t), progress);
+    }
+
+    /**
      * A {@link Consumer} that accepts an index as first argument. Similar to {@link ObjIntConsumer} but with the
      * reverse ordering of arguments in order to comply with the remaining functional interfaces in this class (e.g.
      * IndexedToIntFunction).
