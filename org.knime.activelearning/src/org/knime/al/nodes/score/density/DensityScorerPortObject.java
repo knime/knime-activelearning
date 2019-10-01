@@ -245,7 +245,7 @@ public final class DensityScorerPortObject extends FileStorePortObject {
         try {
             neighborhoodModel = CACHE.get(m_neighborhoodId, this::deserializeNeighborhoodModel);
         } catch (ExecutionException ex) {
-            throw new IllegalStateException("Couldn't load the neighborhood model.");
+            throw new IllegalStateException("Couldn't load the neighborhood model.", ex);
         }
         assert neighborhoodModel.getId().equals(m_neighborhoodId);
         return neighborhoodModel;
