@@ -84,7 +84,8 @@ final class MemoryAlertAwareGuavaCache {
             @Override
             protected boolean memoryAlert(final MemoryAlert alert) {
                 if (m_gate.tryAcquire()) {
-                    LOGGER.infoWithFormat("Clean cache in response to memory alert.");
+                    LOGGER.infoWithFormat("Cleaning %s entries from cache in response to memory alert.",
+                        m_cache.size());
                     m_cache.invalidateAll();
                     m_cache.cleanUp();
                     m_gate.release();

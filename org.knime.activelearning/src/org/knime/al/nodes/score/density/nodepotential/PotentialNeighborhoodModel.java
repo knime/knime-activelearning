@@ -225,20 +225,22 @@ final class PotentialNeighborhoodModel extends AbstractNeighborhoodModel {
         private double[] createSquaredDistances(final int idx, final PotentialDataPoint dataPoint) {
             final List<Double> squaredDistances = dataPoint.getSquaredDistances();
             final List<PotentialDataPoint> neighbors = dataPoint.getNeighbors();
-            final int firstLarger = m_idxOfFirstLarger[idx];
-            return IntStream.range(0, neighbors.size()).boxed()
-                .sorted((i, j) -> compareNeighborIndices(i, j, neighbors)).skip(firstLarger)
-                .mapToDouble(squaredDistances::get).toArray();
+            return IntStream.range(0, neighbors.size()).filter(i -> getIndex(neighbors.get(i)) > idx).boxed()
+                .sorted((i, j) -> compareNeighborIndices(i, j, neighbors)).mapToDouble(squaredDistances::get).toArray();
         }
 
-        private int compareNeighborIndices(final int i, final int j, final List<PotentialDataPoint> neighbors) {
+        private int getIndex(final PotentialDataPoint p) {
             try {
-                final int idxLeft = m_keyMap.getIndex(neighbors.get(i).getKey());
-                final int idxRight = m_keyMap.getIndex(neighbors.get(j).getKey());
-                return Integer.compare(idxLeft, idxRight);
+                return m_keyMap.getIndex(p.getKey());
             } catch (UnknownRowException ex) {
                 throw new IllegalStateException("Unknown row during model creation.", ex);
             }
+        }
+
+        private int compareNeighborIndices(final int i, final int j, final List<PotentialDataPoint> neighbors) {
+            final int idxLeft = getIndex(neighbors.get(i));
+            final int idxRight = getIndex(neighbors.get(j));
+            return Integer.compare(idxLeft, idxRight);
         }
     }
 
