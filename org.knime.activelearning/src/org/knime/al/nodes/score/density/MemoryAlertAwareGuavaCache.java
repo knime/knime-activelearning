@@ -57,6 +57,7 @@ import java.util.concurrent.Semaphore;
 import org.knime.core.data.util.memory.MemoryAlert;
 import org.knime.core.data.util.memory.MemoryAlertListener;
 import org.knime.core.data.util.memory.MemoryAlertSystem;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.util.CheckUtils;
 
 import com.google.common.cache.Cache;
@@ -74,6 +75,8 @@ final class MemoryAlertAwareGuavaCache {
 
     private static final int CACHE_SIZE = 20;
 
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(MemoryAlertAwareGuavaCache.class);
+
     MemoryAlertAwareGuavaCache() {
         m_cache = CacheBuilder.newBuilder().maximumSize(CACHE_SIZE).softValues().build();
 
@@ -81,6 +84,7 @@ final class MemoryAlertAwareGuavaCache {
             @Override
             protected boolean memoryAlert(final MemoryAlert alert) {
                 if (m_gate.tryAcquire()) {
+                    LOGGER.infoWithFormat("Clean cache in response to memory alert.");
                     m_cache.invalidateAll();
                     m_cache.cleanUp();
                     m_gate.release();
@@ -98,9 +102,12 @@ final class MemoryAlertAwareGuavaCache {
      * @param value
      */
     synchronized void put(final UUID key, final Object value) {
-        CheckUtils.checkState(m_cache.getIfPresent(key) == null, "There is already a value stored for the key '%s'.",
-            key);
-        m_cache.put(key, value);
+        if (m_gate.tryAcquire()) {
+            CheckUtils.checkState(m_cache.getIfPresent(key) == null,
+                "There is already a value stored for the key '%s'.", key);
+            m_cache.put(key, value);
+            m_gate.release();
+        }
     }
 
     /**
