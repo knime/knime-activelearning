@@ -55,6 +55,9 @@ import org.knime.base.util.kdtree.NearestNeighbour;
 import org.knime.core.data.RowKey;
 import org.knime.core.node.util.CheckUtils;
 
+import gnu.trove.list.TDoubleList;
+import gnu.trove.list.array.TDoubleArrayList;
+
 /**
  * Representation of a DataPoint in space.
  *
@@ -65,7 +68,7 @@ final class PotentialDataPoint extends AbstractDensityDataPoint<PotentialDataPoi
 
     private final List<PotentialDataPoint> m_neighbors = new ArrayList<>();
 
-    private final List<Double> m_squaredNeighborDistances = new ArrayList<>();
+    private final TDoubleList m_squaredNeighborDistances = new TDoubleArrayList();
 
     /**
      * @param key {@link RowKey} of the corresponding row
@@ -88,7 +91,7 @@ final class PotentialDataPoint extends AbstractDensityDataPoint<PotentialDataPoi
         return m_neighbors;
     }
 
-    List<Double> getSquaredDistances() {
+    TDoubleList getSquaredDistances() {
         return m_squaredNeighborDistances;
     }
 

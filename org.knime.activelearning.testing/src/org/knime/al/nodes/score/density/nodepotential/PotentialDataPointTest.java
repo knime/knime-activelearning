@@ -54,7 +54,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,6 +61,8 @@ import org.junit.runner.RunWith;
 import org.knime.base.util.kdtree.NearestNeighbour;
 import org.knime.core.data.RowKey;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import gnu.trove.list.TDoubleList;
 
 /**
  *
@@ -91,7 +92,7 @@ public class PotentialDataPointTest {
         m_testInstance.registerNeighbor(mock);
         m_testInstance.registerNeighbor(mock);
         Collection<PotentialDataPoint> neighbors = m_testInstance.getNeighbors();
-        List<Double> distances = m_testInstance.getSquaredDistances();
+        TDoubleList distances = m_testInstance.getSquaredDistances();
         assertEquals(2, neighbors.size());
         Iterator<PotentialDataPoint> iter = neighbors.iterator();
         assertEquals(n1, iter.next());

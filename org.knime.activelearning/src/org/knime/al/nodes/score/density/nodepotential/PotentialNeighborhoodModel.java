@@ -65,6 +65,8 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.util.CheckUtils;
 
+import gnu.trove.list.TDoubleList;
+
 /**
  * Model for the potential based density measure used in
  * http://www.uni-konstanz.de/bioml/bioml2/publications/Papers2009/CeBe09.pdf.
@@ -223,7 +225,7 @@ final class PotentialNeighborhoodModel extends AbstractNeighborhoodModel {
         }
 
         private double[] createSquaredDistances(final int idx, final PotentialDataPoint dataPoint) {
-            final List<Double> squaredDistances = dataPoint.getSquaredDistances();
+            final TDoubleList squaredDistances = dataPoint.getSquaredDistances();
             final List<PotentialDataPoint> neighbors = dataPoint.getNeighbors();
             return IntStream.range(0, neighbors.size()).filter(i -> getIndex(neighbors.get(i)) > idx).boxed()
                 .sorted((i, j) -> compareNeighborIndices(i, j, neighbors)).mapToDouble(squaredDistances::get).toArray();
