@@ -139,12 +139,19 @@ public abstract class AbstractDensityInitializerNodeModel extends AbstractALNode
         CheckUtils.checkSetting(unlabeledTable.size() > 0, "The input table is empty.");
         checkInputTable(unlabeledTable);
         exec.setProgress("Init data structures and density");
-        final DensityScorerModel model = initialize(unlabeledTable, exec);
+        final DensityScorerModel model;
+        try {
+            model = initialize(unlabeledTable, exec);
+        } catch (OutOfMemoryError error) {
+            throw new OutOfMemoryError(
+                "The initialization process ran out of memory. "
+                + "Please try to increase the amount of RAM KNIME can use or check the node description "
+                + "for how to reduce the memory requirements of this node.");
+        }
         final FileStore neighborhoodFileStore = createFileStore(exec);
         final FileStore potentialsFilestore = createFileStore(exec);
-        final DensityScorerPortObject po =
-            DensityScorerPortObject.createPortObject(createSpec(unlabeledTable.getDataTableSpec()), model,
-                neighborhoodFileStore, potentialsFilestore);
+        final DensityScorerPortObject po = DensityScorerPortObject.createPortObject(
+            createSpec(unlabeledTable.getDataTableSpec()), model, neighborhoodFileStore, potentialsFilestore);
         return new PortObject[]{po};
     }
 
