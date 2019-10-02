@@ -25,6 +25,8 @@
 			The density of a specific row is calculated as the mean weight of all its edge weights.
 			For more details see the
 			<a href="https://www.mpi-inf.mpg.de/fileadmin/inf/d2/Research_projects_files/EbertCVPR2012.pdf">RALF Paper</a> by Ebert et al.
+			<br />
+			If the node fails to execute due to memory problems, this is usually because the number of neighbors is set too high.
 		</intro>
 		<option name="Column Selection"> The columns that make up the vector space.
 		</option>
