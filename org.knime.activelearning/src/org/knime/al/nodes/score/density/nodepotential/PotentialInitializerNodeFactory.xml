@@ -17,7 +17,7 @@
 			The closer and more numerous the neighbors the higher is the density.
 			The size of the neighborhood is controlled by the <i>Radius Alpha</i> parameter and a larger value will result in a larger neighborhood.
 			
-			For more details see the <a href="http://www.inf.uni-konstanz.de/bioml2/publications/Papers2009/CeBe09.pdf">PBAC paper</a> by Cebron et. al.
+			For more details see the <a href="http://www.uni-konstanz.de/bioml/bioml2/publications/Papers2009/CeBe09.pdf">PBAC paper</a> by Cebron et. al.
 			<br />
 			If the node fails due to memory problems, this is usually due to a too large radius Alpha which results in many rows with a lot of neighbors.
 		</intro>
