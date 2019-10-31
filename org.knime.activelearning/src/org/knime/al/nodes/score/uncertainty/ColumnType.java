@@ -44,61 +44,75 @@
  * ---------------------------------------------------------------------
  *
  * History
- *   Jun 28, 2015 (gabriel): created
+ *   Nov 4, 2019 (Perla Gjoka, KNIME GmbH, Konstanz, Germany): created
  */
 package org.knime.al.nodes.score.uncertainty;
 
-import org.knime.core.node.NodeDialogPane;
-import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeView;
+import org.knime.core.node.util.ButtonGroupEnumInterface;
 
 /**
- * Abstract superclass for the Exploitation scorer nodes, contains all the common methods. Subclasses only need to
- * implement the {@link #createNodeModel()} method.
  *
- * @author gabriel
- * @author Simon Schmid, KNIME GmbH, Konstanz, Germany
  * @author Perla Gjoka, KNIME GmbH, Konstanz, Germany
- * @param <T>
  */
-public abstract class AbstractUncertaintyNodeFactory<T extends AbstractUncertaintyNodeModel> extends NodeFactory<T> {
+enum ColumnType implements ButtonGroupEnumInterface {
+        NUMERIC_COLUMNS("Numeric columns", null, true),
+        PROBABILITY_COLUMN("Probability column", null, false);
 
+    private final String m_text;
+
+    private final String m_toolTip;
+
+    private final boolean m_numericColumns;
+
+    private ColumnType(final String text, final String toolTip, final boolean numericColumns) {
+        m_text = text;
+        m_toolTip = toolTip;
+        m_numericColumns = numericColumns;
+    }
+
+    public boolean isMultipleColumn() {
+        return m_numericColumns;
+    }
     /**
      * {@inheritDoc}
      */
     @Override
-    public int getNrNodeViews() {
-        return 0;
+    public String getText() {
+        return m_text;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean hasDialog() {
-        return true;
+    public String getActionCommand() {
+        return name();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public abstract T createNodeModel();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public NodeView<T> createNodeView(final int viewIndex, final T nodeModel) {
-        return null;
+    public String getToolTip() {
+        return m_toolTip;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected NodeDialogPane createNodeDialogPane() {
-        return new UncertaintyNodeDialog();
+    public boolean isDefault() {
+        return NUMERIC_COLUMNS == this;
+    }
+
+    public static ColumnType getDefault() {
+        ColumnType[] possibleValues = values();
+        for (final ColumnType number : possibleValues) {
+            if (number.isDefault()) {
+                return number;
+            }
+        }
+        return possibleValues[0];
     }
 
 }
