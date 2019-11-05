@@ -48,8 +48,11 @@
  */
 package org.knime.al.nodes.score.combine.pbac;
 
+import java.util.Collections;
+import java.util.Map;
+
+import org.knime.core.node.MapNodeFactoryClassMapper;
 import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeFactoryClassMapper;
 import org.knime.core.node.NodeModel;
 
 /**
@@ -57,18 +60,16 @@ import org.knime.core.node.NodeModel;
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
-public final class UncertaintyDistributionScorerNodeFactoryMapper extends NodeFactoryClassMapper {
+public final class UncertaintyDistributionScorerNodeFactoryMapper extends MapNodeFactoryClassMapper {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public NodeFactory<? extends NodeModel> mapFactoryClassName(final String factoryClassName) {
-        if (factoryClassName.equals(
-            "org.knime.al.nodes.score.combine.uncertaintydistribution.UncertaintyDistributionScorerNodeFactory")) {
-            return new UncertaintyDistributionScorerNodeFactory();
-        }
-        return null;
+    @SuppressWarnings("deprecation")
+    protected Map<String, Class<? extends NodeFactory<? extends NodeModel>>> getMapInternal() {
+        return Collections.singletonMap(
+            "org.knime.al.nodes.score.combine.uncertaintydistribution.UncertaintyDistributionScorerNodeFactory",
+            UncertaintyDistributionScorerNodeFactory.class);
     }
-
 }
