@@ -54,7 +54,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
-import org.knime.core.node.defaultnodesettings.DialogComponentFlowVariableNameSelection;
+import org.knime.core.node.defaultnodesettings.DialogComponentFlowVariableNameSelection2;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
@@ -63,7 +63,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.workflow.FlowVariable;
 import org.knime.core.node.workflow.FlowVariable.Scope;
-import org.knime.core.node.workflow.FlowVariable.Type;
+import org.knime.core.node.workflow.VariableType.BooleanType;
 
 /**
  * Dialog of the Active Learning Loop End. Mostly copied from the Recursive Loop End node.
@@ -78,7 +78,7 @@ public class ActiveLearningLoopEndNodeDialog extends DefaultNodeSettingsPane {
 
     private final SettingsModelBoolean m_useVariable = createUseVariable();
 
-    private final DialogComponentFlowVariableNameSelection m_flowVarSelection;
+    private final DialogComponentFlowVariableNameSelection2 m_flowVarSelection;
 
     private boolean m_varsAvailable = false;
 
@@ -92,8 +92,8 @@ public class ActiveLearningLoopEndNodeDialog extends DefaultNodeSettingsPane {
         addDialogComponent(
             new DialogComponentNumber(createIterationsModel(), "Maximal number of iterations :", 10, 10));
 
-        m_flowVarSelection = new DialogComponentFlowVariableNameSelection(m_endLoopVar, "",
-            getAvailableFlowVariables().values(), false, FlowVariable.Type.STRING);
+        m_flowVarSelection = new DialogComponentFlowVariableNameSelection2(m_endLoopVar, "",
+            getAvailableFlowVariables(BooleanType.INSTANCE).values(), false, BooleanType.INSTANCE);
 
         setHorizontalPlacement(true);
         addDialogComponent(new DialogComponentBoolean(m_useVariable, "End Loop with Variable:"));
@@ -165,9 +165,9 @@ public class ActiveLearningLoopEndNodeDialog extends DefaultNodeSettingsPane {
         throws NotConfigurableException {
         super.loadAdditionalSettingsFrom(settings, specs);
 
-        // get all string flow vars
-        final List<FlowVariable> vars = getAvailableFlowVariables().values().stream()
-            .filter(v -> (v.getScope() == Scope.Flow) && (v.getType() == Type.STRING)).collect(Collectors.toList());
+        // get all boolean flow vars
+        final List<FlowVariable> vars = getAvailableFlowVariables(BooleanType.INSTANCE).values().stream()
+            .filter(v -> (v.getScope() == Scope.Flow)).collect(Collectors.toList());
 
         if (vars.isEmpty()) {
             m_varsAvailable = false;

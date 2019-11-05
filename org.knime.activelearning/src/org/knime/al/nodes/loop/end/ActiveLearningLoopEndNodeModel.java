@@ -47,6 +47,7 @@ package org.knime.al.nodes.loop.end;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 import org.knime.al.nodes.loop.start.ActiveLearningLoopStartNodeModel;
 import org.knime.core.data.DataCell;
@@ -74,6 +75,7 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.LoopEndNode;
+import org.knime.core.node.workflow.VariableType.BooleanType;
 
 /**
  * Extension to the Recursive Loop End node for Active Learning. Has three inputs: 1. Port Object used for recursion, 2.
@@ -157,14 +159,16 @@ public class ActiveLearningLoopEndNodeModel extends NodeModel implements LoopEnd
         BufferedDataTable collectingTable = (BufferedDataTable)inData[COLLECTING_IN_PORT_INDEX];
         PortObject recursivePort = inData[RECURSIVE_IN_PORT_INDEX];
 
-        boolean endLoopFromVariable = false;
+        final boolean endLoopFromVariable;
         if (m_useVariable.getBooleanValue()) {
-            final String value = peekFlowVariableString(m_endLoopVariableName.getStringValue());
-            if (value == null) {
+            try {
+                endLoopFromVariable = peekFlowVariable(m_endLoopVariableName.getStringValue(), BooleanType.INSTANCE);
+            } catch (NoSuchElementException e) {
                 throw new InvalidSettingsException(
-                    "The selected flow variable '" + m_endLoopVariableName.getStringValue() + "' does not exist.");
+                    "The selected flow variable '" + m_endLoopVariableName.getStringValue() + "' does not exist.", e);
             }
-            endLoopFromVariable = "true".equalsIgnoreCase(value);
+        } else {
+            endLoopFromVariable = false;
         }
 
         // Stopping conditions, break recursion if either:
@@ -251,7 +255,7 @@ public class ActiveLearningLoopEndNodeModel extends NodeModel implements LoopEnd
             return new PortObjectSpec[]{inSpecs[RECURSIVE_IN_PORT_INDEX], null};
         }
         if (m_useVariable.getBooleanValue()
-            && getAvailableFlowVariables().get(m_endLoopVariableName.getStringValue()) == null) {
+            && getAvailableFlowVariables(BooleanType.INSTANCE).get(m_endLoopVariableName.getStringValue()) == null) {
             throw new InvalidSettingsException(
                 "Selected flow variable: '" + m_endLoopVariableName.getStringValue() + "' not available!");
         }
