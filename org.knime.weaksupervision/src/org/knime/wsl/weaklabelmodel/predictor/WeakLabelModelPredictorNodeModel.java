@@ -102,7 +102,7 @@ final class WeakLabelModelPredictorNodeModel extends NodeModel {
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final WeakLabelModelPortObjectSpec spec = (WeakLabelModelPortObjectSpec)inSpecs[MODEL_PORT];
         final DataTableSpec tableSpec = (DataTableSpec)inSpecs[DATA_PORT];
-        try (final WeakLabelModelPredictor predictor = new WeakLabelModelPredictor(spec, null, m_settings)) {
+        try (final WeakLabelModelPredictor predictor = new WeakLabelModelPredictor(spec, m_settings)) {
             return new PortObjectSpec[]{createRearranger(tableSpec, spec, predictor).createSpec()};
 
         } catch (InvalidSettingsException ise) {
@@ -132,7 +132,7 @@ final class WeakLabelModelPredictorNodeModel extends NodeModel {
         final BufferedDataTable table = (BufferedDataTable)inObjects[DATA_PORT];
         final DataTableSpec dataSpec = table.getDataTableSpec();
         final WeakLabelModelPortObjectSpec spec = po.getSpec();
-        try (WeakLabelModelPredictor predictor = new WeakLabelModelPredictor(spec, po, m_settings)) {
+        try (WeakLabelModelPredictor predictor = new WeakLabelModelPredictor(po, m_settings, exec)) {
             final ColumnRearranger rearranger = createRearranger(dataSpec, spec, predictor);
             final BufferedDataTable output = exec.createColumnRearrangeTable(table, rearranger, exec);
             return new PortObject[]{output};
@@ -154,7 +154,7 @@ final class WeakLabelModelPredictorNodeModel extends NodeModel {
                     (WeakLabelModelPortObject)((PortObjectInput)inputs[MODEL_PORT]).getPortObject();
                 final DataTableSpec dataSpec = (DataTableSpec)inSpecs[DATA_PORT];
                 final WeakLabelModelPortObjectSpec spec = po.getSpec();
-                try (WeakLabelModelPredictor predictor = new WeakLabelModelPredictor(spec, po, m_settings)) {
+                try (WeakLabelModelPredictor predictor = new WeakLabelModelPredictor(po, m_settings, exec)) {
                     final ColumnRearranger rearranger = createRearranger(dataSpec, spec, predictor);
                     final StreamableFunction func = rearranger.createStreamableFunction(1, 0);
                     func.runFinal(inputs, outputs, exec);

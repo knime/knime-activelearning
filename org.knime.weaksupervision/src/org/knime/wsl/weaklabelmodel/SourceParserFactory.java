@@ -50,8 +50,7 @@ package org.knime.wsl.weaklabelmodel;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,7 +59,7 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.NominalValue;
-import org.knime.core.data.probability.ProbabilityDistributionValue;
+import org.knime.core.data.probability.nominal.NominalDistributionValue;
 import org.knime.core.node.util.CheckUtils;
 
 /**
@@ -70,13 +69,16 @@ import org.knime.core.node.util.CheckUtils;
  */
 public final class SourceParserFactory {
 
-    private final Map<String, Integer> m_labelIdxMap;
+    private final Map<String, Integer> m_labelIdxMap = new HashMap<>();
+
+    private final String[] m_idxToLabel;
 
     /**
      * @param labelIdxMap associates the string representation of a label with its index used inside the model
      */
-    SourceParserFactory(final Map<String, Integer> labelIdxMap) {
-        m_labelIdxMap = labelIdxMap;
+    SourceParserFactory(final String[] labels) {
+        m_idxToLabel = labels;
+        Arrays.stream(labels).forEach(l -> m_labelIdxMap.put(l, m_labelIdxMap.size()));
     }
 
     /**
@@ -87,9 +89,9 @@ public final class SourceParserFactory {
      * are of an unsupported type
      */
     public static SourceParser[] createParsers(final DataTableSpec sourceSpec, final Set<String> possibleClasses) {
-        final Map<String, Integer> labelIdxMap = new HashMap<>();
+        final LinkedHashMap<String, Integer> labelIdxMap = new LinkedHashMap<>();
         possibleClasses.forEach(c -> labelIdxMap.put(c, labelIdxMap.size()));
-        final SourceParserFactory factory = new SourceParserFactory(labelIdxMap);
+        final SourceParserFactory factory = new SourceParserFactory(possibleClasses.toArray(new String[0]));
         return sourceSpec.stream().map(factory::create).toArray(SourceParser[]::new);
     }
 
@@ -102,52 +104,21 @@ public final class SourceParserFactory {
         final DataType type = columnSpec.getType();
         if (type.isCompatible(NominalValue.class)) {
             return this::parseNominalSource;
-        } else if (type.isCompatible(ProbabilityDistributionValue.class)) {
-            return createProbabilityDistributionParser(columnSpec);
+        } else if (type.isCompatible(NominalDistributionValue.class)) {
+            return this::parseProbabilityDistribution;
         } else {
             throw new IllegalArgumentException(String.format("Unsupported source type %s encountered.", type));
         }
     }
 
-    private SourceParser createProbabilityDistributionParser(final DataColumnSpec columnSpec) {
-        final List<String> labelsInColumn = columnSpec.getElementNames();
-        CheckUtils.checkArgument(labelsInColumn != null && !labelsInColumn.isEmpty(),
-            "A probability distribution column must always provide its element names.");
-        // It's explicitly checked that labelsInColumn is NOT null
-        final int[] idxMapping = createMapping(labelsInColumn);
-        return (c, l) -> parseProbabilityDistribution(c, l, idxMapping);
-    }
-
-    private static float parseProbabilityDistribution(final DataCell cell, final int label, final int[] idxMapping) {
+    private float parseProbabilityDistribution(final DataCell cell, final int label) {
         if (cell.isMissing()) {
             return 0.0f;
         }
-        CheckUtils.checkArgument(cell instanceof ProbabilityDistributionValue,
+        CheckUtils.checkArgument(cell instanceof NominalDistributionValue,
             "The provided cell %s is not a probability distribution value.", cell);
-        final int localIdx = idxMapping[label];
-        if (localIdx == -1) {
-            // the probability distribution doesn't contain label and its probability is therefore 0
-            return 0;
-        } else {
-            final ProbabilityDistributionValue value = (ProbabilityDistributionValue)cell;
-            return (float)value.getProbability(localIdx);
-        }
-    }
-
-    /**
-     * @param labelsInColumn the element names of a probability distribution column
-     * @return a mapping from the global label index to the local index of the column or -1 if the column doesn't
-     *         contain this label
-     */
-    private int[] createMapping(final List<String> labelsInColumn) {
-        final int[] mapping = new int[m_labelIdxMap.size()];
-        Arrays.fill(mapping, -1);
-        final Iterator<String> labels = labelsInColumn.iterator();
-        for (int i = 0; labels.hasNext(); i++) {
-            final int globalIdx = getLabelIndex(labels.next());
-            mapping[globalIdx] = i;
-        }
-        return mapping;
+            final NominalDistributionValue value = (NominalDistributionValue)cell;
+            return (float)value.getProbability(m_idxToLabel[label]);
     }
 
     private float parseNominalSource(final DataCell cell, final int label) {

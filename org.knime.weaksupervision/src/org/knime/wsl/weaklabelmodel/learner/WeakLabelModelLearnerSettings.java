@@ -49,7 +49,7 @@
 package org.knime.wsl.weaklabelmodel.learner;
 
 import org.knime.core.data.NominalValue;
-import org.knime.core.data.probability.ProbabilityDistributionValue;
+import org.knime.core.data.probability.nominal.NominalDistributionValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -58,7 +58,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 
 /**
- * Handles the settings for the Label Model node.
+ * Handles the settings for the Weak Label Model Learner.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
@@ -67,7 +67,7 @@ final class WeakLabelModelLearnerSettings {
     @SuppressWarnings("unchecked")
     static SettingsModelColumnFilter2 createLabelSourceColumns() {
         return new SettingsModelColumnFilter2("noisyLabelColumns", NominalValue.class,
-            ProbabilityDistributionValue.class);
+            NominalDistributionValue.class);
     }
 
     static SettingsModelDoubleBounded createLearningRate() {

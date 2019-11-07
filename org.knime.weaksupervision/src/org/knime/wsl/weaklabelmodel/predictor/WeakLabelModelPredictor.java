@@ -59,7 +59,10 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.container.AbstractCellFactory;
 import org.knime.core.data.container.CellFactory;
 import org.knime.core.data.def.DoubleCell;
-import org.knime.core.data.probability.ProbabilityDistributionCellFactory;
+import org.knime.core.data.filestore.FileStoreFactory;
+import org.knime.core.data.probability.nominal.NominalDistributionCell;
+import org.knime.core.data.probability.nominal.NominalDistributionCellFactory;
+import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.wsl.weaklabelmodel.LabelMatrixReader;
 import org.knime.wsl.weaklabelmodel.LabelModelAdapter;
@@ -68,28 +71,51 @@ import org.knime.wsl.weaklabelmodel.WeakLabelModelPortObject;
 import org.knime.wsl.weaklabelmodel.WeakLabelModelPortObjectSpec;
 
 /**
- * Holds the TensorFlow model, which is used by all the {@link CellFactory CellFactories} created by
- * this class.
+ * Holds the TensorFlow model, which is used by all the {@link CellFactory CellFactories} created by this class.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
 final class WeakLabelModelPredictor implements AutoCloseable {
 
+    private static final double PROBABILITY_EPSILON = 1e-3;
+
     private final LabelModelAdapter m_labelModel;
 
     private final WeakLabelModelConfigurator m_configurator;
 
-    WeakLabelModelPredictor(final WeakLabelModelPortObjectSpec spec, final WeakLabelModelPortObject model,
-        final WeakLabelModelPredictorSettings settings) {
+    private final NominalDistributionCellFactory m_nomDistrFactory;
+
+    /**
+     * Constructor to be used during execution.
+     *
+     * @param model the {@link WeakLabelModelPortObject} containing the trained model
+     * @param settings the settings of the Weak Label Model Predictor node
+     * @param exec the execution context that will be used to create {@link NominalDistributionCell NominalDistributionCells}.
+     */
+    WeakLabelModelPredictor(final WeakLabelModelPortObject model,
+        final WeakLabelModelPredictorSettings settings, final ExecutionContext exec) {
+        final WeakLabelModelPortObjectSpec spec = model.getSpec();
         m_configurator = new WeakLabelModelConfigurator(spec, settings);
-        if (model != null) {
-            final WeakLabelModelContent content = model.getContent();
-            m_labelModel = LabelModelAdapter.createDefault();
-            m_labelModel.setMu(content.getMu());
-            m_labelModel.setClassBalance(content.getClassBalance());
-        } else {
-            m_labelModel = null;
-        }
+        m_nomDistrFactory = new NominalDistributionCellFactory(FileStoreFactory.createFileStoreFactory(exec),
+            spec.getPossibleClasses().toArray(new String[0]));
+        final WeakLabelModelContent content = model.getContent();
+        m_labelModel = LabelModelAdapter.createDefault();
+        m_labelModel.setMu(content.getMu());
+        m_labelModel.setClassBalance(content.getClassBalance());
+    }
+
+    /**
+     * Constructor to be used during configuration.
+     * Instances created with this constructor can not be used to actually append cells to a table and will fail
+     * in that case.
+     *
+     * @param spec the {@link WeakLabelModelPortObjectSpec} of the weak label model
+     * @param settings the settings of the Weak Label Model Predictor node
+     */
+    WeakLabelModelPredictor(final WeakLabelModelPortObjectSpec spec, final WeakLabelModelPredictorSettings settings) {
+        m_configurator = new WeakLabelModelConfigurator(spec, settings);
+        m_nomDistrFactory = null;
+        m_labelModel = null;
     }
 
     CellFactory createCellFactory(final DataTableSpec spec) throws InvalidSettingsException {
@@ -111,10 +137,10 @@ final class WeakLabelModelPredictor implements AutoCloseable {
     private DataCell[] createCells(final float[] probabilities) {
         final double[] probs = toDouble(probabilities);
         if (!m_configurator.isAppendProbabilities()) {
-            return new DataCell[]{ProbabilityDistributionCellFactory.createCell(probs)};
+            return new DataCell[]{m_nomDistrFactory.createCell(probs, PROBABILITY_EPSILON)};
         }
         final List<DataCell> cells = Arrays.stream(probs).mapToObj(DoubleCell::new).collect(Collectors.toList());
-        cells.add(ProbabilityDistributionCellFactory.createCell(probs));
+        cells.add(m_nomDistrFactory.createCell(probs, PROBABILITY_EPSILON));
         return cells.toArray(new DataCell[0]);
     }
 

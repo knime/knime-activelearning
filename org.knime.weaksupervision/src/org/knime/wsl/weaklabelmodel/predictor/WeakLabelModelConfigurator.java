@@ -61,8 +61,9 @@ import org.knime.core.data.DataType;
 import org.knime.core.data.NominalValue;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.def.DoubleCell;
-import org.knime.core.data.probability.ProbabilityDistributionCellFactory;
-import org.knime.core.data.probability.ProbabilityDistributionValue;
+import org.knime.core.data.probability.nominal.NominalDistributionCellFactory;
+import org.knime.core.data.probability.nominal.NominalDistributionValue;
+import org.knime.core.data.probability.nominal.NominalDistributionValueMetaData;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.util.CheckUtils;
 import org.knime.core.util.UniqueNameGenerator;
@@ -111,7 +112,7 @@ final class WeakLabelModelConfigurator {
             CheckUtils.checkSetting(inSpec != null, "The source column %s is missing.", sourceSpec);
             @SuppressWarnings("null") // explicitly checked above
             DataType type = inSpec.getType();
-            if (type.isCompatible(ProbabilityDistributionValue.class)) {
+            if (type.isCompatible(NominalDistributionValue.class)) {
                 checkCompatibilityOfProbabilityDistribution(inSpec);
             } else if (type.isCompatible(NominalValue.class)) {
                 checkCompatibilityOfNominalColumn(inSpec);
@@ -155,8 +156,9 @@ final class WeakLabelModelConfigurator {
 
     private DataColumnSpec createPredictionSpec(final UniqueNameGenerator nameGenerator) {
         final DataColumnSpecCreator colSpecCreator =
-            nameGenerator.newCreator(m_settings.getPredictionColumnName(), ProbabilityDistributionCellFactory.TYPE);
-        colSpecCreator.setElementNames(m_possibleClasses.toArray(new String[0]));
+            nameGenerator.newCreator(m_settings.getPredictionColumnName(), NominalDistributionCellFactory.TYPE);
+        colSpecCreator.addMetaData(new NominalDistributionValueMetaData(m_possibleClasses.toArray(new String[0])),
+            true);
         return colSpecCreator.createSpec();
     }
 

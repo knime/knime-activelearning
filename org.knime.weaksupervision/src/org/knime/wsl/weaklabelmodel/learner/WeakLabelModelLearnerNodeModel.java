@@ -55,7 +55,7 @@ import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.NominalValue;
-import org.knime.core.data.probability.ProbabilityDistributionValue;
+import org.knime.core.data.probability.nominal.NominalDistributionValue;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -114,7 +114,7 @@ final class WeakLabelModelLearnerNodeModel extends NodeModel {
         if (type.isCompatible(NominalValue.class)) {
             return spec.getDomain().hasValues();
         }
-        return type.isCompatible(ProbabilityDistributionValue.class);
+        return type.isCompatible(NominalDistributionValue.class);
     }
 
     /**

@@ -50,7 +50,6 @@ package org.knime.wsl.weaklabelmodel.learner;
 
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -62,8 +61,8 @@ import org.knime.core.data.DataType;
 import org.knime.core.data.NominalValue;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.def.StringCell;
-import org.knime.core.data.probability.ProbabilityDistributionValue;
-import org.knime.core.node.util.CheckUtils;
+import org.knime.core.data.probability.nominal.NominalDistributionValue;
+import org.knime.core.data.probability.nominal.NominalDistributionValueMetaData;
 
 /**
  * Extracts and stores information from the {@link DataTableSpec} of the label sources table. This includes which label
@@ -112,14 +111,10 @@ final class MetaData {
         final DataType type = colSpec.getType();
         if (type.isCompatible(NominalValue.class)) {
             return colSpec.getDomain().getValues();
-        } else if (type.isCompatible(ProbabilityDistributionValue.class)) {
-            final List<String> elementNames = colSpec.getElementNames();
-            CheckUtils.checkArgument(elementNames != null && !elementNames.isEmpty(),
-                "A probability distribution must always specify its element names.");
-            @SuppressWarnings("null") // explicitly checked above
-            Set<DataCell> possibleClasses =
-                elementNames.stream().map(StringCell::new).collect(Collectors.toCollection(LinkedHashSet::new));
-            return possibleClasses;
+        } else if (type.isCompatible(NominalDistributionValue.class)) {
+            final NominalDistributionValueMetaData metaData = NominalDistributionValueMetaData.extractFromSpec(colSpec);
+            return metaData.getValues().stream().map(StringCell::new)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
         } else {
             throw new IllegalArgumentException(String.format("Unsupported column type %s encountered.", type));
         }
