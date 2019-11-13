@@ -49,7 +49,7 @@
 package org.knime.al.nodes.score.uncertainty;
 
 import java.util.Arrays;
-import java.util.stream.IntStream;
+import java.util.Set;
 
 import org.knime.al.nodes.score.ExceptionHandling;
 import org.knime.al.util.MathUtils;
@@ -63,7 +63,8 @@ import org.knime.core.data.MissingCell;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.container.SingleCellFactory;
 import org.knime.core.data.def.DoubleCell;
-import org.knime.core.data.probability.ProbabilityDistributionValue;
+import org.knime.core.data.probability.nominal.NominalDistributionValue;
+import org.knime.core.data.probability.nominal.NominalDistributionValueMetaData;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -81,6 +82,9 @@ import org.knime.core.util.UniqueNameGenerator;
  * @author Simon Schmid, KNIME GmbH, Konstanz, Germany
  */
 public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunctionNodeModel {
+
+    /** The config key used for the exception handling setting. */
+    private static final String CFG_EXCEPTION_HANDLING = "exception_handling";
 
     /** The config key used for the column name setting. */
     protected static final String CFG_KEY_COLUMN_NAME = "column_name";
@@ -148,17 +152,17 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
      */
     static SettingsModelString createExceptionHandlingModel() {
         // we have to override the validation and loading methods in order to ensure backwards compatibility
-        return new SettingsModelString("exception_handling", ExceptionHandling.FAIL.name()) {
+        return new SettingsModelString(CFG_EXCEPTION_HANDLING, ExceptionHandling.FAIL.name()) {
             @Override
             protected void validateSettingsForModel(final NodeSettingsRO settings) throws InvalidSettingsException {
-                settings.getString("exception_handling", ExceptionHandling.FAIL.name());
+                settings.getString(CFG_EXCEPTION_HANDLING, ExceptionHandling.FAIL.name());
             }
 
             @Override
             protected void loadSettingsForModel(final NodeSettingsRO settings) throws InvalidSettingsException {
                 try {
                     // use the default value, if no value is stored in the settings
-                    setStringValue(settings.getString("exception_handling", ExceptionHandling.FAIL.name()));
+                    setStringValue(settings.getString(CFG_EXCEPTION_HANDLING, ExceptionHandling.FAIL.name()));
                 } catch (final IllegalArgumentException iae) {
                     // if the argument is not accepted: keep the old value.
                 }
@@ -178,26 +182,25 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
         }
 
         final String exceptionHandlingStrategy = m_exceptionHandlingModel.getStringValue();
-        if (!Arrays.stream(ExceptionHandling.values()).map(e -> e.name()).anyMatch(exceptionHandlingStrategy::equals)) {
-            throw new InvalidSettingsException(
-                "Unknown option to handle exceptions: '" + exceptionHandlingStrategy + "'");
-        }
+        CheckUtils.checkSetting(
+            Arrays.stream(ExceptionHandling.values()).map(ExceptionHandling::name)
+                .anyMatch(exceptionHandlingStrategy::equals),
+            "Unknown option to handle exceptions: '%s'", exceptionHandlingStrategy);
         final boolean failHandling = m_exceptionHandlingModel.getStringValue().equals(ExceptionHandling.FAIL.name());
         final DataColumnSpec newColSpec =
             new UniqueNameGenerator(inSpec).newColumn(m_columnNameModel.getStringValue(), DoubleCell.TYPE);
 
         final String columnType = m_columnTypeModel.getStringValue();
-        if (Arrays.stream(ColumnType.values()).map(ColumnType::name).noneMatch(columnType::equals)){
+        if (Arrays.stream(ColumnType.values()).map(ColumnType::name).noneMatch(columnType::equals)) {
             throw new InvalidSettingsException(String.format("Unknown column type: '%s'.", columnType));
         }
-        // create column rearranger
         final ColumnRearranger rearranger = new ColumnRearranger(inSpec);
         rearranger.append(getSingleCellFactory(inSpec, newColSpec, failHandling));
         return rearranger;
     }
 
     /**
-     * @return true if the radio button for single {@link ProbabilityDistributionValue} column is selected, false
+     * @return true if the radio button for single {@link NominalDistributionValue} column is selected, false
      *         otherwise.
      */
     private boolean isSingleColumnSelected() {
@@ -205,7 +208,7 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
     }
 
     /**
-     * @return a {@link SingleCellFactory} created by a single {@link ProbabilityDistributionValue} column, or by
+     * @return a {@link SingleCellFactory} created by a single {@link NominalDistributionValue} column, or by
      *         muliple columns which represent a probability distribution.
      */
     private SingleCellFactory getSingleCellFactory(final DataTableSpec inSpec, final DataColumnSpec newColSpec,
@@ -219,7 +222,7 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
 
     /**
      * @return a {@link SingleCellFactory} which holds the uncertainty score of a single
-     *         {@link ProbabilityDistributionValue} column.
+     *         {@link NominalDistributionValue} column.
      */
     private SingleCellFactory getProbabilityColumnFactory(final DataTableSpec inSpec, final DataColumnSpec newColSpec,
         final boolean failHandling) throws InvalidSettingsException {
@@ -241,7 +244,7 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
         if (columnIndices.length < 2) {
             throw new InvalidSettingsException("At least two columns must be included.");
         }
-        return new NumericColumnCellCreator(inSpec, newColSpec, columnIndices, failHandling);
+        return new NumericColumnCellCreator(newColSpec, columnIndices, failHandling);
     }
 
     /**
@@ -250,15 +253,17 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
      *
      * @author Perla Gjoka, KNIME GmbH, Konstanz, Germany
      */
-    private class ProbabilityColumnCellCreator extends SingleCellFactory {
+    private final class ProbabilityColumnCellCreator extends SingleCellFactory {
 
-        boolean m_hasMissing = false;
+        private boolean m_hasMissing = false;
 
-        final DataTableSpec m_spec;
+        private final int m_columnIndex;
 
-        final int m_columnIndex;
+        private final boolean m_failHandling;
 
-        final boolean m_failHandling;
+        private final Set<String> m_classes;
+
+        private final String m_columnName;
 
         /**
          * @param inSpec holds the {@link DataTableSpec} of the input table.
@@ -269,8 +274,10 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
         private ProbabilityColumnCellCreator(final DataTableSpec inSpec, final DataColumnSpec newColSpec,
             final int columnIndex, final boolean failHandling) {
             super(newColSpec);
-            m_spec = inSpec;
             m_columnIndex = columnIndex;
+            final DataColumnSpec colSpec = inSpec.getColumnSpec(m_columnIndex);
+            m_columnName = colSpec.getName();
+            m_classes = NominalDistributionValueMetaData.extractFromSpec(colSpec).getValues();
             m_failHandling = failHandling;
         }
 
@@ -286,28 +293,26 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
                         "The probability distribution of row '" + row.getKey() + "' constains missing values.");
                 }
                 if (!m_hasMissing) {
-                    setWarningMessage("At least one row in the picked probability distribution column '"
-                        + m_spec.getColumnSpec(m_columnIndex).getName()
+                    setWarningMessage("At least one row in the picked probability distribution column '" + m_columnName
                         + "' contains a missing values. Missing values will be in the output.");
                     m_hasMissing = true;
                 }
-                return new MissingCell(m_spec.getColumnSpec(m_columnIndex).getName() + " contains missing values.");
+                return new MissingCell(m_columnName + " contains missing values.");
             }
-            final ProbabilityDistributionValue value = (ProbabilityDistributionValue)rowCell;
-            final double[] probabilityValues =
-                IntStream.range(0, value.size()).mapToDouble(value::getProbability).toArray();
+            final NominalDistributionValue value = (NominalDistributionValue)rowCell;
+            final double[] probabilityValues = m_classes.stream().mapToDouble(value::getProbability).toArray();
             return new DoubleCell(calculateUncertainty(probabilityValues));
         }
 
     }
 
     /**
-     * This class creates the {@link DataCell} containting the uncertainty score for each row in the table when a
+     * This class creates the {@link DataCell} containing the uncertainty score for each row in the table when a
      * multiple numeric columns are selected.
      *
      * @author Perla Gjoka, KNIME GmbH, Konstanz, Germany
      */
-    private class NumericColumnCellCreator extends SingleCellFactory {
+    private final class NumericColumnCellCreator extends SingleCellFactory {
 
         boolean m_hasMissing = false;
 
@@ -318,13 +323,12 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
         final boolean m_failHandling;
 
         /**
-         * @param inSpec holds the {@link DataTableSpec} of the input table.
          * @param newColSpec holds the new {@link DataColumnSpec} created for the uncertainty scores.
          * @param columnIndices holds the indices of all numeric columns picked.
          * @param failHandling holds the picked invalid handling strategy picked.
          */
-        public NumericColumnCellCreator(final DataTableSpec inSpec, final DataColumnSpec newColSpec,
-            final int[] columnIndices, final boolean failHandling) {
+        public NumericColumnCellCreator(final DataColumnSpec newColSpec, final int[] columnIndices,
+            final boolean failHandling) {
             super(newColSpec);
             m_columnIndices = columnIndices;
             m_failHandling = failHandling;

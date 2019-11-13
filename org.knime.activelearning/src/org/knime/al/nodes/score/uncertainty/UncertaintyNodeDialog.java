@@ -58,7 +58,7 @@ import javax.swing.border.Border;
 
 import org.knime.al.nodes.score.ExceptionHandling;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.probability.ProbabilityDistributionValue;
+import org.knime.core.data.probability.nominal.NominalDistributionValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeSettingsRO;
@@ -98,7 +98,7 @@ final class UncertaintyNodeDialog extends NodeDialogPane {
 
     @SuppressWarnings("unchecked")
     private final ColumnSelectionComboxBox m_singleColumnSelection =
-        new ColumnSelectionComboxBox((Border)null, ProbabilityDistributionValue.class);
+        new ColumnSelectionComboxBox((Border)null, NominalDistributionValue.class);
 
     public UncertaintyNodeDialog() {
         m_columnTypeModel.getModel().addChangeListener(e -> updateColumnNumber());
@@ -163,7 +163,7 @@ final class UncertaintyNodeDialog extends NodeDialogPane {
     private void updateColumnNumber() {
         final boolean isMultiple = !isSingleColumn();
         m_numericColumnsFilterComponent.getModel().setEnabled(isMultiple);
-        if (m_spec.containsCompatibleType(ProbabilityDistributionValue.class)) {
+        if (m_spec.containsCompatibleType(NominalDistributionValue.class)) {
             m_singleColumnSelection.setEnabled(!isMultiple);
         } else {
             m_singleColumnSelection.setEnabled(false);
