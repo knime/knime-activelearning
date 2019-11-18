@@ -68,10 +68,13 @@ import org.knime.core.data.probability.nominal.NominalDistributionValueMetaData;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.streamable.simple.SimpleStreamableFunctionNodeModel;
 import org.knime.core.node.util.CheckUtils;
+import org.knime.core.node.util.filter.NameFilterConfiguration.FilterResult;
 import org.knime.core.util.UniqueNameGenerator;
 
 /**
@@ -80,8 +83,15 @@ import org.knime.core.util.UniqueNameGenerator;
  *
  * @author gabriel
  * @author Simon Schmid, KNIME GmbH, Konstanz, Germany
+ * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
 public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunctionNodeModel {
+
+    /** The config key used for the column type setting. */
+    private static final String CFG_COLUMN_TYPE = "column_type";
+
+    /** The config key used for the single probability column setting. */
+    private static final String CFG_SINGLE_PROBABILITY_COLUMN = "single_probability_column";
 
     /** The config key used for the exception handling setting. */
     private static final String CFG_EXCEPTION_HANDLING = "exception_handling";
@@ -116,11 +126,61 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
      * @return Settings Model to store the Single Probability Distribution Column
      */
     static SettingsModelString createSingleColumnFilterModel() {
-        return new SettingsModelString("single_probability_column", "Single Column");
+        return new SettingsModelString(CFG_SINGLE_PROBABILITY_COLUMN, "Single Column") {
+            @Override
+            protected void validateSettingsForModel(final NodeSettingsRO settings) throws InvalidSettingsException {
+                if (settings.containsKey(CFG_SINGLE_PROBABILITY_COLUMN)) {
+                    super.validateSettingsForModel(settings);
+                }
+            }
+            @Override
+            protected void loadSettingsForModel(final NodeSettingsRO settings) throws InvalidSettingsException {
+                if (settings.containsKey(CFG_SINGLE_PROBABILITY_COLUMN)) {
+                    super.loadSettingsForModel(settings);
+                } else {
+                    setStringValue("");
+                }
+            }
+            @Override
+            protected void loadSettingsForDialog(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+                throws NotConfigurableException {
+                if (settings.containsKey(CFG_SINGLE_PROBABILITY_COLUMN)) {
+                    super.loadSettingsForDialog(settings, specs);
+                } else {
+                    setStringValue("");
+                }
+            }
+        };
     }
 
     static SettingsModelString createColumnTypeFilterModel() {
-        return new SettingsModelString("column_type", ColumnType.getDefault().name());
+        return new SettingsModelString(CFG_COLUMN_TYPE, ColumnType.getDefault().name()) {
+            @Override
+            protected void validateSettingsForModel(final NodeSettingsRO settings) throws InvalidSettingsException {
+                if (settings.containsKey(CFG_COLUMN_TYPE)) {
+                    super.validateSettingsForModel(settings);
+                }
+            }
+
+            @Override
+            protected void loadSettingsForModel(final NodeSettingsRO settings) throws InvalidSettingsException {
+                if (settings.containsKey(CFG_COLUMN_TYPE)) {
+                    super.loadSettingsForModel(settings);
+                } else {
+                    setStringValue(ColumnType.NUMERIC_COLUMNS.name());
+                }
+            }
+
+            @Override
+            protected void loadSettingsForDialog(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+                throws NotConfigurableException {
+                if (settings.containsKey(CFG_COLUMN_TYPE)) {
+                    super.loadSettingsForDialog(settings, specs);
+                } else {
+                    setStringValue(ColumnType.NUMERIC_COLUMNS.name());
+                }
+            }
+        };
     }
 
     /**
@@ -239,7 +299,8 @@ public abstract class AbstractUncertaintyNodeModel extends SimpleStreamableFunct
      */
     private SingleCellFactory getNumericColumnFactory(final DataTableSpec inSpec, final DataColumnSpec newColSpec,
         final boolean failHandling) throws InvalidSettingsException {
-        final int[] columnIndices = inSpec.columnsToIndices(m_columnFilterModel.applyTo(inSpec).getIncludes());
+        final FilterResult filterResult = m_columnFilterModel.applyTo(inSpec);
+        final int[] columnIndices = inSpec.columnsToIndices(filterResult.getIncludes());
         // check configuration
         if (columnIndices.length < 2) {
             throw new InvalidSettingsException("At least two columns must be included.");
