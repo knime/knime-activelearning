@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="nodepotentialscorer.png" type="Manipulator"
+	xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+
+	<name>Potential Uncertainty Scorer (Legacy)</name>
+	<shortDescription>
+		Calculates/Updates a density based exploration potential of a n-dimensional vector space.
+	</shortDescription>
+
+	<fullDescription>
+		<intro>
+			Calculates/Updates the density based exploration potential of a
+			n-dimensional vector space.
+			<br />
+			See Paper by Cebron et. al: <br/>
+			<a
+				href="http://www.inf.uni-konstanz.de/bioml2/publications/Papers2009/CeBe09.pdf">http://www.inf.uni-konstanz.de/bioml2/publications/Papers2009/CeBe09.pdf
+			</a>
+		</intro>
+		<option name="Radius Alpha">Radius Alpha parameter, influences the size of the
+			neighborhood considered for the density estimation.
+		</option>
+		<option name="Column Selection">Select columns containing vector values.</option>
+	</fullDescription>
+
+	<ports>
+		<inPort name="Unlabeled data" index="0">Rows without class label.
+		</inPort>
+		<inPort name="Newly labeled data" index="1" optional="true">Rows
+			labeled in the last iteration, the node will not perform the
+			reduction step of the Node Potential algorithm if this port is not connected. </inPort>
+		<outPort name="Unlabed Data with Node Potentialscore" index="0">Unlabed data with Node Potentialscore.</outPort>
+	</ports>
+</knimeNode>

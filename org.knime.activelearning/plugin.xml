@@ -66,6 +66,13 @@
             name="All in One"
             path="/labs/activelearning/score">
       </category>
+   <category
+         icon="icons/missing.gif"
+         level-id="legacy"
+         locked="false"
+         name="Legacy"
+         path="/labs/activelearning">
+   </category>
    </extension>
 
    <!-- Nodesets -->
@@ -165,6 +172,31 @@
             deprecated="false"
             factory-class="org.knime.al.nodes.labelingWidget.ActiveLabelingNodeFactory">
       </node>
+      <node
+            category-path="/labs/activelearning/legacy"
+            deprecated="false"
+            factory-class="org.knime.al.nodes.legacy.score.density.graphdensity.GraphDensityScorerNodeFactory">
+      </node>
+      <node
+            category-path="/labs/activelearning/legacy"
+            deprecated="false"
+            factory-class="org.knime.al.nodes.legacy.score.density.nodepotential.NodePotentialScorerNodeFactory">
+      </node>
+      <node
+            category-path="/labs/activelearning/legacy"
+            deprecated="false"
+            factory-class="org.knime.al.nodes.legacy.loop.dbg.DBGActiveLearnLoopEndNodeFactory">
+      </node>
+      <node
+            category-path="/labs/activelearning/legacy"
+            deprecated="false"
+            factory-class="org.knime.al.nodes.legacy.loop.start.ActiveLearnLoopStartNodeFactory">
+      </node>
+      <node
+            category-path="/labs/activelearning/legacy"
+            deprecated="false"
+            factory-class="org.knime.al.nodes.legacy.loop.end.ActiveLearnLoopEndNodeFactory">
+      </node>
    </extension>
      <extension
            point="org.knime.core.PortType">
@@ -184,7 +216,7 @@
               specClass="org.knime.al.nodes.score.density.DensityScorerPortObjectSpec"
               specSerializer="org.knime.al.nodes.score.density.DensityScorerPortObjectSpec$Serializer">
         </portType>
-   org.knime.al.nodes.score.novelty.knfstlearner.KNFSTPortObjectSpec  </extension>
+     </extension>
      <extension
            point="org.knime.core.NodeFactoryClassMapper">
         <NodeFactoryClassMapper

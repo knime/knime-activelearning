@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<knimeNode icon="loop-start.png" type="LoopStart"
+	xmlns="http://knime.org/node/v2.12" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://knime.org/node/v2.12 http://knime.org/node/v2.12.xsd">
+
+	<name>Active Learn Loop Start (Legacy)</name>
+	<shortDescription>
+		Start node of the Active Learn Loop.
+	</shortDescription>
+
+	<fullDescription>
+		<intro>
+			Start Node of the Active Learning Loop, this node is the origin
+			of the active learning process.
+
+		</intro>
+		<tab name="Options">
+			<option name="Append Class Column" optional="true">Whether a class
+				column is appended to the data. Select this option for data which
+				does not contain a class column.
+			</option>
+			<option name="Class Column Name" optional="false">The name for the
+				appended class column.
+			</option>
+			<option name="Class Column Selection" optional="false">Select the
+				class column if it is already in the input table.
+			</option>
+		</tab>
+	</fullDescription>
+
+	<ports>
+		<inPort name="Data" index="0">Data</inPort>
+		<outPort index="0" name="Unlabeled Data">Unlabeled Data, all rows without a
+			value in the class column</outPort>
+		<outPort index="1" name="Labeled Data">Labeled Data, all rows with a value in
+			the class column</outPort>
+		<outPort index="2" name="Newly labeled Data">Newly labeled Data, all rows which
+			have been labeled in the last iteration.</outPort>
+	</ports>
+</knimeNode>
