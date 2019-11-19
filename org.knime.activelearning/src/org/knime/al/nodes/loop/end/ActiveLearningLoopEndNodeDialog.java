@@ -45,13 +45,6 @@
  */
 package org.knime.al.nodes.loop.end;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFlowVariableNameSelection2;
@@ -60,9 +53,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.knime.core.node.port.PortObjectSpec;
-import org.knime.core.node.workflow.FlowVariable;
-import org.knime.core.node.workflow.FlowVariable.Scope;
 import org.knime.core.node.workflow.VariableType.BooleanType;
 
 /**
@@ -72,15 +62,11 @@ import org.knime.core.node.workflow.VariableType.BooleanType;
  */
 public class ActiveLearningLoopEndNodeDialog extends DefaultNodeSettingsPane {
 
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(ActiveLearningLoopEndNodeDialog.class);
-
     private final SettingsModelString m_endLoopVar = createEndLoopVarModel();
 
     private final SettingsModelBoolean m_useVariable = createUseVariable();
 
     private final DialogComponentFlowVariableNameSelection2 m_flowVarSelection;
-
-    private boolean m_varsAvailable = false;
 
     /**
      * Create new dialog.
@@ -93,7 +79,7 @@ public class ActiveLearningLoopEndNodeDialog extends DefaultNodeSettingsPane {
             new DialogComponentNumber(createIterationsModel(), "Maximal number of iterations :", 10, 10));
 
         m_flowVarSelection = new DialogComponentFlowVariableNameSelection2(m_endLoopVar, "",
-            getAvailableFlowVariables(BooleanType.INSTANCE).values(), false, BooleanType.INSTANCE);
+            () -> getAvailableFlowVariables(BooleanType.INSTANCE));
 
         setHorizontalPlacement(true);
         addDialogComponent(new DialogComponentBoolean(m_useVariable, "End Loop with Variable:"));
@@ -106,13 +92,12 @@ public class ActiveLearningLoopEndNodeDialog extends DefaultNodeSettingsPane {
         addDialogComponent(new DialogComponentBoolean(createAddIterationColumn(), "Add iteration column"));
         closeCurrentGroup();
 
-        // listener setup
-        m_useVariable
-            .addChangeListener(e -> m_endLoopVar.setEnabled(m_varsAvailable && m_useVariable.getBooleanValue()));
+        m_endLoopVar.setEnabled(m_useVariable.getBooleanValue());
+        m_useVariable.addChangeListener(e -> m_endLoopVar.setEnabled(m_useVariable.getBooleanValue()));
     }
 
     /**
-     * @return
+     * @return the SM for determining whether to use a flow variable
      */
     static SettingsModelBoolean createUseVariable() {
         return new SettingsModelBoolean("Use Flow Variable", false);
@@ -155,33 +140,4 @@ public class ActiveLearningLoopEndNodeDialog extends DefaultNodeSettingsPane {
         return new SettingsModelBoolean("CFG_OnlyLastData", false);
     }
 
-    /**
-     * List of available string flow variables must be updated since it could have changed.
-     *
-     * {@inheritDoc}
-     */
-    @Override
-    public void loadAdditionalSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs)
-        throws NotConfigurableException {
-        super.loadAdditionalSettingsFrom(settings, specs);
-
-        // get all boolean flow vars
-        final List<FlowVariable> vars = getAvailableFlowVariables(BooleanType.INSTANCE).values().stream()
-            .filter(v -> (v.getScope() == Scope.Flow)).collect(Collectors.toList());
-
-        if (vars.isEmpty()) {
-            m_varsAvailable = false;
-        } else {
-            try {
-                final String flowVar =
-                    ((SettingsModelString)m_endLoopVar.createCloneWithValidatedValue(settings)).getStringValue();
-                m_flowVarSelection.replaceListItems(vars, flowVar);
-                m_varsAvailable = true;
-            } catch (final InvalidSettingsException e) {
-                LOGGER.warn("Could not clone settings object correctly!", e);
-            }
-        }
-        // disable flow variable selection when no valid vars are available
-        m_endLoopVar.setEnabled(m_varsAvailable && m_useVariable.getBooleanValue());
-    }
 }

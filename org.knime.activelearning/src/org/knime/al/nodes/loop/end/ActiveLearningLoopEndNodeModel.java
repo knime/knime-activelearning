@@ -112,6 +112,8 @@ public class ActiveLearningLoopEndNodeModel extends NodeModel implements LoopEnd
     protected ActiveLearningLoopEndNodeModel() {
         super(new PortType[]{PortObject.TYPE, BufferedDataTable.TYPE, BufferedDataTable.TYPE},
             new PortType[]{PortObject.TYPE, BufferedDataTable.TYPE});
+        m_endLoopVariableName.setEnabled(m_useVariable.getBooleanValue());
+        m_useVariable.addChangeListener(e -> m_endLoopVariableName.setEnabled(m_useVariable.getBooleanValue()));
     }
 
     private static int RECURSIVE_IN_PORT_INDEX = 0;
@@ -254,10 +256,13 @@ public class ActiveLearningLoopEndNodeModel extends NodeModel implements LoopEnd
             // nevertheless. For now, keeping the same behavior as in the original Recursive Loop End.
             return new PortObjectSpec[]{inSpecs[RECURSIVE_IN_PORT_INDEX], null};
         }
-        if (m_useVariable.getBooleanValue()
-            && getAvailableFlowVariables(BooleanType.INSTANCE).get(m_endLoopVariableName.getStringValue()) == null) {
-            throw new InvalidSettingsException(
-                "Selected flow variable: '" + m_endLoopVariableName.getStringValue() + "' not available!");
+        if (m_useVariable.getBooleanValue()) {
+            final String selection = m_endLoopVariableName.getStringValue();
+            if (selection == null) {
+                throw new InvalidSettingsException("No flow variable selected!");
+            } else if (!getAvailableFlowVariables(BooleanType.INSTANCE).containsKey(selection)) {
+                throw new InvalidSettingsException("Selected flow variable: '" + selection + "' not available!");
+            }
         }
         DataTableSpec collectingTableSpecs = (DataTableSpec)inSpecs[COLLECTING_IN_PORT_INDEX];
         return new PortObjectSpec[]{inSpecs[RECURSIVE_IN_PORT_INDEX], createSpec(collectingTableSpecs)};
