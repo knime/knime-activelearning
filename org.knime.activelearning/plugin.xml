@@ -160,6 +160,11 @@
             deprecated="false"
             factory-class="org.knime.al.nodes.score.density.updater.DensityUpdaterNodeFactory">
       </node>
+      <node
+            category-path="/labs/activelearning/"
+            deprecated="false"
+            factory-class="org.knime.al.nodes.labelingWidget.ActiveLabelingNodeFactory">
+      </node>
    </extension>
      <extension
            point="org.knime.core.PortType">
@@ -185,5 +190,55 @@
         <NodeFactoryClassMapper
               classMapper="org.knime.al.nodes.score.combine.pbac.UncertaintyDistributionScorerNodeFactoryMapper">
         </NodeFactoryClassMapper>
+     </extension>
+     <extension
+           point="org.knime.js.core.javascriptComponents">
+        <javascriptComponent
+              getComponentValue-method-name="getComponentValue"
+              implementationBundleID="org.knime.activelearning.labelingWidget.bundle"
+              init-method-name="init"
+              javascriptComponentID="org.knime.activelearning.labelingWidget"
+              name="Active Labeling Widget"
+              namespace="generalPurposeLabelingWidget"
+              setValidationError-method-name="setValidationError"
+              validate-method-name="validate">
+        </javascriptComponent>
+     </extension>
+     <extension
+           point="org.knime.js.core.webResources">
+        <webResourceBundle
+              debug="true"
+              name="Active Learning JS"
+              usesDefine="true"
+              version="1.0.0"
+              webResourceBundleID="org.knime.activelearning.labelingWidget.bundle">
+           <webResource
+                 relativePathSource="js-src/org/knime/activelearning/"
+                 relativePathTarget="/org/knime/activelearning/">
+           </webResource>
+           <importResource
+                 relativePath="/org/knime/activelearning/labelingWidget.js"
+                 type="JAVASCRIPT">
+           </importResource>
+           <importResource
+                 relativePath="/org/knime/activelearning/labelingWidget.css"
+                 type="CSS">
+           </importResource>
+           <webDependency
+                 webResourceBundleID="KnimeTableView_1.0.0">
+           </webDependency>
+           <webDependency
+                 webResourceBundleID="KnimeTable_1.0.0">
+           </webDependency>
+           <webDependency
+                 webResourceBundleID="org.knime.js.base.node.viz.pagedTable.bundle">
+           </webDependency>
+           <webDependency
+                 webResourceBundleID="org.knime.js.base.node.viz.tileView.bundle">
+           </webDependency>
+           <webDependency
+                 webResourceBundleID="knimeService_1.0">
+           </webDependency>
+        </webResourceBundle>
      </extension>
 </plugin>

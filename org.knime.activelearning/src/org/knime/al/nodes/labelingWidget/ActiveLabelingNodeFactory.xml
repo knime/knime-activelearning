@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./labeling.png" type="Visualizer" xmlns="http://knime.org/node/v3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v3.1 http://knime.org/node/v3.1.xsd">
+    <name>Labeling View</name>
+    
+    <shortDescription>
+    	This node allows the user to manually assign labels to objects.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>
+    		This node allows the user to manually assign labels to objects. This is useful to e.g. create training data for learning algorithms or create a ground-truth to test your algorithms etc. New labels can be created, renamed or deleted freely.
+		</intro>
+        <tab name="Labeling">
+            <description>
+                General labeling options.
+            </description>
+            <option name="Column with possible labels">
+                Possible domain values of the selected column get used as label classes.
+            </option>
+            <option name="Color Scheme">
+                Label class colors can be set via predefined palettes.
+            </option>
+             <option name="Use second input port">
+                Enable or disable the usage of a second input port for label classes.
+            </option>
+            <option name="Column with possible labels as values">
+                Values of the selected column get appended as label classes.
+            </option>
+             <option name="Add new labels during workflow">
+                When this option is enabled it is possible to add/delete labels when the view is opened.
+                For this, there will be an extra option in the view menu when this option is set.
+            </option>
+            <option name="Show progress bar at the top of the view">
+                When this option is set, there will be a progress bar in the view, which shows the progress of the labeling.
+            </option>
+            <option name="Initial page size">
+                Set the page size to be used on initial layout. A page size is defined as the number of tiles the view
+                displays on one page. If the page size change control is enabled the page length can be changed in the
+                view.
+            </option>
+            <option name="Enable page size change control">
+                Enable or disable the control to change the page size interactively in the view.
+            </option>
+            <option name="Selectable page sizes">
+                Define a comma-separated list of allowed page sizes for the page size control.
+            </option>
+            <option name="Add 'All' option to page sizes">
+                When checked, an additional 'All' option will be available in the page size control.
+            </option>
+        </tab>
+		<tab name="Options">
+            <description>
+                General view and display options.
+            </description>
+            <option name="No. of rows to display">
+                Use this numerical value to restrict the number of rows used for this visualization.
+            </option>
+            <option name="Title" optional="true">
+                An optional title to be displayed above the tiles. Leave blank if no title is desired.
+            </option>
+            <option name="Subtitle" optional="true">
+                An optional subtitle to be displayed above the tiles. Leave blank if no subtitle is desired.
+            </option>
+            <option name="Display row colors">
+                Enable or disable the display of row colors. Colors can be assigned e.g. with the Color Manager node and
+                will be rendered as a colored stripe at the top of the respective tile.
+            </option>
+            <option name="Display column headers">
+                Enable or disable the display of column headers. The column headers will be shown along with the cell
+                entries in each tile. Note that column headers are not rendered for images.
+            </option>
+            <option name="Display row id">
+                Enable or disable the display of row ids. The row ids will be shown along with the cell
+                entries in each tile.
+            </option>
+            <option name="Display full screen button">
+                Check to display a button which switches the view into fullscreen mode.
+                The button is only available in the KNIME WebPortal.
+            </option>
+            <option name="Fixed number of tiles per row (1-100)">
+                If checked, the specified number of tiles will be displayed for each row. The number of tiles per row 
+                must be between 1 and 100, inclusive. The width of these tiles will change as the window size changes, 
+                unless "Fixed tile width" is selected (see below).
+            </option>
+            <option name="Fixed tile width (30-5000px)">
+                If checked, each tile will have the specified width. The specified width must be between 30px and 
+                5000px, inclusive. The number of tiles per row will vary with the window size, unless "Fixed number 
+                of tiles per row" is selected (see above).
+            </option>
+            <option name="Select text alignment">
+                The alignment of the text within each tile.
+            </option>
+            <option name="Columns to display">
+                Select the columns whose contents should be included in the tile’s contents.
+            </option>
+        </tab>
+        
+<tab name="Formatters">
+            <description>
+                The JavaScript Labeling View maps the KNIME table data types to types in JavaScript. The types that can be
+                displayed are:
+                <ul>
+                    <li>Boolean</li>
+                    <li>Number (double, integer, etc.)</li>
+                    <li>String</li>
+                    <li>Date and Time (legacy)</li>
+                    <li>Zoned Date and Time</li>
+                    <li>Local Date and Time</li>
+                    <li>Local Date</li>
+                    <li>Local Time</li>
+                    <li>PNG</li>
+                    <li>SVG</li>
+                </ul>
+                All other data types will be treated as UNKNOWN types. The node tries to display them by extracting
+                their respective standard string representation.
+                <br />
+                <br />
+                If you wish to customize the format for certain data types you can use the following options. For
+                unknown types the formatting has to be applied in preceding nodes.
+                <br />
+                <br />
+
+                <b>Date and Time types</b>
+                Date and Time values are converted into string using the selected or entered conversion pattern as
+                defined by <a href="http://momentjs.com/docs/#/displaying/format/">moment.js</a>. Examples:
+                <ul>
+                    <li>"dddd, MMMM Do YYYY, h:mm:ss a" formats dates like "Sunday, February 14th 2010, 3:25:50 pm"
+                    </li>
+                    <li>"ddd, hA" formats dates like "Sun, 3PM"</li>
+                    <li>
+                        "YYYY-MM-DDTHH:mm:ssZ" formats dates as defined by
+                        <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a>.
+                    </li>
+                </ul>
+                Some valid pattern elements are:
+                <ul>
+                    <li>Y: year</li>
+                    <li>Q: quarter</li>
+                    <li>M: month of year</li>
+                    <li>W: week of year</li>
+                    <li>DDD: day of year</li>
+                    <li>D: day of month</li>
+                    <li>d: day of week</li>
+                    <li>dd: day of week (Su Mo ... Fr Sa)</li>
+                    <li>a: am/pm marker</li>
+                    <li>H: hour in day (0-23)</li>
+                    <li>k: hour in day (1-24)</li>
+                    <li>h: hour in am/pm (1-12)</li>
+                    <li>m: minute in hour</li>
+                    <li>s: second in minute</li>
+                    <li>S: millisecond</li>
+                    <li>z: Time zone (EST CST ... MST PST)</li>
+                    <li>Z: Time zone (offset)</li>
+                    <li>X: unix timestamp</li>
+                </ul>
+                Localized formats:
+                <ul>
+                    <li>LT: Time (e.g. 8:30 PM)</li>
+                    <li>LTS: Time with seconds (e.g. 8:30:25 PM)</li>
+                    <li>L: Month numeral (0 padded), day of month (0 padded), year (e.g. 09/04/1986)</li>
+                    <li>l: Month numeral, day of month, year (e.g. 9/4/1986)</li>
+                    <li>LL: Month name, day of month, year (e.g. September 4 1986)</li>
+                    <li>ll: Month name (short), day of month, year (e.g. Sep 4 1986)</li>
+                    <li>LLL: Month name, day of month, year, time (e.g. September 4 1986 8:30 PM)</li>
+                    <li>lll: Month name (short), day of month, year, time (e.g. Sep 4 1986 8:30 PM)</li>
+                    <li>LLLL: Month name, day of month, day of week, year, time
+                        (e.g. Thursday, September 4 1986 8:30 PM)
+                    </li>
+                    <li>llll: Month name (short), day of month, day of week (short), year, time
+                        (e.g. Thu, Sep 4 1986 8:30 PM)
+                    </li>
+                </ul>
+                For printing an arbitrary string, wrap the string in square brackets, e.g. '[today] dddd'.
+            </description>
+            <option name="Locale">
+                The locale which is used to render all date/time cells.
+            </option>
+            <option name="Local Date format">
+                A global format, which is applied to all locale date cells. To format the string the framework moment.js
+                is used.
+            </option>
+            <option name="Local Date &amp; Time format">
+                A global format, which is applied to all local date/time cells. To format the string the framework
+                moment.js is used.
+            </option>
+            <option name="Local Time format">
+                A global format, which is applied to all local time cells. To format the string the framework moment.js
+                is used.
+            </option>
+            <option name="Zoned Date &amp; Time format">
+                A global format, which is applied to all zoned date/time cells. To format the string the framework
+                moment.js is used.
+            </option>
+            <option name="Date &amp; Time (legacy) format">
+                A global format, which is applied to all date/time (legacy) cells. To format the string the framework
+                moment.js is used.
+            </option>
+            <option name="Enable global number format (double cells)">
+                If checked the option beneath will be applied to all columns of type <i>Double</i>.
+            </option>
+            <option name="Decimal places">
+                If number format is enabled use this value to restrict the display of decimal places for double columns
+                in the tile view.
+            </option>
+            <option name="Display missing value as red question mark">
+                If checked, a missing value in the tile view is represented by a red question mark. Otherwise, an empty
+                cell is shown.
+            </option>
+        </tab>
+        
+    </fullDescription>
+    
+    <interactiveView name="Labeling View">
+		Displays the detail of the current object to annotate.
+	</interactiveView>
+	
+    <ports>
+        <inPort name="Data" index="0">Table</inPort>
+		<outPort name="Annotated data" index="0">Annotated table</outPort>
+    </ports>    
+</knimeNode>

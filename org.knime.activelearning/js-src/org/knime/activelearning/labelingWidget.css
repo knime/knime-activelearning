@@ -1,0 +1,173 @@
+body {
+    font-family: sans-serif;
+    /*display: inline-block !important;*/
+}
+h1 {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+.success {
+    color: #006633;
+    font-weight: bold;
+}
+
+.failure {
+    color: #990000;
+    font-weight: bold;
+}
+
+.item-list {
+  border-radius: 5px;
+  width: 100%;
+  height: 250px;
+}
+
+.annotation-view
+{
+border: 1px solid gray;
+border-radius: 5px;
+margin-left: 12px;
+}
+
+.undo-view
+{
+border: 1px solid gray;
+border-radius: 5px;
+}
+
+
+.column-left{ float: left; width: 20%; }
+.column-right{ float: right; width: 20%; }
+.column-center{ display: inline-block; 
+width: 60%;
+}
+
+html,body {
+    height:100%;
+}
+#divLabelingContainer {
+	margin: 0 auto !important;
+}
+
+.knime-table-container > div > div.row {
+	margin: 0 auto !important;
+}
+
+.knime-table-container > div > div > div {
+	position: initial !important;
+}
+
+.knime-tiles .dataTables_wrapper > .row:nth-child(2) {
+    box-shadow: initial;
+}
+
+.knime-tiles .knime-selected {
+    transform: scale(0.9)
+}
+.knime-tiles table.knime-table .knimeTableRowColor {
+    padding-bottom: 20px;
+    padding-left: 5px !important;
+}
+
+.knime-table-container.knime-tiles {
+    flex: initial !important;
+}
+
+#labCurrentProgress {
+    background-color: gray;
+    height: 16px;
+    width: 100%;
+    padding: 2px;
+    margin: 0 auto 10px auto;
+    display: table;
+}
+
+.labCurrentProgressWithoutTitle {
+    margin-top: 15px !important;
+}
+
+#labCurrentProgressBar {
+    background-color: yellow;
+    height: 100%;
+    width: 0%;
+}
+
+.pagination.knime-table-control-text {
+    display: inline-flex;
+}
+
+#labelingButtonGroup {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#skipButtonContainer {
+    text-align: center;
+}
+
+#btnSkip {
+    -webkit-transition-duration: 0s; /* Safari */
+    transition-duration: 0s;
+}
+
+.btnLabel {
+    border-radius: 2px;
+    padding: 5px 10px;
+    font-weight: 600;
+    border-color: white;
+    border-style: solid;
+    -webkit-transition-duration: 0.2s; /* Safari */
+    transition-duration: 0.2s;
+    border-width: 0px;
+}
+
+.btnLabel:first-child {
+    margin-left: 0px !important;
+}
+
+.btnLabel:last-child {
+    margin-right: 0px !important;
+}
+
+.btnLabel:hover {
+  background-color: gray !important; /* Green */
+  color: white !important;
+}
+
+#dropdownContainer {
+    background: #e0e0e0;
+    padding: 8px;
+    padding-right: 0px;
+}
+
+#labelButton {
+    margin-left: 0px;
+    border-style: none;
+    margin-left: 5px;
+    background: #cccccc;
+}
+
+#progressText {
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 16px;
+}
+
+#divLabels {
+    margin: 0px !important;
+}
+
+#selectedText {
+    float: right;
+}
+
+#btnRemove {
+    float: right;
+}
+
+#btnEditClasses {
+    width: 40px;
+    height: 20px;
+    padding: 0px;
+    padding-bottom: 20px;
+}
