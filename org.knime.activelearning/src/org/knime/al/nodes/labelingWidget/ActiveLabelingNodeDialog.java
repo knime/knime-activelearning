@@ -64,7 +64,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
-import org.knime.base.node.viz.histogram.util.NoDomainColumnFilter;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DoubleValue;
 import org.knime.core.data.NominalValue;
@@ -91,11 +90,11 @@ import org.knime.js.core.settings.table.TableSettings;
 
 /**
  * <code>NodeDialog</code> for the "ActiveLearning" Node.
- * 
+ *
  *
  * This node dialog derives from {@link DefaultNodeSettingsPane} which allows creation of a simple dialog with standard
  * components. If you need a more complex dialog please derive directly from {@link org.knime.core.node.NodeDialogPane}.
- * 
+ *
  * @author Daniel Bogenrieder, Knime GmbH, Konstanz, Germany
  */
 public class ActiveLabelingNodeDialog extends NodeDialogPane {
@@ -194,6 +193,8 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
 
     private final JCheckBox m_useProgressBar;
 
+    private final JCheckBox m_autoSelectNextTile;
+
     @SuppressWarnings("unchecked")
     ActiveLabelingNodeDialog() {
         m_config = new ActiveLabelingConfig();
@@ -213,8 +214,9 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_enableShowAllCheckBox = new JCheckBox("Add \"All\" option to page sizes");
         m_enableJumpToPageCheckBox = new JCheckBox("Display field to jump to a page directly");
         //		m_useSecondPort = new JCheckBox("Use second input port for possible labels");
-        m_addLabelsDynamically = new JCheckBox("Add new labels during workflow");
+        m_addLabelsDynamically = new JCheckBox("Add new labels in View");
         m_useProgressBar = new JCheckBox("Show progress bar at the top of the view");
+        m_autoSelectNextTile = new JCheckBox("Automatically select next tile when tiles are labeled");
         m_titleField = new JTextField(TEXT_FIELD_SIZE);
         m_subtitleField = new JTextField(TEXT_FIELD_SIZE);
         m_columnFilterPanel = new DataColumnSpecFilterPanel();
@@ -364,6 +366,7 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_config.setAlignRight(m_alignRightRadioButton.isSelected());
         m_config.setAlignCenter(m_alignCenterRadioButton.isSelected());
         m_config.setUseProgressBar(m_useProgressBar.isSelected());
+        m_config.setAutoSelectNextTile(m_autoSelectNextTile.isSelected());
         m_config.setAddLabelsDynamically(m_addLabelsDynamically.isSelected());
 
         m_config.saveSettings(settings);
@@ -432,6 +435,7 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_alignRightRadioButton.setSelected(m_config.getAlignRight());
         m_alignCenterRadioButton.setSelected(m_config.getAlignCenter());
         m_useProgressBar.setSelected(m_config.getUseProgressBar());
+        m_autoSelectNextTile.setSelected(m_config.isAutoSelectNextTile());
         m_addLabelsDynamically.setSelected(m_config.isAddLabelsDynamically());
 
         enabledNumColMode();
@@ -502,6 +506,9 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
 
         gbcN.gridy++;
         labelPanel.add(m_useProgressBar, gbcN);
+
+        gbcN.gridy++;
+        labelPanel.add(m_autoSelectNextTile, gbcN);
 
         // copied from table view start
         final JPanel pagingPanel = new JPanel(new GridBagLayout());

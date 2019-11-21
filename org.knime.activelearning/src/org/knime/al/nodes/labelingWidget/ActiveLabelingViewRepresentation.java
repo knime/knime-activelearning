@@ -101,6 +101,8 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
 
     private boolean m_useProgressBar;
 
+    private boolean m_autoSelectNextTile;
+
     private TableRepresentationSettings m_settings = new TableRepresentationSettings();
 
     public ActiveLabelingViewRepresentation() {
@@ -174,6 +176,16 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
     @JsonProperty("useProgressBar")
     public boolean getUseProgressBar() {
         return m_useProgressBar;
+    }
+
+    @JsonProperty("autoSelectNextTile")
+    public void setAutoSelectNextTile(final boolean autoSelectNextTile) {
+        m_autoSelectNextTile = autoSelectNextTile;
+    }
+
+    @JsonProperty("autoSelectNextTile")
+    public boolean isAutoSelectNextTile() {
+        return m_autoSelectNextTile;
     }
 
     @JsonProperty("tablesettings")
@@ -344,7 +356,7 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
 
     /**
      * Copy settings from dialog keeping the existing table data
-     * 
+     *
      * @param settings the settings to set
      */
     @Override
@@ -377,6 +389,7 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
         // TODO label creation =adding labels dynamically?
         settings.addBoolean(ActiveLabelingConfig.CFG_ADD_LABELS_DYNAMICALLY, m_labelCreation);
         settings.addBoolean(ActiveLabelingConfig.CFG_USE_PROGRESS_BAR, m_useProgressBar);
+        settings.addBoolean(ActiveLabelingConfig.CFG_AUTO_SELECT_NEXT_TILE, m_autoSelectNextTile);
     }
 
     /**
@@ -397,6 +410,7 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
         m_alignCenter = settings.getBoolean(ActiveLabelingConfig.CFG_ALIGN_CENTER);
         m_labelCreation = settings.getBoolean(ActiveLabelingConfig.CFG_ADD_LABELS_DYNAMICALLY);
         m_useProgressBar = settings.getBoolean(ActiveLabelingConfig.CFG_USE_PROGRESS_BAR);
+        m_autoSelectNextTile = settings.getBoolean(ActiveLabelingConfig.CFG_AUTO_SELECT_NEXT_TILE);
     }
 
     /**
@@ -420,7 +434,7 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
             .append(m_useRowID, other.getUseRowID()).append(m_alignLeft, other.getAlignLeft())
             .append(m_alignRight, other.getAlignRight()).append(m_alignCenter, other.getAlignCenter())
             .append(m_useProgressBar, other.getUseProgressBar()).append(m_labelCreation, other.m_labelCreation)
-            .isEquals();
+            .append(m_autoSelectNextTile, other.isAutoSelectNextTile()).isEquals();
     }
 
     /**
@@ -430,6 +444,6 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
     public int hashCode() {
         return new HashCodeBuilder().append(m_settings).append(m_useNumCols).append(m_useColWidth).append(m_numCols)
             .append(m_colWidth).append(m_labelCol).append(m_useRowID).append(m_alignLeft).append(m_alignRight)
-            .append(m_alignCenter).append(m_useProgressBar).append(m_labelCreation).toHashCode();
+            .append(m_alignCenter).append(m_useProgressBar).append(m_labelCreation).append(m_autoSelectNextTile).toHashCode();
     }
 }

@@ -152,12 +152,6 @@ public class ActiveLabelingNodeModel
                             }
                         }
                         colors.put(SKIP_NAME, Integer.parseInt(DEFAULT_COLOR, 16));
-                    } else {
-                        for (final String label : values) {
-                            if (!colors.containsKey(label)) {
-                                colors.put(label, Integer.parseInt(DEFAULT_COLOR, 16));
-                            }
-                        }
                     }
                     viewRepresentation.setColors(colors);
                 }
@@ -279,18 +273,18 @@ public class ActiveLabelingNodeModel
     }
 
     private void fillColorSchemes() {
-        colorScheme1.add(Integer.parseInt("8dd3c7", 16));
-        colorScheme1.add(Integer.parseInt("ffffb3", 16));
-        colorScheme1.add(Integer.parseInt("bebada", 16));
-        colorScheme1.add(Integer.parseInt("fb8072", 16));
-        colorScheme1.add(Integer.parseInt("80b1d3", 16));
-        colorScheme1.add(Integer.parseInt("fdb462", 16));
-        colorScheme1.add(Integer.parseInt("b3de69", 16));
-        colorScheme1.add(Integer.parseInt("fccde5", 16));
-        colorScheme1.add(Integer.parseInt("d9d9d9", 16));
-        colorScheme1.add(Integer.parseInt("bc80bd", 16));
-        colorScheme1.add(Integer.parseInt("ccebc5", 16));
-        colorScheme1.add(Integer.parseInt("ffed6f", 16));
+        colorScheme1.add(Integer.parseInt("a6cee3", 16));
+        colorScheme1.add(Integer.parseInt("1f78b4", 16));
+        colorScheme1.add(Integer.parseInt("b2df8a", 16));
+        colorScheme1.add(Integer.parseInt("33a02c", 16));
+        colorScheme1.add(Integer.parseInt("fb9a99", 16));
+        colorScheme1.add(Integer.parseInt("e31a1c", 16));
+        colorScheme1.add(Integer.parseInt("fdbf6f", 16));
+        colorScheme1.add(Integer.parseInt("ff7f00", 16));
+        colorScheme1.add(Integer.parseInt("cab2d6", 16));
+        colorScheme1.add(Integer.parseInt("6a3d9a", 16));
+        colorScheme1.add(Integer.parseInt("ffff99", 16));
+        colorScheme1.add(Integer.parseInt("b15928", 16));
 
         colorScheme2.add(Integer.parseInt("a6cee3", 16));
         colorScheme2.add(Integer.parseInt("1f78b4", 16));
@@ -330,6 +324,7 @@ public class ActiveLabelingNodeModel
             viewRepresentation.setAlignCenter(conf.getAlignCenter());
             viewRepresentation.setUseProgressBar(conf.getUseProgressBar());
             viewRepresentation.setLabelCreation(conf.isAddLabelsDynamically());
+            viewRepresentation.setAutoSelectNextTile(conf.isAutoSelectNextTile());
 
             final ActiveLabelingViewValue viewValue = getViewValue();
             if (isViewValueEmpty()) {

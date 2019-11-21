@@ -80,6 +80,10 @@ public class ActiveLabelingViewValue extends AbstractTableValue {
 
     private Map<String, Integer> m_colors = Collections.<String, Integer> emptyMap();
 
+    private final static String CFG_AUTO_SELECT_NEXT_TILE = "autoSelectNextTile";
+
+    private boolean m_autoSelectNextTile = true;
+
     private TableValueSettings m_tableSettings = new TableValueSettings();
 
     @JsonProperty("tablesettings")
@@ -122,6 +126,16 @@ public class ActiveLabelingViewValue extends AbstractTableValue {
         m_possibleLabelValues = values;
     }
 
+    @JsonProperty("autoSelectNextTile")
+    public boolean isAutoSelectNextTile() {
+        return m_autoSelectNextTile;
+    }
+
+    @JsonProperty("autoSelectNextTile")
+    public void setAutoSelectNextTile(final boolean autoSelectNextTile) {
+        m_autoSelectNextTile = autoSelectNextTile;
+    }
+
     private TableValueSettings m_settings = new TableValueSettings();
 
     /**
@@ -149,6 +163,7 @@ public class ActiveLabelingViewValue extends AbstractTableValue {
     @JsonIgnore
     public void saveToNodeSettings(final NodeSettingsWO settings) {
         settings.addStringArray(CFG_POSSIBLE_VALUES, m_possibleLabelValues);
+        settings.addBoolean(CFG_AUTO_SELECT_NEXT_TILE, m_autoSelectNextTile);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -171,6 +186,7 @@ public class ActiveLabelingViewValue extends AbstractTableValue {
     @JsonIgnore
     public void loadFromNodeSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         setPossibleLabelValues(settings.getStringArray(CFG_POSSIBLE_VALUES));
+        setAutoSelectNextTile(settings.getBoolean(CFG_AUTO_SELECT_NEXT_TILE));
         Map<String, String> labels;
         Map<String, Integer> colors;
         try {
@@ -202,7 +218,8 @@ public class ActiveLabelingViewValue extends AbstractTableValue {
         }
         final ActiveLabelingViewValue other = (ActiveLabelingViewValue)obj;
         return new EqualsBuilder().append(m_settings, other.m_settings)
-            .append(m_possibleLabelValues, other.getPossibleLabelValues()).append(m_labels, other.m_labels).isEquals();
+            .append(m_possibleLabelValues, other.getPossibleLabelValues()).append(m_labels, other.m_labels)
+            .append(m_autoSelectNextTile, other.isAutoSelectNextTile()).isEquals();
     }
 
     /**
@@ -210,7 +227,7 @@ public class ActiveLabelingViewValue extends AbstractTableValue {
      */
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(m_settings).append(m_possibleLabelValues).append(m_labels).toHashCode();
+        return new HashCodeBuilder().append(m_settings).append(m_possibleLabelValues).append(m_labels).append(m_autoSelectNextTile).toHashCode();
     }
 
 }

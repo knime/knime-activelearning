@@ -26,7 +26,7 @@
             <option name="Column with possible labels as values">
                 Values of the selected column get appended as label classes.
             </option>
-             <option name="Add new labels during workflow">
+             <option name="Add new labels in View">
                 When this option is enabled it is possible to add/delete labels when the view is opened.
                 For this, there will be an extra option in the view menu when this option is set.
             </option>

@@ -17,11 +17,11 @@ public class ActiveLabelingConfig implements TableConfig {
 
     static final String CFG_USE_COL_WIDTH = "useColWidth";
 
-    private static final boolean DEFAULT_USE_COL_WIDTH = true;
+    private static final boolean DEFAULT_USE_COL_WIDTH = false;
 
     private boolean m_useColWidth = DEFAULT_USE_COL_WIDTH;
 
-    static final int INITIAL_PAGE_SIZE = 3;
+    static final int INITIAL_PAGE_SIZE = 1;
 
     static final int[] ALLOWED_PAGE_SIZE = new int[]{1, 3, 6, 9, 20};
 
@@ -31,7 +31,7 @@ public class ActiveLabelingConfig implements TableConfig {
 
     static final int MAX_NUM_COLS = 100;
 
-    static final int DEFAULT_NUM_COLS = 3;
+    static final int DEFAULT_NUM_COLS = 1;
 
     private int m_numCols = DEFAULT_NUM_COLS;
 
@@ -106,6 +106,12 @@ public class ActiveLabelingConfig implements TableConfig {
     private static final boolean DEFAULT_USE_PROGRESS_BAR = true;
 
     private boolean m_useProgressBar = DEFAULT_USE_PROGRESS_BAR;
+
+    static final String CFG_AUTO_SELECT_NEXT_TILE = "autoSelectNextTile";
+
+    private static final boolean DEFAULT_AUTO_SELECT_NEXT_TILE = true;
+
+    private boolean m_autoSelectNextTile = DEFAULT_AUTO_SELECT_NEXT_TILE;
 
     private TableSettings m_settings = new TableSettings();
 
@@ -258,6 +264,20 @@ public class ActiveLabelingConfig implements TableConfig {
     }
 
     /**
+     * @return true if next tile should be automatically selected
+     */
+    public boolean isAutoSelectNextTile() {
+        return m_autoSelectNextTile;
+    }
+
+    /**
+     * @param useProgressBar true if progress bar should be used
+     */
+    public void setAutoSelectNextTile(final boolean autoSelectNextTile) {
+        m_autoSelectNextTile = autoSelectNextTile;
+    }
+
+    /**
      * @return the m_possibleValues
      */
     public String[] getPossibleValues() {
@@ -361,6 +381,7 @@ public class ActiveLabelingConfig implements TableConfig {
         settings.addBoolean(CFG_ALIGN_RIGHT, m_alignRight);
         settings.addBoolean(CFG_ALIGN_CENTER, m_alignCenter);
         settings.addBoolean(CFG_USE_PROGRESS_BAR, m_useProgressBar);
+        settings.addBoolean(CFG_AUTO_SELECT_NEXT_TILE, m_autoSelectNextTile);
         // settings.addBoolean(CFG_USE_SECOND_PORT, m_useSecondPort);
         settings.addBoolean(CFG_ADD_LABELS_DYNAMICALLY, m_addLabelsDynamically);
         settings.addString(CFG_COLOR_SCHEME, m_colorScheme);
@@ -399,6 +420,7 @@ public class ActiveLabelingConfig implements TableConfig {
         m_possibleValues = settings.getStringArray(CFG_POSSIBLE_VALUES);
         // m_secondPortValues = settings.getStringArray(CFG_SECOND_PORT_VALUES);
         m_useProgressBar = settings.getBoolean(CFG_USE_PROGRESS_BAR);
+        m_autoSelectNextTile = settings.getBoolean(CFG_AUTO_SELECT_NEXT_TILE);
         m_numCols = numCols;
         m_colWidth = colWidth;
     }
@@ -426,6 +448,7 @@ public class ActiveLabelingConfig implements TableConfig {
         // m_secondPortValues = settings.getStringArray(CFG_SECOND_PORT_VALUES,
         // DEFAULT_SECOND_PORT_VALUES);
         m_useProgressBar = settings.getBoolean(CFG_USE_PROGRESS_BAR, DEFAULT_USE_PROGRESS_BAR);
+        m_autoSelectNextTile = settings.getBoolean(CFG_AUTO_SELECT_NEXT_TILE, DEFAULT_AUTO_SELECT_NEXT_TILE);
     }
 
     static void validateConfig(final int numCols, final int colWidth, final int initPageSize, final int maxRows,

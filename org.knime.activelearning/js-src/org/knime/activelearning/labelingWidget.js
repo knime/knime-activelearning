@@ -40,15 +40,18 @@ window.generalPurposeLabelingWidget = (function () {
     _initializeView = function (representation, value) {
         if (_initialized === false) {
             if (Object.keys(value.labels).length > 0) {
-                _selectedTiles = value.labels;
-                for (var tile in _selectedTiles) {
-                    var color = _representation.colors[_selectedTiles[tile]];
+                _tempSelectedTiles = value.labels;
+                for (var tile in _tempSelectedTiles) {
+                    var color = value.colors[_tempSelectedTiles[tile]];
                     if (!color) {
-                        color = value.colors[_selectedTiles[tile]];
+                        color = representation.colors[_tempSelectedTiles[tile]];
                     }
-                    _labelAndLoadNext(_hexToRgb(_getHexColor(color)), _selectedTiles[tile], true, tile);
+                    _labelAndLoadNext(_hexToRgb(_getHexColor(color)), _tempSelectedTiles[tile], true, tile);
                 }
                 _selectedTiles = [];
+            }
+            if (_representation.autoSelectNextTile) {
+                _selectNextTile();
             }
             _initialized = true;
         } else {
@@ -569,7 +572,10 @@ window.generalPurposeLabelingWidget = (function () {
     
     _getColorValue = function (index) {
         var bgColor;
-        if (_value.possiblevalues[index] in _value.colors) {
+        var defaultColor = 15790320;
+        if( _representation.colorscheme === 'None') {
+            bgColor = defaultColor;
+        } else if (_value.possiblevalues[index] in _value.colors) {
             bgColor = _value.colors[_value.possiblevalues[index]];
         } else {
             bgColor = _getRandomColor();
@@ -619,7 +625,13 @@ window.generalPurposeLabelingWidget = (function () {
         var invertedColor = _invertColor(rgbObject);
         var invertedRGBColor = 'rgb(' + invertedColor.r + ',' +  invertedColor.g + ',' +  invertedColor.b + ')';
         for (row in selectedRows) {
-            var rowNumber = selectedRows[row].split('Row')[1];
+            var rowNumber;
+            for(var i = 0; i < _tileView._dataTable.data().length; i++) {
+                if(_tileView._dataTable.data()[i][0] === selectedRows[row]) {
+                    rowNumber = i;
+                    break;
+                }
+            }
             // Check for hex string
             _tileView._dataTable.data()[rowNumber][1] = _tileView._dataTable.data()[rowNumber][1].replace(
                 /background-color:\s*#[A-Fa-f0-9]{6};*/, 'background-color: ' + labelColor + ';');
