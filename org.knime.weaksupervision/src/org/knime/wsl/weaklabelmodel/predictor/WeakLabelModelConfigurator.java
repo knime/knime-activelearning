@@ -48,6 +48,7 @@
  */
 package org.knime.wsl.weaklabelmodel.predictor;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -131,12 +132,9 @@ final class WeakLabelModelConfigurator {
         checkClasses(inSpec, possibleValues.stream().map(DataCell::toString).iterator());
     }
 
-    @SuppressWarnings("null") // elementNames is explicitly checked to not be null
     private void checkCompatibilityOfProbabilityDistribution(final DataColumnSpec inSpec)
         throws InvalidSettingsException {
-        final List<String> possibleClasses = inSpec.getElementNames();
-        CheckUtils.checkArgument(possibleClasses != null && !possibleClasses.isEmpty(),
-            "A probability distribution column must always have non-empty element names.");
+        final Collection<String> possibleClasses = NominalDistributionValueMetaData.extractFromSpec(inSpec).getValues();
         checkClasses(inSpec, possibleClasses.iterator());
     }
 
