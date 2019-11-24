@@ -101,6 +101,7 @@ final class WeakLabelModelLearnerNodeModel extends NodeModel {
         final DataTableSpec dataSpec = (DataTableSpec)inSpecs[DATA_PORT];
         CheckUtils.checkSetting(dataSpec.stream().filter(WeakLabelModelLearnerNodeModel::isPossibleSource).count() > 1,
             "The input table must contain at least two possible source columns.");
+        WeakLabelModelLearnerSettings.checkLabelSources(dataSpec, m_settings.getLabelSourcesFilter());
         final WeakLabelModelLearner learner = new WeakLabelModelLearner(m_settings, dataSpec);
         CheckUtils.checkSetting(learner.getClassNames().size() > 1,
             "The selected label columns contain only a single class.");

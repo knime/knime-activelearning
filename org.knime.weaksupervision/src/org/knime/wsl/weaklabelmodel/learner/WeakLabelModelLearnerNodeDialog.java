@@ -48,9 +48,15 @@
  */
 package org.knime.wsl.weaklabelmodel.learner;
 
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
 
 /**
  * The dialog for the Label Model node.
@@ -59,10 +65,13 @@ import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
  */
 final class WeakLabelModelLearnerNodeDialog extends DefaultNodeSettingsPane {
 
+    private final SettingsModelColumnFilter2 m_sourceColumns = WeakLabelModelLearnerSettings.createLabelSourceColumns();
+
+    private DataTableSpec m_spec;
+
     WeakLabelModelLearnerNodeDialog() {
         createNewGroup("Label sources");
-        addDialogComponent(new DialogComponentColumnFilter2(WeakLabelModelLearnerSettings.createLabelSourceColumns(),
-            WeakLabelModelLearnerNodeModel.DATA_PORT));
+        addDialogComponent(new DialogComponentColumnFilter2(m_sourceColumns, WeakLabelModelLearnerNodeModel.DATA_PORT));
         closeCurrentGroup();
         createNewGroup("Learning settings");
         setHorizontalPlacement(true);
@@ -78,5 +87,24 @@ final class WeakLabelModelLearnerNodeDialog extends DefaultNodeSettingsPane {
         //        addDialogComponent(
         //            new DialogComponentColumnNameSelection(LabelModelSettings.createSecondCorrelationColumn(),
         //                "Second correlation column", 1, false, StringValue.class));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void loadAdditionalSettingsFrom(final NodeSettingsRO settings, final DataTableSpec[] specs)
+        throws NotConfigurableException {
+        super.loadAdditionalSettingsFrom(settings, specs);
+        m_spec = specs[WeakLabelModelLearnerNodeModel.DATA_PORT];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void saveAdditionalSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
+        super.saveAdditionalSettingsTo(settings);
+        WeakLabelModelLearnerSettings.checkLabelSources(m_spec, m_sourceColumns);
     }
 }

@@ -90,7 +90,7 @@ final class WeakLabelModelLearner {
 
     WeakLabelModelLearner(final WeakLabelModelLearnerSettings settings, final DataTableSpec spec) {
         m_settings = settings;
-        final String[] sourceColumnNames = m_settings.getNoisyLabelsFilter().applyTo(spec).getIncludes();
+        final String[] sourceColumnNames = m_settings.getLabelSourcesFilter().applyTo(spec).getIncludes();
         m_metaData = new MetaData(sourceColumnNames, spec);
         m_correlationGraphHandler = new CorrelationHandler(m_metaData.getNonEmptyColumns(), m_metaData.getNumClasses());
     }

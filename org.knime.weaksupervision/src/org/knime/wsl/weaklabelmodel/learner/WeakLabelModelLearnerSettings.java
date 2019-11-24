@@ -48,6 +48,7 @@
  */
 package org.knime.wsl.weaklabelmodel.learner;
 
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.NominalValue;
 import org.knime.core.data.probability.nominal.NominalDistributionValue;
 import org.knime.core.node.InvalidSettingsException;
@@ -56,6 +57,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.util.CheckUtils;
 
 /**
  * Handles the settings for the Weak Label Model Learner.
@@ -66,12 +68,17 @@ final class WeakLabelModelLearnerSettings {
 
     @SuppressWarnings("unchecked")
     static SettingsModelColumnFilter2 createLabelSourceColumns() {
-        return new SettingsModelColumnFilter2("noisyLabelColumns", NominalValue.class,
-            NominalDistributionValue.class);
+        return new SettingsModelColumnFilter2("noisyLabelColumns", NominalValue.class, NominalDistributionValue.class);
     }
 
     static SettingsModelDoubleBounded createLearningRate() {
         return new SettingsModelDoubleBounded("learningRate", 0.01, 1e-6, 1);
+    }
+
+    static void checkLabelSources(final DataTableSpec spec, final SettingsModelColumnFilter2 sourceFilter)
+        throws InvalidSettingsException {
+        CheckUtils.checkSetting(sourceFilter.applyTo(spec).getIncludes().length > 1,
+            "Please select at least two label columns.");
     }
 
     //    static SettingsModelColumnName createFirstCorrelationColumn() {
@@ -118,7 +125,7 @@ final class WeakLabelModelLearnerSettings {
         m_epochs.loadSettingsFrom(settings);
     }
 
-    SettingsModelColumnFilter2 getNoisyLabelsFilter() {
+    SettingsModelColumnFilter2 getLabelSourcesFilter() {
         return m_labelSourceColumns;
     }
 
