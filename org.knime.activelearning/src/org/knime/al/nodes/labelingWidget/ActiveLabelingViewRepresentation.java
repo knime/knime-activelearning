@@ -70,16 +70,20 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
 
     private String[] m_possibleLabelValues = new String[]{};
 
+    private String m_replaceCol = new String();
+
+    private String m_appendCol = new String();
+
     private String[] m_secondPortLabelValues = new String[]{};
 
     private String m_labelColumnName;
 
-    private boolean m_labelCreation = false;
+    private boolean m_labelCreation;
 
     private Map<String, Integer> m_colors = Collections.<String, Integer> emptyMap();
 
-    private String m_colorScheme = "";
-    //	private boolean m_useSecondInputPort = false;
+    private String m_colorScheme;
+//    private boolean m_useSecondInputPort = false;
 
     private boolean m_useNumCols;
 
@@ -156,6 +160,26 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
     @JsonProperty("possiblevalues")
     public void setPossibleLabelValues(final String[] values) {
         m_possibleLabelValues = values;
+    }
+
+    @JsonProperty("replaceCol")
+    public String getReplaceCol() {
+        return m_replaceCol;
+    }
+
+    @JsonProperty("replaceCol")
+    public void setReplaceCol(final String replaceCol) {
+        m_replaceCol = replaceCol;
+    }
+
+    @JsonProperty("appendCol")
+    public String getAppendCol() {
+        return m_appendCol;
+    }
+
+    @JsonProperty("appendCol")
+    public void setAppendCol(final String appendCol) {
+        m_appendCol = appendCol;
     }
 
     @JsonProperty("secondportvalues")
@@ -390,6 +414,8 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
         settings.addBoolean(ActiveLabelingConfig.CFG_ADD_LABELS_DYNAMICALLY, m_labelCreation);
         settings.addBoolean(ActiveLabelingConfig.CFG_USE_PROGRESS_BAR, m_useProgressBar);
         settings.addBoolean(ActiveLabelingConfig.CFG_AUTO_SELECT_NEXT_TILE, m_autoSelectNextTile);
+        settings.addString(ActiveLabelingConfig.CFG_REPLACE_COL, m_replaceCol);
+        settings.addString(ActiveLabelingConfig.CFG_APPEND_COL,  m_appendCol);
     }
 
     /**
@@ -411,6 +437,8 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
         m_labelCreation = settings.getBoolean(ActiveLabelingConfig.CFG_ADD_LABELS_DYNAMICALLY);
         m_useProgressBar = settings.getBoolean(ActiveLabelingConfig.CFG_USE_PROGRESS_BAR);
         m_autoSelectNextTile = settings.getBoolean(ActiveLabelingConfig.CFG_AUTO_SELECT_NEXT_TILE);
+        m_replaceCol = settings.getString(ActiveLabelingConfig.CFG_REPLACE_COL);
+        m_appendCol = settings.getString(ActiveLabelingConfig.CFG_APPEND_COL);
     }
 
     /**
@@ -434,7 +462,8 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
             .append(m_useRowID, other.getUseRowID()).append(m_alignLeft, other.getAlignLeft())
             .append(m_alignRight, other.getAlignRight()).append(m_alignCenter, other.getAlignCenter())
             .append(m_useProgressBar, other.getUseProgressBar()).append(m_labelCreation, other.m_labelCreation)
-            .append(m_autoSelectNextTile, other.isAutoSelectNextTile()).isEquals();
+            .append(m_autoSelectNextTile, other.isAutoSelectNextTile()).append(m_replaceCol,  other.m_replaceCol)
+            .append(m_appendCol, other.m_appendCol).isEquals();
     }
 
     /**
@@ -444,6 +473,7 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
     public int hashCode() {
         return new HashCodeBuilder().append(m_settings).append(m_useNumCols).append(m_useColWidth).append(m_numCols)
             .append(m_colWidth).append(m_labelCol).append(m_useRowID).append(m_alignLeft).append(m_alignRight)
-            .append(m_alignCenter).append(m_useProgressBar).append(m_labelCreation).append(m_autoSelectNextTile).toHashCode();
+            .append(m_alignCenter).append(m_useProgressBar).append(m_labelCreation).append(m_autoSelectNextTile)
+            .append(m_replaceCol).append(m_appendCol).toHashCode();
     }
 }

@@ -82,8 +82,6 @@ import org.knime.js.core.node.table.AbstractTableNodeModel;
 public class ActiveLabelingNodeModel
     extends AbstractTableNodeModel<ActiveLabelingViewRepresentation, ActiveLabelingViewValue> {
 
-    private static final String OUTPUT_NAME = "Output_Labels";
-
     private static final String DEFAULT_Label = "?";
 
     private static final String SKIP_NAME = "Skip";
@@ -92,13 +90,16 @@ public class ActiveLabelingNodeModel
 
     private final LinkedList<Integer> colorScheme1 = new LinkedList<Integer>();
 
-    private final LinkedList<Integer> colorScheme2 = new LinkedList<Integer>();
+    private final ActiveLabelingConfig m_config;
+
+//    private final LinkedList<Integer> colorScheme2 = new LinkedList<Integer>();
 
     private final SettingsModelString m_colorSchemeModel = createColorSchemeSettingsModel();
 
     protected ActiveLabelingNodeModel(final String viewName) {
         super(viewName, new ActiveLabelingConfig());
         fillColorSchemes();
+        m_config = new ActiveLabelingConfig();
     }
 
     @Override
@@ -130,9 +131,13 @@ public class ActiveLabelingNodeModel
 
                 // Load possible domain values into representation
                 // final String possibleValuesColumnName = m_tableViewPossibleValuesModel.getStringValue();
-                String possibleValuesColumnName = ((ActiveLabelingConfig)m_config).getLabelCol();
+                String possibleValuesColumnName = m_config.getLabelCol();
                 if (possibleValuesColumnName == null) {
-                    // nothing to do
+                    final Map<String, Integer> colors = new HashMap<String, Integer>();
+                    colors.put(SKIP_NAME, Integer.parseInt(DEFAULT_COLOR, 16));
+                    viewRepresentation.setColors(colors);
+                } else if (m_table.getDataTableSpec().getColumnSpec(possibleValuesColumnName) == null) {
+                    throw new InvalidSettingsException("The column which is selected for possible values is invalid");
                 } else {
                     final Set<DataCell> possibleValuesSet =
                         m_table.getDataTableSpec().getColumnSpec(possibleValuesColumnName).getDomain().getValues();
@@ -164,7 +169,13 @@ public class ActiveLabelingNodeModel
 
             final BufferedDataContainer dc = exec.createDataContainer(out.getDataTableSpec());
 
-            final int index = out.getSpec().findColumnIndex(OUTPUT_NAME);
+
+            final int index;
+            if (m_config.isAppendRadio()) {
+                index = out.getSpec().findColumnIndex(m_config.getAppendCol());
+            } else {
+                index = out.getSpec().findColumnIndex(m_config.getReplaceCol());
+            }
             for (final DataRow row : out) {
                 final DataCell[] copy = new DataCell[row.getNumCells()];
                 for (int i = 0; i < row.getNumCells(); i++) {
@@ -195,7 +206,25 @@ public class ActiveLabelingNodeModel
 
     /** {@inheritDoc} */
     protected ColumnRearranger createColumnRearranger(final DataTableSpec in) throws InvalidSettingsException {
-        final String newName = DataTableSpec.getUniqueColumnName(in, OUTPUT_NAME);
+        final String value = m_config.getAppendCol();
+        final String colName;
+//        checkSetting(value != null, "Configuration missing.");
+//
+//        checkSetting(!(m_config.getReplacedColumn() == null && m_config.getNewColumnName() == null),
+//            "Either a replacing column or a new column name must be specified");
+
+        if (m_config.isReplaceRadio()) {
+            colName = m_config.getReplaceCol();
+        } else {
+            colName = m_config.getAppendCol();
+        }
+        final int replacedColumn = in.findColumnIndex(colName);
+
+//        checkSetting(!(colName != null && replacedColumn < 0), "Column to replace: '%s' does not exist in input table",
+//            colName);
+
+        String newName =
+                replacedColumn >= 0 ? colName : DataTableSpec.getUniqueColumnName(in, m_config.getAppendCol());
 
         final DataColumnSpec outColumnSpec = new DataColumnSpecCreator(newName, StringCell.TYPE).createSpec();
 
@@ -209,7 +238,11 @@ public class ActiveLabelingNodeModel
             }
         };
 
-        rearranger.append(fac);
+        if (replacedColumn >= 0) {
+            rearranger.replace(fac, replacedColumn);
+        } else {
+            rearranger.append(fac);
+        }
         return rearranger;
     }
 
@@ -252,8 +285,8 @@ public class ActiveLabelingNodeModel
         switch (getViewRepresentation().getColorScheme()) {
             case "Scheme 1":
                 return colorScheme1.toArray(new Integer[0]);
-            case "Scheme 2":
-                return colorScheme2.toArray(new Integer[0]);
+//            case "Scheme 2":
+//                return colorScheme2.toArray(new Integer[0]);
             default:
                 return null;
         }
@@ -264,9 +297,9 @@ public class ActiveLabelingNodeModel
             case "Scheme 1":
                 colorScheme1.add(colorScheme1.peek());
                 return colorScheme1.remove();
-            case "Scheme 2":
-                colorScheme2.add(colorScheme2.peek());
-                return colorScheme2.remove();
+//            case "Scheme 2":
+//                colorScheme2.add(colorScheme2.peek());
+//                return colorScheme2.remove();
             default:
                 return null;
         }
@@ -286,18 +319,18 @@ public class ActiveLabelingNodeModel
         colorScheme1.add(Integer.parseInt("ffff99", 16));
         colorScheme1.add(Integer.parseInt("b15928", 16));
 
-        colorScheme2.add(Integer.parseInt("a6cee3", 16));
-        colorScheme2.add(Integer.parseInt("1f78b4", 16));
-        colorScheme2.add(Integer.parseInt("b2df8a", 16));
-        colorScheme2.add(Integer.parseInt("33a02c", 16));
-        colorScheme2.add(Integer.parseInt("fb9a99", 16));
-        colorScheme2.add(Integer.parseInt("e31a1c", 16));
-        colorScheme2.add(Integer.parseInt("fdbf6f", 16));
-        colorScheme2.add(Integer.parseInt("ff7f00", 16));
-        colorScheme2.add(Integer.parseInt("cab2d6", 16));
-        colorScheme2.add(Integer.parseInt("6a3d9a", 16));
-        colorScheme2.add(Integer.parseInt("ffff99", 16));
-        colorScheme2.add(Integer.parseInt("b15928", 16));
+//        colorScheme2.add(Integer.parseInt("a6cee3", 16));
+//        colorScheme2.add(Integer.parseInt("1f78b4", 16));
+//        colorScheme2.add(Integer.parseInt("b2df8a", 16));
+//        colorScheme2.add(Integer.parseInt("33a02c", 16));
+//        colorScheme2.add(Integer.parseInt("fb9a99", 16));
+//        colorScheme2.add(Integer.parseInt("e31a1c", 16));
+//        colorScheme2.add(Integer.parseInt("fdbf6f", 16));
+//        colorScheme2.add(Integer.parseInt("ff7f00", 16));
+//        colorScheme2.add(Integer.parseInt("cab2d6", 16));
+//        colorScheme2.add(Integer.parseInt("6a3d9a", 16));
+//        colorScheme2.add(Integer.parseInt("ffff99", 16));
+//        colorScheme2.add(Integer.parseInt("b15928", 16));
     }
 
     /**
@@ -306,7 +339,7 @@ public class ActiveLabelingNodeModel
     @Override
     protected void copyConfigToRepresentation() {
         synchronized (getLock()) {
-            final ActiveLabelingConfig conf = (ActiveLabelingConfig)m_config;
+            final ActiveLabelingConfig conf = m_config;
             final ActiveLabelingViewRepresentation viewRepresentation = getViewRepresentation();
             // Use setSettingsFromDialog, it ensures the table that got set on the representation settings is preserved
             viewRepresentation.setSettingsFromDialog(m_config.getSettings().getRepresentationSettings());
@@ -325,6 +358,8 @@ public class ActiveLabelingNodeModel
             viewRepresentation.setUseProgressBar(conf.getUseProgressBar());
             viewRepresentation.setLabelCreation(conf.isAddLabelsDynamically());
             viewRepresentation.setAutoSelectNextTile(conf.isAutoSelectNextTile());
+            viewRepresentation.setReplaceCol(conf.getReplaceCol());
+            viewRepresentation.setAppendCol(conf.getAppendCol());
 
             final ActiveLabelingViewValue viewValue = getViewValue();
             if (isViewValueEmpty()) {

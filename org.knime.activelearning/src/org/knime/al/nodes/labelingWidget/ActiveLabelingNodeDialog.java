@@ -53,15 +53,16 @@ import java.awt.GridLayout;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
 import org.knime.core.data.DataTableSpec;
@@ -79,7 +80,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.ColumnSelectionPanel;
 import org.knime.core.node.util.DataValueColumnFilter;
-import org.knime.core.node.util.StringIconListCellRenderer;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterConfiguration;
 import org.knime.core.node.util.filter.column.DataColumnSpecFilterPanel;
 import org.knime.js.core.components.datetime.DialogComponentDateTimeOptions;
@@ -127,6 +127,14 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
     private final ColumnSelectionPanel m_labelColColumnSelectionPanel;
 
     private final ColumnSelectionPanel m_columnWithPossibleValues;
+
+    private final ColumnSelectionPanel m_replaceColumnName;
+
+    private final JTextField m_appendColumnName;
+
+    private final JRadioButton m_replaceColumnRadio;
+
+    private final JRadioButton m_appendColumnRadio;
 
     private final JRadioButton m_alignLeftRadioButton;
 
@@ -183,11 +191,11 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
 
     private final JLabel m_maxRowsWarning;
 
-    private JComboBox<String> m_colorSchemeSelection;
+//    private JComboBox<String> m_colorSchemeSelection;
 
-    //	private final JCheckBox m_useSecondPort;
+//    private final JCheckBox m_useSecondPort;
 
-    //	private final ColumnSelectionPanel m_secondInputPortValues;
+//    private final ColumnSelectionPanel m_secondInputPortValues;
 
     private final JCheckBox m_addLabelsDynamically;
 
@@ -264,9 +272,20 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_columnWithPossibleValues =
             new ColumnSelectionPanel(BorderFactory.createTitledBorder("Column with possible labels: "),
                 new DataValueColumnFilter(StringValue.class, DoubleValue.class), true);
+        m_replaceColumnName =
+                new ColumnSelectionPanel(BorderFactory.createTitledBorder("Replace column: "),
+                    new DataValueColumnFilter(StringValue.class, DoubleValue.class));
         //		m_secondInputPortValues = new ColumnSelectionPanel(
         //				BorderFactory.createTitledBorder("Column with possible labels as values: "),
         //				new DataValueColumnFilter(NominalValue.class, DoubleValue.class), true, true);
+
+        m_replaceColumnRadio = new JRadioButton("Replace existing variable:");
+        m_replaceColumnRadio.addActionListener(e -> appendVariableChanged());
+     // Enable and disable text of not selected Button
+        m_appendColumnRadio = new JRadioButton("Append new variable:");
+        m_appendColumnRadio.addActionListener(e -> appendVariableChanged());
+        m_appendColumnName = new JTextField();
+
 
         m_alignLeftRadioButton = new JRadioButton("Left");
         m_alignRightRadioButton = new JRadioButton("Right");
@@ -298,7 +317,7 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
 
         addTab("Labeling", initLabeling());
         addTab("Options", initOptions());
-        //addTab("Interactivity", initInteractivity());
+        addTab("Interactivity", initInteractivity());
         addTab("Formatters", initFormatters());
     }
 
@@ -361,7 +380,10 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
             m_config.setColWidth(colWidth);
         }
         m_config.setLabelCol(m_columnWithPossibleValues.getSelectedColumn());
-        m_config.setColorScheme(m_colorSchemeSelection.getSelectedItem().toString());
+        m_config.setReplaceCol(m_replaceColumnName.getSelectedColumn());
+        m_config.setAppendCol(m_appendColumnName.getText());
+        appendVariableChanged();
+        //m_config.setColorScheme(m_colorSchemeSelection.getSelectedItem().toString());
         m_config.setAlignLeft(m_alignLeftRadioButton.isSelected());
         m_config.setAlignRight(m_alignRightRadioButton.isSelected());
         m_config.setAlignCenter(m_alignCenterRadioButton.isSelected());
@@ -427,6 +449,9 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_colWidthSpinner.loadSettingsFrom(settings, specs);
         m_labelColColumnSelectionPanel.update(inSpec, m_config.getLabelCol(), m_config.getUseRowID());
         m_columnWithPossibleValues.update(inSpec, m_config.getLabelCol(), m_config.getUseRowID());
+        m_replaceColumnName.update(inSpec, m_config.getReplaceCol());
+        m_appendColumnName.setText(m_config.getAppendCol());
+
         //		if (specs.length > 1) {
         //			final DataTableSpec inSpec2 = (DataTableSpec) specs[1];
         //			m_secondInputPortValues.update(inSpec2, m_config.getLabelCol(), m_config.getUseRowID());
@@ -445,7 +470,8 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         enableFormatterFields();
         setNumberOfFilters(inSpec);
         m_whitespace.setVisible(true);
-        m_colorSchemeSelection.setSelectedItem(m_config.getColorScheme());
+        appendVariableChanged();
+        //m_colorSchemeSelection.setSelectedItem(m_config.getColorScheme());
     }
 
     // -- Helper methods --
@@ -466,6 +492,9 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
     }
 
     private Component initLabeling() {
+        Border noBorder = BorderFactory.createEmptyBorder();
+        Border paddingBorder = BorderFactory.createEmptyBorder(3, 3, 3, 3);
+        Border lineBorder = BorderFactory.createLineBorder(new Color(200, 200, 200), 1);
         final JPanel labelPanel = new JPanel(new GridBagLayout());
         labelPanel.setBorder(new TitledBorder("Labeling"));
         final GridBagConstraints gbcN = DialogUtil.defaultGridBagConstraints();
@@ -473,33 +502,36 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         gbcN.gridy++;
         gbcN.fill = GridBagConstraints.HORIZONTAL;
         labelPanel.add(m_columnWithPossibleValues, gbcN);
-
-        gbcN.fill = GridBagConstraints.NONE;
         gbcN.gridy++;
-        final JPanel colorSchemeSubPanel = new JPanel();
-        m_colorSchemeSelection = new JComboBox<>();
-        m_colorSchemeSelection.setRenderer(new StringIconListCellRenderer());
-        final String[] elements = new String[]{"None", "Scheme 1", "Scheme 2"};
-        for (final String o : elements) {
-            if (o == null) {
-                throw new NullPointerException("Options in the selection" + " list can't be null");
-            }
-            m_colorSchemeSelection.addItem(o);
-        }
-        colorSchemeSubPanel.add(new JLabel("Color Scheme: "), gbcN);
-        colorSchemeSubPanel.add(m_colorSchemeSelection);
-        labelPanel.add(colorSchemeSubPanel, gbcN);
+        gbcN.fill = GridBagConstraints.HORIZONTAL;
 
-        //		gbcN.gridy++;
-        //		labelPanel.add(m_useSecondPort, gbcN);
-        //
-        //		gbcN.gridy++;
-        //		gbcN.fill = GridBagConstraints.HORIZONTAL;
-        //		labelPanel.add(m_secondInputPortValues, gbcN);
-        //		m_secondInputPortValues.setEnabled(false);
-        //		gbcN.fill = GridBagConstraints.NONE;
-        //
-        //		m_useSecondPort.addChangeListener(e -> m_secondInputPortValues.setEnabled(m_useSecondPort.isSelected()));
+
+//        gbcN.fill = GridBagConstraints.NONE;
+//        gbcN.gridy++;
+//        final JPanel colorSchemeSubPanel = new JPanel();
+//        m_colorSchemeSelection = new JComboBox<>();
+//        m_colorSchemeSelection.setRenderer(new StringIconListCellRenderer());
+//        final String[] elements = new String[]{"None", "Scheme 1", "Scheme 2"};
+//        for (final String o : elements) {
+//            if (o == null) {
+//                throw new NullPointerException("Options in the selection" + " list can't be null");
+//            }
+//            m_colorSchemeSelection.addItem(o);
+//        }
+//        colorSchemeSubPanel.add(new JLabel("Color Scheme: "), gbcN);
+//        colorSchemeSubPanel.add(m_colorSchemeSelection);
+//        labelPanel.add(colorSchemeSubPanel, gbcN);
+
+//        		gbcN.gridy++;
+//        		labelPanel.add(m_useSecondPort, gbcN);
+//
+//        		gbcN.gridy++;
+//        		gbcN.fill = GridBagConstraints.HORIZONTAL;
+//        		labelPanel.add(m_secondInputPortValues, gbcN);
+//        		m_secondInputPortValues.setEnabled(false);
+//        		gbcN.fill = GridBagConstraints.NONE;
+//
+//        		m_useSecondPort.addChangeListener(e -> m_secondInputPortValues.setEnabled(m_useSecondPort.isSelected()));
 
         gbcN.gridy++;
         labelPanel.add(m_addLabelsDynamically, gbcN);
@@ -509,38 +541,41 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
 
         gbcN.gridy++;
         labelPanel.add(m_autoSelectNextTile, gbcN);
+        gbcN.gridy++;
 
-        // copied from table view start
-        final JPanel pagingPanel = new JPanel(new GridBagLayout());
-        pagingPanel.setBorder(new TitledBorder("Paging"));
-        final GridBagConstraints gbcP = DialogUtil.defaultGridBagConstraints();
-        gbcP.fill = GridBagConstraints.HORIZONTAL;
-        gbcP.weightx = 1;
-        gbcP.gridwidth = 2;
-        pagingPanel.add(m_initialPageSizeSpinner.getComponentPanel(), gbcP);
-        gbcP.gridx = 0;
-        gbcP.gridy++;
-        pagingPanel.add(m_warningLabelInteract, gbcP);
-        gbcP.gridx = 0;
-        gbcP.gridy++;
-        pagingPanel.add(m_enablePageSizeChangeCheckBox, gbcP);
-        gbcP.gridx = 0;
-        gbcP.gridy++;
-        gbcP.gridwidth = 1;
-        pagingPanel.add(new JLabel("Selectable page sizes: "), gbcP);
-        gbcP.gridx++;
-        pagingPanel.add(m_allowedPageSizesField, gbcP);
-        gbcP.gridx = 0;
-        gbcP.gridy++;
-        gbcP.gridwidth = 2;
-        pagingPanel.add(m_enableShowAllCheckBox, gbcP);
+        JPanel newVariabelPanel = new JPanel();
+        newVariabelPanel.setLayout(new BoxLayout(newVariabelPanel, BoxLayout.X_AXIS));
+        newVariabelPanel.setBorder(noBorder);
+        newVariabelPanel.add(m_appendColumnRadio);
+        m_appendColumnName.setPreferredSize(new Dimension(100, 20));
+        newVariabelPanel.add(m_appendColumnName);
+
+        JPanel replaceVariablePanel = new JPanel();
+        replaceVariablePanel.setLayout(new BoxLayout(replaceVariablePanel, BoxLayout.X_AXIS));
+        replaceVariablePanel.setBorder(noBorder);
+        replaceVariablePanel.add(m_replaceColumnRadio);
+        replaceVariablePanel.add(m_replaceColumnName);
+
+        ButtonGroup radioButtongroup = new ButtonGroup();
+        radioButtongroup.add(m_appendColumnRadio);
+        radioButtongroup.add(m_replaceColumnRadio);
+        m_appendColumnRadio.setSelected(true);
+
+        newVariabelPanel.setAlignmentX(Component.LEFT_ALIGNMENT);//0.0
+        replaceVariablePanel.setAlignmentX(Component.LEFT_ALIGNMENT);//0.0
+
+        labelPanel.add(newVariabelPanel, gbcN);
+        gbcN.gridy++;
+        gbcN.fill = GridBagConstraints.HORIZONTAL;
+        labelPanel.add(replaceVariablePanel, gbcN);
+        gbcN.gridy++;
+        gbcN.fill = GridBagConstraints.HORIZONTAL;
 
         final JPanel panel = new JPanel(new GridBagLayout());
         final GridBagConstraints gbc = DialogUtil.defaultGridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         panel.add(labelPanel, gbc);
         gbc.gridy++;
-        panel.add(pagingPanel, gbc);
 
         return panel;
     }
@@ -655,48 +690,70 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         // end
     }
 
-    //	private JPanel initInteractivity() {
+	private JPanel initInteractivity() {
+        // copied from table view start
+        final JPanel pagingPanel = new JPanel(new GridBagLayout());
+        pagingPanel.setBorder(new TitledBorder("Paging"));
+        final GridBagConstraints gbcP = DialogUtil.defaultGridBagConstraints();
+        gbcP.fill = GridBagConstraints.HORIZONTAL;
+        gbcP.weightx = 1;
+        gbcP.gridwidth = 2;
+        pagingPanel.add(m_initialPageSizeSpinner.getComponentPanel(), gbcP);
+        gbcP.gridx = 0;
+        gbcP.gridy++;
+        pagingPanel.add(m_warningLabelInteract, gbcP);
+        gbcP.gridx = 0;
+        gbcP.gridy++;
+        pagingPanel.add(m_enablePageSizeChangeCheckBox, gbcP);
+        gbcP.gridx = 0;
+        gbcP.gridy++;
+        gbcP.gridwidth = 1;
+        pagingPanel.add(new JLabel("Selectable page sizes: "), gbcP);
+        gbcP.gridx++;
+        pagingPanel.add(m_allowedPageSizesField, gbcP);
+        gbcP.gridx = 0;
+        gbcP.gridy++;
+        gbcP.gridwidth = 2;
+        pagingPanel.add(m_enableShowAllCheckBox, gbcP);
 
-    //final JPanel selectionPanel = new JPanel(new GridBagLayout());
-    // TODO Removed Selection & Filtering option in the dialog until it works correctly.
-    // section name change not in table view
-    // selectionPanel.setBorder(new TitledBorder("Selection & Filtering"));
-    // final GridBagConstraints gbcS = DialogUtil.defaultGridBagConstraints();
-    // gbcS.fill = GridBagConstraints.HORIZONTAL;
-    // gbcS.weightx = 1;
-    // gbcS.gridwidth = 1;
-    // selectionPanel.add(m_enableSelectionCheckbox, gbcS);
-    // gbcS.gridx++;
-    // selectionPanel.add(m_subscribeFilterCheckBox, gbcS);
-    // gbcS.gridx = 0;
-    // gbcS.gridy++;
-    // selectionPanel.add(m_enableClearSelectionButtonCheckbox, gbcS);
-    // gbcS.gridx++;
-    // selectionPanel.add(m_hideUnselectedCheckbox, gbcS);
-    // gbcS.gridx = 0;
-    // gbcS.gridy++;
-    // selectionPanel.add(m_enableHideUnselectedCheckbox, gbcS);
-    // gbcS.gridx++;
-    // selectionPanel.add(m_publishSelectionCheckBox, gbcS);
-    // gbcS.gridx = 0;
-    // gbcS.gridy++;
-    // selectionPanel.add(m_subscribeSelectionCheckBox, gbcS);
-    // gbcS.gridx = 0;
-    // gbcS.gridy++;
-    // selectionPanel.add(new JLabel("Selection column name: "), gbcS);
-    // gbcS.gridx++;
-    // selectionPanel.add(m_selectionColumnNameField, gbcS);
-    // end
+        final JPanel selectionPanel = new JPanel(new GridBagLayout());
+        // section name change not in table view
+        selectionPanel.setBorder(new TitledBorder("Selection & Filtering"));
+        final GridBagConstraints gbcS = DialogUtil.defaultGridBagConstraints();
+        gbcS.fill = GridBagConstraints.HORIZONTAL;
+        gbcS.weightx = 1;
+        gbcS.gridwidth = 1;
+        selectionPanel.add(m_enableSelectionCheckbox, gbcS);
+        gbcS.gridx++;
+        selectionPanel.add(m_subscribeFilterCheckBox, gbcS);
+        gbcS.gridx = 0;
+        gbcS.gridy++;
+        selectionPanel.add(m_enableClearSelectionButtonCheckbox, gbcS);
+        gbcS.gridx++;
+        selectionPanel.add(m_hideUnselectedCheckbox, gbcS);
+        gbcS.gridx = 0;
+        gbcS.gridy++;
+        selectionPanel.add(m_enableHideUnselectedCheckbox, gbcS);
+        gbcS.gridx++;
+        selectionPanel.add(m_publishSelectionCheckBox, gbcS);
+        gbcS.gridx = 0;
+        gbcS.gridy++;
+        selectionPanel.add(m_subscribeSelectionCheckBox, gbcS);
+        gbcS.gridx = 0;
+        gbcS.gridy++;
+        selectionPanel.add(new JLabel("Selection column name: "), gbcS);
+        gbcS.gridx++;
+        selectionPanel.add(m_selectionColumnNameField, gbcS);
 
-    //		final JPanel panel = new JPanel(new GridBagLayout());
-    //		final GridBagConstraints gbc = DialogUtil.defaultGridBagConstraints();
-    //		gbc.fill = GridBagConstraints.HORIZONTAL;
-    //		panel.add(pagingPanel, gbc);
-    //		gbc.gridy++;
-    //		panel.add(selectionPanel, gbc);
-    //		gbc.gridy++;
-    //		return panel;
-    //	}
+        final JPanel panel = new JPanel(new GridBagLayout());
+        final GridBagConstraints gbc = DialogUtil.defaultGridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(pagingPanel, gbc);
+        gbc.gridy++;
+        panel.add(selectionPanel, gbc);
+        gbc.gridy++;
+        return panel;
+	}
 
     // -- The below were copied directly from table view dialog --
     private JPanel initFormatters() {
@@ -838,6 +895,29 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
             m_whitespace.setVisible(false);
         } else {
             m_whitespace.setVisible(true);
+        }
+    }
+
+    private void appendVariableChanged() {
+        if (m_appendColumnRadio.isSelected()) {
+            m_appendColumnName.setEnabled(true);
+            m_replaceColumnName.setEnabled(false);
+            m_config.setAppendRadio(true);
+            m_config.setReplaceRadio(false);
+        } else {
+            m_appendColumnName.setEnabled(false);
+            if (m_replaceColumnName.getNrItemsInList() > 0) {
+                m_replaceColumnName.setEnabled(true);
+                m_config.setAppendRadio(false);
+                m_config.setReplaceRadio(true);
+            } else {
+                m_replaceColumnRadio.setEnabled(false);
+                m_replaceColumnName.setEnabled(false);
+                m_appendColumnRadio.setSelected(true);
+                m_appendColumnName.setEnabled(true);
+                m_config.setAppendRadio(false);
+                m_config.setReplaceRadio(true);
+            }
         }
     }
 }

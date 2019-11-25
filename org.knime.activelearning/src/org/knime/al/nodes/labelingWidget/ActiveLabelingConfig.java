@@ -81,11 +81,36 @@ public class ActiveLabelingConfig implements TableConfig {
 
     private String[] m_possibleValues = DEFAULT_POSSIBLE_VALUES;
 
+    static final String CFG_REPLACE_COL = "replaceCol";
+
+    private static final String DEFAULT_REPLACE_COL = new String();
+
+    private String m_replaceCol = DEFAULT_REPLACE_COL;
+
+    static final String CFG_REPLACE_RADIO = "isReplaceRadio";
+
+    private static final boolean DEFAULT_REPLACE_RADIO = false;
+
+    private boolean m_isReplaceRadio = DEFAULT_REPLACE_RADIO;
+
+    static final String CFG_APPEND_COL = "appendCol";
+
+    private static final String DEFAULT_APPEND_COL = "Output_Column";
+
+    private String m_appendCol = DEFAULT_APPEND_COL;
+
+    static final String CFG_APPEND_RADIO = "isAppendRadio";
+
+    private static final boolean DEFAULT_APPEND_RADIO = true;
+
+    private boolean m_isAppendRadio = DEFAULT_APPEND_RADIO;
+
     static final String CFG_COLOR_SCHEME = "colorScheme";
 
-    private static final String DEFAULT_COLOR_SCHEME = "";
+    private static final String DEFAULT_COLOR_SCHEME = "Scheme 1";
 
     private String m_colorScheme = DEFAULT_COLOR_SCHEME;
+
 
     // static final String CFG_USE_SECOND_PORT = "useSecondPort";
     // private static final boolean DEFAULT_USE_SECOND_PORT = false;
@@ -292,6 +317,62 @@ public class ActiveLabelingConfig implements TableConfig {
     }
 
     /**
+     * @return the m_replaceCol
+     */
+    public String getReplaceCol() {
+        return m_replaceCol;
+    }
+
+    /**
+     * @param replaceCol the column to replace
+     */
+    public void setReplaceCol(final String replaceCol) {
+        this.m_replaceCol = replaceCol;
+    }
+
+    /**
+     * @return the m_isReplaceRadio
+     */
+    public boolean isReplaceRadio() {
+        return m_isReplaceRadio;
+    }
+
+    /**
+     * @param isReplaceRadio true if column should be replaced
+     */
+    public void setReplaceRadio(final boolean isReplaceRadio) {
+        this.m_isReplaceRadio = isReplaceRadio;
+    }
+
+    /**
+     * @return the m_appendeCol
+     */
+    public String getAppendCol() {
+        return m_appendCol;
+    }
+
+    /**
+     * @param appendCol the column to append
+     */
+    public void setAppendCol(final String appendCol) {
+        this.m_appendCol = appendCol;
+    }
+
+    /**
+     * @return the m_isAppendRadio
+     */
+    public boolean isAppendRadio() {
+        return m_isAppendRadio;
+    }
+
+    /**
+     * @param isAppendRadio the possibleValues to set
+     */
+    public void setAppendRadio(final boolean isAppendRadio) {
+        this.m_isAppendRadio = isAppendRadio;
+    }
+
+    /**
      * @return the m_colorScheme
      */
     public String getColorScheme() {
@@ -386,6 +467,10 @@ public class ActiveLabelingConfig implements TableConfig {
         settings.addBoolean(CFG_ADD_LABELS_DYNAMICALLY, m_addLabelsDynamically);
         settings.addString(CFG_COLOR_SCHEME, m_colorScheme);
         settings.addStringArray(CFG_POSSIBLE_VALUES, m_possibleValues);
+        settings.addString(CFG_REPLACE_COL, m_replaceCol);
+        settings.addBoolean(CFG_APPEND_RADIO, m_isAppendRadio);
+        settings.addString(CFG_APPEND_COL, m_appendCol);
+        settings.addBoolean(CFG_REPLACE_RADIO, m_isReplaceRadio);
         // settings.addStringArray(CFG_SECOND_PORT_VALUES, m_secondPortValues);
     }
 
@@ -418,6 +503,10 @@ public class ActiveLabelingConfig implements TableConfig {
         m_addLabelsDynamically = settings.getBoolean(CFG_ADD_LABELS_DYNAMICALLY);
         m_colorScheme = settings.getString(CFG_COLOR_SCHEME);
         m_possibleValues = settings.getStringArray(CFG_POSSIBLE_VALUES);
+        m_replaceCol = settings.getString(CFG_REPLACE_COL);
+        m_appendCol = settings.getString(CFG_APPEND_COL);
+        m_isReplaceRadio = settings.getBoolean(CFG_REPLACE_RADIO);
+        m_isAppendRadio = settings.getBoolean(CFG_APPEND_RADIO);
         // m_secondPortValues = settings.getStringArray(CFG_SECOND_PORT_VALUES);
         m_useProgressBar = settings.getBoolean(CFG_USE_PROGRESS_BAR);
         m_autoSelectNextTile = settings.getBoolean(CFG_AUTO_SELECT_NEXT_TILE);
@@ -445,6 +534,10 @@ public class ActiveLabelingConfig implements TableConfig {
         m_addLabelsDynamically = settings.getBoolean(CFG_ADD_LABELS_DYNAMICALLY, DEFAULT_ADD_LABELS_DYNAMICALLY);
         m_colorScheme = settings.getString(CFG_COLOR_SCHEME, DEFAULT_COLOR_SCHEME);
         m_possibleValues = settings.getStringArray(CFG_POSSIBLE_VALUES, DEFAULT_POSSIBLE_VALUES);
+        m_replaceCol = settings.getString(CFG_REPLACE_COL, DEFAULT_REPLACE_COL);
+        m_appendCol = settings.getString(CFG_APPEND_COL, DEFAULT_APPEND_COL);
+        m_isReplaceRadio = settings.getBoolean(CFG_REPLACE_RADIO, DEFAULT_REPLACE_RADIO);
+        m_isAppendRadio = settings.getBoolean(CFG_APPEND_RADIO, DEFAULT_APPEND_RADIO);
         // m_secondPortValues = settings.getStringArray(CFG_SECOND_PORT_VALUES,
         // DEFAULT_SECOND_PORT_VALUES);
         m_useProgressBar = settings.getBoolean(CFG_USE_PROGRESS_BAR, DEFAULT_USE_PROGRESS_BAR);
