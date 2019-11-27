@@ -54,10 +54,6 @@ html, body {
     height: 100%;
 }
 
-#divLabelingContainer {
-    margin: 0 auto !important;
-}
-
 .knime-table-container>div>div.row {
     margin: 0 auto !important;
 }
@@ -79,8 +75,32 @@ html, body {
     padding-left: 5px !important;
 }
 
+#knime-service-header {
+    padding-top: 40px;
+}
+
+#labelingContainer {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+}
+
+
 .knime-table-container.knime-tiles {
     flex: initial !important;
+    margin: 0px;
+    padding: 0px 10px 10px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.dataTables_wrapper {
+    overflow: auto;
 }
 
 #labCurrentProgress {
