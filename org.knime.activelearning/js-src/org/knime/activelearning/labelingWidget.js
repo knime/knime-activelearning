@@ -8,10 +8,10 @@ window.generalPurposeLabelingWidget = (function () {
         _tileView,
 
         // function definitions
-        createContainer, _updateButtonClasses, _getHexColor, _changeSkipButton, _setupSkipButtonHandler, _labelAndLoadNext,
+        _createContainer, _updateButtonClasses, _getHexColor, _changeSkipButton, _setupSkipButtonHandler, _labelAndLoadNext,
         _setupAddClassesButtonHandler, _createClassEditorDialog, _getRandomColor, _updateDialogClasses, _initializeView,
         _bindArrowKeys, _updateLabelClasses, _updateDropdownClasses, _filterData, _getAllPossibleValues, _invertColor,
-        _yuv2rgb, _rgb2yuv, _clamp, _hexToRgb, _selectNextTile, _getColorValue, _createRemoveDialog, _combinePossibleValues,
+        _hexToRgb, _selectNextTile, _getColorValue, _createRemoveDialog, _combinePossibleValues, _checkIfIsCurrentlyDisplayed,
         _changeToDefaultHeaderColor, _selectFirstTile;
 
     labelingWidget.init = function (representation, value) {
@@ -20,7 +20,7 @@ window.generalPurposeLabelingWidget = (function () {
         _representation.table.spec.rowColorValues = _changeToDefaultHeaderColor(_representation.table.spec.rowColorValues, '#404040');
         _value = value;
         _value.possiblevalues = _combinePossibleValues(_representation, _value);
-        createContainer();
+        _createContainer();
         _bindArrowKeys();
     };
 
@@ -32,6 +32,9 @@ window.generalPurposeLabelingWidget = (function () {
         return _value;
     };
 
+    /**
+     * Changes any existing colored header rows to a default color
+     */
     _changeToDefaultHeaderColor = function (rowColorValues, colorValue) {
         rowColorValues.forEach(function (part, index, data) {
             data[index] = colorValue;
@@ -39,6 +42,9 @@ window.generalPurposeLabelingWidget = (function () {
         return rowColorValues;
     };
 
+    /**
+     * combines possible values of representation and value
+     */
     _combinePossibleValues = function (_representationn, _value) {
         var possibleValues = _representation.possiblevalues.concat(_value.possiblevalues);
         var result = possibleValues.filter(function (item, pos) {
@@ -51,24 +57,52 @@ window.generalPurposeLabelingWidget = (function () {
         if (_initialized === false) {
             _initialized = true;
             if (Object.keys(value.labels).length > 0) {
-                _tempSelectedTiles = value.labels;
+                var _tempSelectedTiles = value.labels;
+                var _tempLength = Object.keys(_tempSelectedTiles).length - 1;
+                var counter = 0;
                 for (var tile in _tempSelectedTiles) {
                     var color = value.colors[_tempSelectedTiles[tile]];
                     if (!color) {
                         color = representation.colors[_tempSelectedTiles[tile]];
                     }
-                    _labelAndLoadNext(_hexToRgb(_getHexColor(color)), _tempSelectedTiles[tile], true, tile);
+                    if (counter === _tempLength) {
+                        _labelAndLoadNext(_hexToRgb(_getHexColor(color)), _tempSelectedTiles[tile], true, tile, true);
+                    } else {
+                        _labelAndLoadNext(_hexToRgb(_getHexColor(color)), _tempSelectedTiles[tile], true, tile);
+                    }
+                    counter++;
                 }
                 _selectedTiles = [];
-            }
-            if (_representation.autoSelectNextTile) {
-                _selectFirstTile();
+            } else {
+                if (_representation.autoSelectNextTile) {
+                    _selectFirstTile();
+                }
             }
         } else {
             return;
         }
     };
 
+    /**
+     * Overwrite selectionChanged function to react to selection events from other views.
+     */
+    window.knimeTileView._selectionChangedOld = window.knimeTileView._selectionChanged;
+    window.knimeTileView._selectionChanged = function (data) {
+        window.knimeTileView._selectionChangedOld.apply(this, [data]);
+        this._value.selection = this._selection;
+        _selectedTiles = this._selection;
+        for (var row in _selectedTiles) {
+            if (_selectedTiles[row] === false) {
+                delete _selectedTiles[row];
+            }
+        }
+        document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + Object.keys(_selectedTiles).length;
+        _changeSkipButton();
+    };
+
+    /**
+     * Overwrite dataTableDrawCallback function to load selection into view, if there was a previous selection
+     */
     window.knimeTileView._dataTableDrawCallbackOld = window.knimeTileView._dataTableDrawCallback;
     window.knimeTileView._dataTableDrawCallback = function () {
         window.knimeTileView._dataTableDrawCallbackOld.apply(this);
@@ -109,28 +143,27 @@ window.generalPurposeLabelingWidget = (function () {
         }
     };
 
+    /**
+     * Overwrite Menu building function
+     */
     window.knimeTileView._buildMenuOld = window.knimeTileView._buildMenu;
     window.knimeTileView._buildMenu = function () {
         window.knimeTileView._buildMenuOld.apply(this);
         var self = this;
-        if (!this._representation.showUnlabledOnly) {
-            // var subSelIcon = knimeService.createStackedIcon('check-square-o', 'angle-double-right',
-            // 'faded right sm', 'left bold');
-            var showUnlabledCheckbox = knimeService.createMenuCheckbox('showUnlabledCheckbox',
-                this._value.showUnlabledOnly, function () {
+        if (!this._representation.showUnlabeledOnly) {
+            var showUnlabeledCheckbox = knimeService.createMenuCheckbox('showUnlabeledCheckbox',
+                this._value.showUnlabeledOnly, function () {
                     if (this.checked) {
                         self._filterLabeldData();
-                        self._value.showUnlabledOnly = true;
+                        self._value.showUnlabeledOnly = true;
                     } else {
                         self._resetFilter();
-                        self._value.showUnlabledOnly = false;
+                        self._value.showUnlabeledOnly = false;
                     }
                 });
-            knimeService.addMenuItem('Show only unlabled data', null, showUnlabledCheckbox);
+            knimeService.addMenuItem('Show only unlabeled data', null, showUnlabeledCheckbox);
         }
         if (this._representation.labelcreation) {
-            // var editLabelIcon = knimeService.createStackedIcon('check-square-o', 'angle-double-right',
-            // 'faded right sm', 'left bold');
             var addClassesButton = document.createElement('button');
             addClassesButton.type = 'button';
             addClassesButton.id = 'btnEditClasses';
@@ -141,8 +174,6 @@ window.generalPurposeLabelingWidget = (function () {
             knimeService.addMenuItem('Create custom classes', null, addClassesButton);
         }
         if (!this._representation.autoSelectNext) {
-            // var autoSelectIcon = knimeService.createStackedIcon('check-square-o', 'angle-double-right',
-            // faded right sm', 'left bold');
             var autoSelectCheckbox = knimeService.createMenuCheckbox('autoSelectCheckbox',
                 this._value.autoSelectNextTile, function () {
                     if (this.checked) {
@@ -151,16 +182,42 @@ window.generalPurposeLabelingWidget = (function () {
                         self._value.autoSelectNextTile = false;
                     }
                 });
-            knimeService.addMenuItem('Auto select next tile when Labled', null, autoSelectCheckbox);
+            knimeService.addMenuItem('Auto select next tile when labeled', null, autoSelectCheckbox);
         }
     };
 
-    createContainer = function () {
+    /**
+     * Overwrite click selection behavior
+     */
+    window.knimeTileView._setSelectionHandlers = function () {
+        KnimeBaseTableViewer.prototype._setSelectionHandlers.apply(this);
+        if (!this._representation.enableSelection) {
+            return;
+        }
+        this._getJQueryTable().find('tbody').addClass('knime-selection-enabled').on('click', 'tr', function (e) {
+            var index;
+            if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
+                if (e.target.checked) {
+                    _selectedTiles[e.target.value] = true;
+                    document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + Object.keys(_selectedTiles).length;
+                    _changeSkipButton();
+                } else {
+                    if (_selectedTiles[e.target.value]) {
+                        delete _selectedTiles[e.target.value];
+                        document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + Object.keys(_selectedTiles).length;
+                    }
+                    _changeSkipButton();
+                }
+                return;
+            } else {
+                $(e.currentTarget).find('input[type="checkbox"]').click();
+            }
+        });
+    };
+
+    _createContainer = function () {
         var labelingContainer = document.createElement('div');
-        labelingContainer.id = 'divLabelingContainer';
-        labelingContainer.style.setProperty('width', 'calc(90% - 20px)', '');
-        labelingContainer.style.setProperty('display', 'inline-block', '');
-        labelingContainer.style.setProperty('margin-left', '20px', '');
+        labelingContainer.id = 'labelingContainer';
         document.body.appendChild(labelingContainer);
 
         _representation.containerElement = labelingContainer;
@@ -187,7 +244,7 @@ window.generalPurposeLabelingWidget = (function () {
             dataTableWrapper.parentNode.insertBefore(progressText, dataTableWrapper);
             // Initialize progress text
             document.getElementById('progressText').innerHTML = _filterData(_getAllPossibleValues()).length + ' / ' +
-                _tileView._representation.table.rows.length + ' labled';
+                _tileView._representation.table.rows.length + ' labeled';
         }
 
         var labelingButtonGroup = document.createElement('div');
@@ -265,42 +322,23 @@ window.generalPurposeLabelingWidget = (function () {
         };
     };
 
-    // As postet at https://stackoverflow.com/questions/9600295/automatically-change-text-color-to-assure-readability
+    // As postet at https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
     // this should increase the readability of the text color.
     // --------------------------------------------------------------------------------------------------------------
-    _yuv2rgb = function (yuv) {
-        var y = yuv.y;
-        var u = yuv.u;
-        var v = yuv.v;
-        var r = _clamp(y + (v - 128) * 1.40200);
-        var g = _clamp(y + (u - 128) * -0.34414 + (v - 128) * -0.71414);
-        var b = _clamp(y + (u - 128) * 1.77200);
+    _invertColor = function (rgb, bw) {
+        var r = rgb.r,
+            g = rgb.g,
+            b = rgb.b;
+        if (bw) {
+            return (r * 0.299 + g * 0.587 + b * 0.114) > 186
+                ? { r: 0, g: 0, b: 0 }
+                : { r: 255, g: 255, b: 255 };
+        }
+        // invert color components
+        r = (255 - r).toString(16);
+        g = (255 - g).toString(16);
+        b = (255 - b).toString(16);
         return { r: r, g: g, b: b };
-    };
-
-    _clamp = function (n) {
-        if (n < 0) {
-            return 0;
-        }
-        if (n > 255) {
-            return 255;
-        }
-        return Math.floor(n);
-    };
-
-    _rgb2yuv = function (rgb) {
-        var y = _clamp(rgb.r * 0.29900 + rgb.g * 0.587 + rgb.b * 0.114);
-        var u = _clamp(rgb.r * -0.16874 + rgb.g * -0.33126 + rgb.b * 0.50000 + 128);
-        var v = _clamp(rgb.r * 0.50000 + rgb.g * -0.41869 + rgb.b * -0.08131 + 128);
-        return { y: y, u: u, v: v };
-    };
-
-    _invertColor = function (rgb) {
-        var yuv = _rgb2yuv(rgb);
-        var factor = 180;
-        var threshold = 100;
-        yuv.y = _clamp(yuv.y + (yuv.y > threshold ? -factor : factor));
-        return _yuv2rgb(yuv);
     };
     // --------------------------------------------------------------------------------------------------------------
 
@@ -478,7 +516,6 @@ window.generalPurposeLabelingWidget = (function () {
     _updateDropdownClasses = function () {
         var buttons = document.getElementById('divLabels');
         buttons.innerHTML = '';
-        // TODO get max amount of buttons to display from dialog
         _updateButtonClasses(7);
         var counter = 7;
 
@@ -573,7 +610,7 @@ window.generalPurposeLabelingWidget = (function () {
             bgColor = _getColorValue(k);
             addedLabelButton.style.background = _getHexColor(bgColor);
 
-            textColor = _invertColor(_hexToRgb(_getHexColor(bgColor)));
+            textColor = _invertColor(_hexToRgb(_getHexColor(bgColor)), true);
             addedLabelButton.style.color = 'rgb(' + textColor.r + ',' + textColor.g + ', ' + textColor.b + ')';
             addedLabelButton.onclick = function (e) {
                 if (e.target.completeName) {
@@ -607,26 +644,44 @@ window.generalPurposeLabelingWidget = (function () {
         return color;
     };
 
+    _checkIfIsCurrentlyDisplayed = function (rowId) {
+        var currentCheckboxes = knimeTileView._curCells[0].parentElement.parentElement.getElementsByClassName('selection-cell');
+        var displayedCheckbox = null;
+        for (var checkbox in currentCheckboxes) {
+            if (checkbox === 'length') {
+                break;
+            }
+            if (currentCheckboxes[checkbox].children[0].value === rowId) {
+                displayedCheckbox = currentCheckboxes[checkbox];
+                break;
+            }
+        }
+        return displayedCheckbox;
+    };
 
-    _labelAndLoadNext = function (labelColor, labelText, justLabel, row1) {
+
+    _labelAndLoadNext = function (labelColor, labelText, justLabel, rowName, lastToLabel) {
         var selectedRows = [];
         if (justLabel) {
-            selectedRows[0] = row1;
+            selectedRows[0] = rowName;
         } else {
-            for (var i = _selectedTiles.length - 1; i >= 0; i--) {
-                _tileView._selection[_selectedTiles[i].value] = false;
-                if (labelText === '') {
-                    if (_selectedTiles[i].parentNode) {
-                        _selectedTiles[i].parentNode.parentNode.labeled = false;
-                        selectedRows.push(_selectedTiles[i].parentNode);
-                        $(_selectedTiles[i]).click();
+            for (var i = Object.keys(_selectedTiles).length - 1; i >= 0; i--) {
+                var rowName = Object.keys(_selectedTiles)[i];
+                _tileView._selection[rowName] = false;
+                // Remove operation
+                var currentTile = _checkIfIsCurrentlyDisplayed(rowName);
+                if (currentTile !== null) {
+                    if (labelText === '') {
+                        // click the selected Tile
+                        currentTile.parentNode.parentNode.labeled = false;
+                        $(currentTile.children[0]).click();
+                    } else {
+                        currentTile.parentNode.parentNode.labeled = true;
+                        $(currentTile.children[0]).click();
                     }
-                } else if (_selectedTiles[i].parentNode !== null) {
-                    _selectedTiles[i].parentNode.parentNode.labeled = true;
-                    selectedRows.push(_selectedTiles[i].parentNode);
-                    $(_selectedTiles[i]).click();
                 }
-                _selectedTiles.splice(i, 1);
+                selectedRows.push(rowName);
+                delete _selectedTiles[rowName];
             }
         }
         var rgbObject, row;
@@ -639,7 +694,7 @@ window.generalPurposeLabelingWidget = (function () {
             var rgbSplit = labelColor.split('(')[1].substring(0, labelColor.split('(')[1].length - 1).split(',');
             rgbObject = { r: parseInt(rgbSplit[0], 10), g: parseInt(rgbSplit[1], 10), b: parseInt(rgbSplit[2], 10) };
         }
-        var invertedColor = _invertColor(rgbObject);
+        var invertedColor = _invertColor(rgbObject, true);
         var invertedRGBColor = 'rgb(' + invertedColor.r + ',' + invertedColor.g + ',' + invertedColor.b + ')';
         for (row in selectedRows) {
             var rowNumber;
@@ -649,7 +704,7 @@ window.generalPurposeLabelingWidget = (function () {
                         rowNumber = i;
                         break;
                     }
-                } else if (_tileView._dataTable.data()[i][0] === selectedRows[row].children[0].value) {
+                } else if (_tileView._dataTable.data()[i][0] === selectedRows[row]) {
                     rowNumber = i;
                     break;
                 }
@@ -678,25 +733,28 @@ window.generalPurposeLabelingWidget = (function () {
             }
         }
         _value.selection = [];
-        if (_value.showUnlabledOnly) {
+        if (_value.showUnlabeledOnly) {
             _tileView._filterLabeldData();
         }
         // Calculate the percentage of already labeled tiles and display it
         var progress = 1 - (_tileView._representation.table.rows.length - _filterData(_getAllPossibleValues()).length) / _tileView._representation.table.rows.length;
         if (_tileView._representation.useProgressBar) {
             document.getElementById('labCurrentProgressBar').style.width = progress * 100 + '%';
-            document.getElementById('progressText').innerHTML = _filterData(_getAllPossibleValues()).length + ' / ' + _tileView._representation.table.rows.length + ' labled';
+            document.getElementById('progressText').innerHTML = _filterData(_getAllPossibleValues()).length + ' / ' + _tileView._representation.table.rows.length + ' labeled';
         }
         if (_tileView._value.autoSelectNextTile) {
-            if (justLabel) {
-                _selectedTiles = [_selectNextTile([_tileView._curCells[0]])];
-            } else {
-                _selectedTiles = [_selectNextTile(selectedRows)];
+            var selectedRowName;
+            if (justLabel && lastToLabel) {
+                // nothing todo as no tile should be selected
+            } else if (!justLabel) {
+                knimeService.setSelectedRows(_representation.table.id, [], false);
+                selectedRowName = _selectNextTile(selectedRows);
+                _selectedTiles[selectedRowName] = true;
             }
         }
         // check for amount of selected tiles
         if (_selectedTiles.length) {
-            document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + _selectedTiles.length;
+            document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + Object.keys(_selectedTiles).length;
         } else {
             // set to 0 if selected is undefined (results from fresh loading)
             document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + 0;
@@ -710,31 +768,30 @@ window.generalPurposeLabelingWidget = (function () {
         var row, checkbox;
         for (row in selectedRows) {
             var tempRowNumber = selectedRows[row];
-            var newRowId = _tileView._dataTable.data().filter(function (value, index) {
-                return value[0] === tempRowNumber.children[0].value ? true : false;
+            var newRowId = _tileView._dataTable.rows().eq(0).filter(function (rowIdx) {
+                return _tileView._dataTable.cell(rowIdx, 0).data() === tempRowNumber ? true : false;
             });
+            newRowId = newRowId[0];
             if (lastCheckbox < newRowId) {
                 lastCheckbox = newRowId;
             }
         }
-        var lastRowIndex = _tileView._dataTable.row(selectedRows[0]).index();
-
 
         for (checkbox in currentCheckboxes) {
             if (checkbox === 'length') {
                 break;
             }
             var checkboxIndex = _tileView._dataTable.row(currentCheckboxes[checkbox]).index();
-            if (lastRowIndex < checkboxIndex) {
+            if (lastCheckbox < checkboxIndex) {
                 $(currentCheckboxes[checkbox]).click();
                 foundNext = true;
-                return currentCheckboxes[checkbox].children[0];
+                return currentCheckboxes[checkbox].children[0].value;
             }
         }
         if (!foundNext) {
             var lastRow = currentCheckboxes[currentCheckboxes.length - 1];
             _tileView._getJQueryTable().DataTable().page('next').draw('page');
-            return _selectFirstTile();
+            return _selectFirstTile().value;
         }
         return null;
     };
@@ -776,53 +833,23 @@ window.generalPurposeLabelingWidget = (function () {
 
     _changeSkipButton = function (changeToRemoveLabel) {
         var skipButton = document.getElementById('btnSkip');
-        if (_selectedTiles.length > 0) {
+        if (Object.keys(_selectedTiles).length > 0) {
             skipButton.style.visibility = 'visible';
         } else {
             skipButton.style.visibility = 'hidden';
         }
 
-        var onlyUnlabled = true;
+        var onlyUnlabeled = true;
         for (var selectedTile in _selectedTiles) {
-            if (_selectedTiles[selectedTile].parentNode !== null) {
-                if (_selectedTiles[selectedTile].parentNode.parentNode.labeled) {
-                    onlyUnlabled = false;
-                }
+            if (knimeTileView._value.labels[selectedTile]) {
+                onlyUnlabeled = false;
             }
         }
-        if (onlyUnlabled) {
+        if (onlyUnlabeled) {
             skipButton.innerHTML = 'Skip';
         } else {
             skipButton.innerHTML = 'Remove Label';
         }
-    };
-
-    // selection on click
-    window.knimeTileView._setSelectionHandlers = function () {
-        KnimeBaseTableViewer.prototype._setSelectionHandlers.apply(this);
-        if (!this._representation.enableSelection) {
-            return;
-        }
-        this._getJQueryTable().find('tbody').addClass('knime-selection-enabled').on('click', 'tr', function (e) {
-            var index;
-            if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
-                if (e.target.checked) {
-                    _selectedTiles.push(e.target);
-                    document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + _selectedTiles.length;
-                    _changeSkipButton();
-                } else {
-                    index = _selectedTiles.indexOf(e.target);
-                    if (index > -1) {
-                        _selectedTiles.splice(index, 1);
-                        document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + _selectedTiles.length;
-                    }
-                    _changeSkipButton();
-                }
-                return;
-            } else {
-                $(e.currentTarget).find('input[type="checkbox"]').click();
-            }
-        });
     };
 
     /**
