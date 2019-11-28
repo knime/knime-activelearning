@@ -12,7 +12,7 @@ window.generalPurposeLabelingWidget = (function () {
         _setupAddClassesButtonHandler, _createClassEditorDialog, _getRandomColor, _updateDialogClasses, _initializeView,
         _bindArrowKeys, _updateLabelClasses, _updateDropdownClasses, _filterData, _getAllPossibleValues, _invertColor,
         _hexToRgb, _selectNextTile, _getColorValue, _createRemoveDialog, _combinePossibleValues, _checkIfIsCurrentlyDisplayed,
-        _changeToDefaultHeaderColor, _selectFirstTile;
+        _changeToDefaultHeaderColor, _selectFirstTile, _combineColors;
 
     labelingWidget.init = function (representation, value) {
         _representation = representation;
@@ -20,6 +20,9 @@ window.generalPurposeLabelingWidget = (function () {
         _representation.table.spec.rowColorValues = _changeToDefaultHeaderColor(_representation.table.spec.rowColorValues, '#404040');
         _value = value;
         _value.possiblevalues = _combinePossibleValues(_representation, _value);
+        if (Object.keys(_value.colors).length === 0) {
+            _value.colors = _representation.colors;
+        }
         _createContainer();
         _bindArrowKeys();
     };
@@ -29,6 +32,7 @@ window.generalPurposeLabelingWidget = (function () {
     };
 
     labelingWidget.getComponentValue = function () {
+        window.knimeTileView.getComponentValue.apply(window.knimeTileView);
         return _value;
     };
 
@@ -72,14 +76,43 @@ window.generalPurposeLabelingWidget = (function () {
                     }
                     counter++;
                 }
-                _selectedTiles = [];
             } else {
                 if (_representation.autoSelectNextTile) {
-                    _selectFirstTile();
+                    _selectedTiles[_selectFirstTile().value] = true;
                 }
             }
         } else {
             return;
+        }
+    };
+
+    /**
+     * Copy mostly copied from baseTableViewer except for two lines which set to the correct selection. This is necessary, as correct page is drawn after timeout...
+     */
+    window.knimeTileView._applyViewValueOld = window.knimeTileView._applyViewValue;
+    window.knimeTileView._applyViewValue = function () {
+        if (this._representation.enableSearching && this._value.filterString) {
+            this._dataTable.search(this._value.filterString);
+        }
+        if (this._representation.enableColumnSearching && this._value.columnFilterStrings) {
+            for (var i = 0; i < this._value.columnFilterStrings.length; i++) {
+                var curValue = this._value.columnFilterStrings[i];
+                if (curValue.length > 0) {
+                    var column = this._dataTable.column(i);
+                    $('input', column.footer()).val(curValue);
+                    column.search(curValue);
+                }
+            }
+        }
+        if (this._representation.enablePaging && this._value.currentPage) {
+            var self = this;
+            setTimeout(function () {
+                self._dataTable.page(self._value.currentPage).draw('page');
+                // these two lines are new.
+                _selectedTiles = self._selection;
+                document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + Object.keys(_selectedTiles).length;
+                //
+            }, 0);
         }
     };
 
@@ -297,7 +330,7 @@ window.generalPurposeLabelingWidget = (function () {
             if (e.target.innerHTML === 'Skip') {
                 _labelAndLoadNext(_hexToRgb('#F0F0F0'), e.target.innerHTML);
             } else {
-                for (var selectedTile in window.knimeTileView._selection) {
+                for (var selectedTile in _selectedTiles) {
                     if (_value.labels[selectedTile]) {
                         delete _value.labels[selectedTile];
                     }
@@ -625,12 +658,18 @@ window.generalPurposeLabelingWidget = (function () {
     };
 
     _getColorValue = function (index) {
+
         var bgColor;
         var defaultColor = 15790320;
         if (_representation.colorscheme === 'None') {
             bgColor = defaultColor;
         } else if (_value.possiblevalues[index] in _value.colors) {
             bgColor = _value.colors[_value.possiblevalues[index]];
+            // if dropdown is used, then colors should all be the same (6 is dropdown limit at the moment)
+            // TODO make dropdown limit be configurable
+        } else if (index > 6) {
+            bgColor = defaultColor;
+            _value.colors[_value.possiblevalues[index]] = bgColor;
         } else {
             bgColor = _getRandomColor();
             _value.colors[_value.possiblevalues[index]] = bgColor;
@@ -661,103 +700,106 @@ window.generalPurposeLabelingWidget = (function () {
 
 
     _labelAndLoadNext = function (labelColor, labelText, justLabel, rowName, lastToLabel) {
-        var selectedRows = [];
-        if (justLabel) {
-            selectedRows[0] = rowName;
-        } else {
-            for (var i = Object.keys(_selectedTiles).length - 1; i >= 0; i--) {
-                var rowName = Object.keys(_selectedTiles)[i];
-                _tileView._selection[rowName] = false;
-                // Remove operation
-                var currentTile = _checkIfIsCurrentlyDisplayed(rowName);
-                if (currentTile !== null) {
-                    if (labelText === '') {
-                        // click the selected Tile
-                        currentTile.parentNode.parentNode.labeled = false;
-                        $(currentTile.children[0]).click();
-                    } else {
-                        currentTile.parentNode.parentNode.labeled = true;
-                        $(currentTile.children[0]).click();
+        // only work if something is selected. TODO disable buttons.
+        if (Object.keys(_selectedTiles).length > 0 || justLabel) {
+            var selectedRows = [];
+            if (justLabel) {
+                selectedRows[0] = rowName;
+            } else {
+                for (var i = Object.keys(_selectedTiles).length - 1; i >= 0; i--) {
+                    rowName = Object.keys(_selectedTiles)[i];
+                    _tileView._selection[rowName] = false;
+                    // Remove operation
+                    var currentTile = _checkIfIsCurrentlyDisplayed(rowName);
+                    if (currentTile !== null) {
+                        if (labelText === '') {
+                            // click the selected Tile
+                            currentTile.parentNode.parentNode.labeled = false;
+                            $(currentTile.children[0]).click();
+                        } else {
+                            currentTile.parentNode.parentNode.labeled = true;
+                            $(currentTile.children[0]).click();
+                        }
                     }
+                    selectedRows.push(rowName);
+                    delete _selectedTiles[rowName];
                 }
-                selectedRows.push(rowName);
-                delete _selectedTiles[rowName];
             }
-        }
-        var rgbObject, row;
+            var rgbObject, row;
 
-        // Transform from object to rgb string
-        if (typeof labelColor === 'object') {
-            rgbObject = labelColor;
-            labelColor = 'rgb(' + rgbObject.r + ',' + rgbObject.g + ',' + rgbObject.b + ')';
-        } else {
-            var rgbSplit = labelColor.split('(')[1].substring(0, labelColor.split('(')[1].length - 1).split(',');
-            rgbObject = { r: parseInt(rgbSplit[0], 10), g: parseInt(rgbSplit[1], 10), b: parseInt(rgbSplit[2], 10) };
-        }
-        var invertedColor = _invertColor(rgbObject, true);
-        var invertedRGBColor = 'rgb(' + invertedColor.r + ',' + invertedColor.g + ',' + invertedColor.b + ')';
-        for (row in selectedRows) {
-            var rowNumber;
-            for (var i = 0; i < _tileView._dataTable.data().length; i++) {
-                if (justLabel) {
-                    if (_tileView._dataTable.data()[i][0] === selectedRows[row]) {
-                        rowNumber = i;
+            // Transform from object to rgb string
+            if (typeof labelColor === 'object') {
+                rgbObject = labelColor;
+                labelColor = 'rgb(' + rgbObject.r + ',' + rgbObject.g + ',' + rgbObject.b + ')';
+            } else {
+                var rgbSplit = labelColor.split('(')[1].substring(0, labelColor.split('(')[1].length - 1).split(',');
+                rgbObject = { r: parseInt(rgbSplit[0], 10), g: parseInt(rgbSplit[1], 10), b: parseInt(rgbSplit[2], 10) };
+            }
+            var invertedColor = _invertColor(rgbObject, true);
+            var invertedRGBColor = 'rgb(' + invertedColor.r + ',' + invertedColor.g + ',' + invertedColor.b + ')';
+            for (row in selectedRows) {
+                var rowNumber;
+                for (var j = 0; j < _tileView._dataTable.data().length; j++) {
+                    if (justLabel) {
+                        if (_tileView._dataTable.data()[j][0] === selectedRows[row]) {
+                            rowNumber = j;
+                            break;
+                        }
+                    } else if (_tileView._dataTable.data()[j][0] === selectedRows[row]) {
+                        rowNumber = j;
                         break;
                     }
-                } else if (_tileView._dataTable.data()[i][0] === selectedRows[row]) {
-                    rowNumber = i;
-                    break;
+                }
+                // Check for hex string
+                _tileView._dataTable.data()[rowNumber][1] = _tileView._dataTable.data()[rowNumber][1].replace(
+                    /background-color:\s*#[A-Fa-f0-9]{6};*/, 'background-color: ' + labelColor + ';');
+                // Check for rgb background string
+                _tileView._dataTable.data()[rowNumber][1] = _tileView._dataTable.data()[rowNumber][1].replace(
+                    /background-color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/, 'background-color: ' + labelColor + ';');
+                // Check if text color value is set and if yes replace it
+                if (/"color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/.test(_tileView._dataTable.data()[rowNumber][1])) {
+                    _tileView._dataTable.data()[rowNumber][1] = _tileView._dataTable.data()[rowNumber][1].replace(
+                        /"color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/, '"color: ' + invertedRGBColor + ';');
+                } else {
+                    _tileView._dataTable.data()[rowNumber][1] = _tileView._dataTable.data()[rowNumber][1].replace(
+                        /style="/, 'style="color: ' + invertedRGBColor + ';');
+                }
+                // Replace the text of the tile to the new label
+                _tileView._dataTable.data()[rowNumber][1] = _tileView._dataTable.data()[rowNumber][1].replace(
+                    />.*<\/div>/, '>' + labelText + '</div>');
+                _tileView._dataTable.row(rowNumber).invalidate();
+                // Save the current label into the view value, if it is not empty.
+                if (labelText !== '') {
+                    _value.labels[_representation.table.rows[rowNumber].rowKey] = labelText;
                 }
             }
-            // Check for hex string
-            _tileView._dataTable.data()[rowNumber][1] = _tileView._dataTable.data()[rowNumber][1].replace(
-                /background-color:\s*#[A-Fa-f0-9]{6};*/, 'background-color: ' + labelColor + ';');
-            // Check for rgb background string
-            _tileView._dataTable.data()[rowNumber][1] = _tileView._dataTable.data()[rowNumber][1].replace(
-                /background-color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/, 'background-color: ' + labelColor + ';');
-            // Check if text color value is set and if yes replace it
-            if (/"color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/.test(_tileView._dataTable.data()[rowNumber][1])) {
-                _tileView._dataTable.data()[rowNumber][1] = _tileView._dataTable.data()[rowNumber][1].replace(
-                    /"color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/, '"color: ' + invertedRGBColor + ';');
+            _value.selection = [];
+            if (_value.showUnlabeledOnly) {
+                _tileView._filterLabeldData();
+            }
+            // Calculate the percentage of already labeled tiles and display it
+            var progress = 1 - (_tileView._representation.table.rows.length - _filterData(_getAllPossibleValues()).length) / _tileView._representation.table.rows.length;
+            if (_tileView._representation.useProgressBar) {
+                document.getElementById('labCurrentProgressBar').style.width = progress * 100 + '%';
+                document.getElementById('progressText').innerHTML = _filterData(_getAllPossibleValues()).length + ' / ' + _tileView._representation.table.rows.length + ' labeled';
+            }
+            if (_tileView._value.autoSelectNextTile && labelText !== '') {
+                var selectedRowName;
+                if (justLabel && lastToLabel) {
+                    // nothing todo as no tile should be selected
+                } else if (!justLabel) {
+                    knimeService.setSelectedRows(_representation.table.id, [], false);
+                    selectedRowName = _selectNextTile(selectedRows);
+                    _selectedTiles[selectedRowName] = true;
+                }
+            }
+            // check for amount of selected tiles
+            if (Object.keys(_selectedTiles).length) {
+                document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + Object.keys(_selectedTiles).length;
             } else {
-                _tileView._dataTable.data()[rowNumber][1] = _tileView._dataTable.data()[rowNumber][1].replace(
-                    /style="/, 'style="color: ' + invertedRGBColor + ';');
+                // set to 0 if selected is undefined (results from fresh loading)
+                document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + 0;
             }
-            // Replace the text of the tile to the new label
-            _tileView._dataTable.data()[rowNumber][1] = _tileView._dataTable.data()[rowNumber][1].replace(
-                />.*<\/div>/, '>' + labelText + '</div>');
-            _tileView._dataTable.row(rowNumber).invalidate();
-            // Save the current label into the view value, if it is not empty.
-            if (labelText !== '') {
-                _value.labels[_representation.table.rows[rowNumber].rowKey] = labelText;
-            }
-        }
-        _value.selection = [];
-        if (_value.showUnlabeledOnly) {
-            _tileView._filterLabeldData();
-        }
-        // Calculate the percentage of already labeled tiles and display it
-        var progress = 1 - (_tileView._representation.table.rows.length - _filterData(_getAllPossibleValues()).length) / _tileView._representation.table.rows.length;
-        if (_tileView._representation.useProgressBar) {
-            document.getElementById('labCurrentProgressBar').style.width = progress * 100 + '%';
-            document.getElementById('progressText').innerHTML = _filterData(_getAllPossibleValues()).length + ' / ' + _tileView._representation.table.rows.length + ' labeled';
-        }
-        if (_tileView._value.autoSelectNextTile) {
-            var selectedRowName;
-            if (justLabel && lastToLabel) {
-                // nothing todo as no tile should be selected
-            } else if (!justLabel) {
-                knimeService.setSelectedRows(_representation.table.id, [], false);
-                selectedRowName = _selectNextTile(selectedRows);
-                _selectedTiles[selectedRowName] = true;
-            }
-        }
-        // check for amount of selected tiles
-        if (Object.keys(_selectedTiles.length)) {
-            document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + Object.keys(_selectedTiles).length;
-        } else {
-            // set to 0 if selected is undefined (results from fresh loading)
-            document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + 0;
         }
     };
 
