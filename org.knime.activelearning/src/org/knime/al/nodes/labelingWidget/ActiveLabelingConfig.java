@@ -111,15 +111,6 @@ public class ActiveLabelingConfig implements TableConfig {
 
     private String m_colorScheme = DEFAULT_COLOR_SCHEME;
 
-
-    // static final String CFG_USE_SECOND_PORT = "useSecondPort";
-    // private static final boolean DEFAULT_USE_SECOND_PORT = false;
-    // private boolean m_useSecondPort = DEFAULT_USE_SECOND_PORT;
-    //
-    // static final String CFG_SECOND_PORT_VALUES = "useSecondPort";
-    // private static final String[] DEFAULT_SECOND_PORT_VALUES = new String[0];
-    // private String[] m_secondPortValues = DEFAULT_SECOND_PORT_VALUES;
-
     static final String CFG_ADD_LABELS_DYNAMICALLY = "addLabelsDynamically";
 
     private static final boolean DEFAULT_ADD_LABELS_DYNAMICALLY = false;
@@ -386,36 +377,6 @@ public class ActiveLabelingConfig implements TableConfig {
         this.m_colorScheme = colorScheme;
     }
 
-    // /**
-    // * @return the m_useSecondPort
-    // */
-    // public boolean isUseSecondPort() {
-    // return m_useSecondPort;
-    // }
-    //
-    // /**
-    // * @param useSecondPort
-    // * the useSecondPort to set
-    // */
-    // public void setUseSecondPort(final boolean useSecondPort) {
-    // this.m_useSecondPort = useSecondPort;
-    // }
-    //
-    // /**
-    // * @return the secondPortValues
-    // */
-    // public String[] getSecondPortValues() {
-    // return m_secondPortValues;
-    // }
-    //
-    // /**
-    // * @param secondPortValues
-    // * the secondPortValues to set
-    // */
-    // public void setSecondPortValues(final String[] secondPortValues) {
-    // this.m_secondPortValues = secondPortValues;
-    // }
-
     /**
      * @return the addLabelsDynamically
      */
@@ -463,7 +424,6 @@ public class ActiveLabelingConfig implements TableConfig {
         settings.addBoolean(CFG_ALIGN_CENTER, m_alignCenter);
         settings.addBoolean(CFG_USE_PROGRESS_BAR, m_useProgressBar);
         settings.addBoolean(CFG_AUTO_SELECT_NEXT_TILE, m_autoSelectNextTile);
-        // settings.addBoolean(CFG_USE_SECOND_PORT, m_useSecondPort);
         settings.addBoolean(CFG_ADD_LABELS_DYNAMICALLY, m_addLabelsDynamically);
         settings.addString(CFG_COLOR_SCHEME, m_colorScheme);
         settings.addStringArray(CFG_POSSIBLE_VALUES, m_possibleValues);
@@ -471,7 +431,6 @@ public class ActiveLabelingConfig implements TableConfig {
         settings.addBoolean(CFG_APPEND_RADIO, m_isAppendRadio);
         settings.addString(CFG_APPEND_COL, m_appendCol);
         settings.addBoolean(CFG_REPLACE_RADIO, m_isReplaceRadio);
-        // settings.addStringArray(CFG_SECOND_PORT_VALUES, m_secondPortValues);
     }
 
     /**
@@ -499,7 +458,6 @@ public class ActiveLabelingConfig implements TableConfig {
         m_alignLeft = settings.getBoolean(CFG_ALIGN_LEFT);
         m_alignRight = settings.getBoolean(CFG_ALIGN_RIGHT);
         m_alignCenter = settings.getBoolean(CFG_ALIGN_CENTER);
-        // m_useSecondPort = settings.getBoolean(CFG_USE_SECOND_PORT);
         m_addLabelsDynamically = settings.getBoolean(CFG_ADD_LABELS_DYNAMICALLY);
         m_colorScheme = settings.getString(CFG_COLOR_SCHEME);
         m_possibleValues = settings.getStringArray(CFG_POSSIBLE_VALUES);
@@ -507,7 +465,6 @@ public class ActiveLabelingConfig implements TableConfig {
         m_appendCol = settings.getString(CFG_APPEND_COL);
         m_isReplaceRadio = settings.getBoolean(CFG_REPLACE_RADIO);
         m_isAppendRadio = settings.getBoolean(CFG_APPEND_RADIO);
-        // m_secondPortValues = settings.getStringArray(CFG_SECOND_PORT_VALUES);
         m_useProgressBar = settings.getBoolean(CFG_USE_PROGRESS_BAR);
         m_autoSelectNextTile = settings.getBoolean(CFG_AUTO_SELECT_NEXT_TILE);
         m_numCols = numCols;
@@ -529,8 +486,6 @@ public class ActiveLabelingConfig implements TableConfig {
         m_alignLeft = settings.getBoolean(CFG_ALIGN_LEFT, DEFAULT_ALIGN_LEFT);
         m_alignRight = settings.getBoolean(CFG_ALIGN_RIGHT, DEFAULT_ALIGN_RIGHT);
         m_alignCenter = settings.getBoolean(CFG_ALIGN_CENTER, DEFAULT_ALIGN_CENTER);
-        // m_useSecondPort = settings.getBoolean(CFG_USE_SECOND_PORT,
-        // DEFAULT_USE_SECOND_PORT);
         m_addLabelsDynamically = settings.getBoolean(CFG_ADD_LABELS_DYNAMICALLY, DEFAULT_ADD_LABELS_DYNAMICALLY);
         m_colorScheme = settings.getString(CFG_COLOR_SCHEME, DEFAULT_COLOR_SCHEME);
         m_possibleValues = settings.getStringArray(CFG_POSSIBLE_VALUES, DEFAULT_POSSIBLE_VALUES);
@@ -538,8 +493,6 @@ public class ActiveLabelingConfig implements TableConfig {
         m_appendCol = settings.getString(CFG_APPEND_COL, DEFAULT_APPEND_COL);
         m_isReplaceRadio = settings.getBoolean(CFG_REPLACE_RADIO, DEFAULT_REPLACE_RADIO);
         m_isAppendRadio = settings.getBoolean(CFG_APPEND_RADIO, DEFAULT_APPEND_RADIO);
-        // m_secondPortValues = settings.getStringArray(CFG_SECOND_PORT_VALUES,
-        // DEFAULT_SECOND_PORT_VALUES);
         m_useProgressBar = settings.getBoolean(CFG_USE_PROGRESS_BAR, DEFAULT_USE_PROGRESS_BAR);
         m_autoSelectNextTile = settings.getBoolean(CFG_AUTO_SELECT_NEXT_TILE, DEFAULT_AUTO_SELECT_NEXT_TILE);
     }
