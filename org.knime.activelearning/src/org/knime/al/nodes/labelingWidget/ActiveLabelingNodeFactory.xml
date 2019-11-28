@@ -17,15 +17,6 @@
             <option name="Column with possible labels">
                 Possible domain values of the selected column get used as label classes.
             </option>
-            <option name="Color Scheme">
-                Label class colors can be set via predefined palettes.
-            </option>
-             <option name="Use second input port">
-                Enable or disable the usage of a second input port for label classes.
-            </option>
-            <option name="Column with possible labels as values">
-                Values of the selected column get appended as label classes.
-            </option>
              <option name="Add new labels in View">
                 When this option is enabled it is possible to add/delete labels when the view is opened.
                 For this, there will be an extra option in the view menu when this option is set.
@@ -33,20 +24,17 @@
             <option name="Show progress bar at the top of the view">
                 When this option is set, there will be a progress bar in the view, which shows the progress of the labeling.
             </option>
-            <option name="Initial page size">
-                Set the page size to be used on initial layout. A page size is defined as the number of tiles the view
-                displays on one page. If the page size change control is enabled the page length can be changed in the
-                view.
+            <option name="Automatically select next tile when tiles are labeled">
+                When this option is set, the next tile will be automatically be selected after one of the label buttons was pressed.
+                Rightmost selected tile is at the last position of the page, the next page will be displayed and the first tile on that page will be selected.
             </option>
-            <option name="Enable page size change control">
-                Enable or disable the control to change the page size interactively in the view.
+            <option name="Append new column">
+                When this options is selected the output of the labeling will be appended in a new column with the given name.
             </option>
-            <option name="Selectable page sizes">
-                Define a comma-separated list of allowed page sizes for the page size control.
+            <option name="Replace existing column">
+                When this options is selected the output of the labeling will replace the given column.
             </option>
-            <option name="Add 'All' option to page sizes">
-                When checked, an additional 'All' option will be available in the page size control.
-            </option>
+            
         </tab>
 		<tab name="Options">
             <description>
@@ -60,22 +48,6 @@
             </option>
             <option name="Subtitle" optional="true">
                 An optional subtitle to be displayed above the tiles. Leave blank if no subtitle is desired.
-            </option>
-            <option name="Display row colors">
-                Enable or disable the display of row colors. Colors can be assigned e.g. with the Color Manager node and
-                will be rendered as a colored stripe at the top of the respective tile.
-            </option>
-            <option name="Display column headers">
-                Enable or disable the display of column headers. The column headers will be shown along with the cell
-                entries in each tile. Note that column headers are not rendered for images.
-            </option>
-            <option name="Display row id">
-                Enable or disable the display of row ids. The row ids will be shown along with the cell
-                entries in each tile.
-            </option>
-            <option name="Display full screen button">
-                Check to display a button which switches the view into fullscreen mode.
-                The button is only available in the KNIME WebPortal.
             </option>
             <option name="Fixed number of tiles per row (1-100)">
                 If checked, the specified number of tiles will be displayed for each row. The number of tiles per row 
@@ -92,6 +64,53 @@
             </option>
             <option name="Columns to display">
                 Select the columns whose contents should be included in the tile’s contents.
+            </option>
+        </tab>
+        <tab name="Interactivity">
+            <description>
+                The JavaScript Labeling View allows for several ways of interactivity. Please use the options below to
+                configure which features will be activated on the view and further configuration of interactive
+                properties.
+            </description>
+            <option name="Initial page size">
+                Set the page size to be used on initial layout. A page size is defined as the number of tiles the view
+                displays on one page. If the page size change control is enabled the page length can be changed in the
+                view.
+            </option>
+            <option name="Enable page size change control">
+                Enable or disable the control to change the page size interactively in the view.
+            </option>
+            <option name="Selectable page sizes">
+                Define a comma-separated list of allowed page sizes for the page size control.
+            </option>
+            <option name="Add 'All' option to page sizes">
+                When checked, an additional 'All' option will be available in the page size control.
+            </option>
+            <option name="Enable selection">
+                If checked a checkbox is rendered in the bottom left corner of each tile. The selection, when applied,
+                will be represented in the output table as a new boolean column.
+            </option>
+            <option name="Subscribe to filter events">
+                If checked, the view reacts when applied filters have been changed.
+            </option>
+            <option name="Enable 'Clear Selection' button">
+                If checked a button is displayed above the tiles, to clear any selection that is applied, regardless of
+                current search and/or filter settings.
+            </option>
+            <option name="Show selected tiles only">
+                If checked, only tiles which are selected are displayed.
+            </option>
+            <option name="Enable 'Show selected tiles only' option">
+                If checked, a checkbox to switch on and off the mode of displaying only selected tiles is rendered in 
+                the view.
+            </option>
+            <option name="Publish selection events">
+                If checked, notifies other interactive views when user changes the selection in the current view. See
+                also "Subscribe to selection events".
+            </option>
+            <option name="Subscribe to selection events">
+                If checked, the view reacts on notifications from other interactive views that the selection has been
+                changed. See also "Publish selection events".
             </option>
         </tab>
         
