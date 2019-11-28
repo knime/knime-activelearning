@@ -159,8 +159,6 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
 
     private final JCheckBox m_enableClearSelectionButtonCheckbox;
 
-    private final JTextField m_selectionColumnNameField;
-
     private final JCheckBox m_publishSelectionCheckBox;
 
     private final JCheckBox m_subscribeSelectionCheckBox;
@@ -191,12 +189,6 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
 
     private final JLabel m_maxRowsWarning;
 
-//    private JComboBox<String> m_colorSchemeSelection;
-
-//    private final JCheckBox m_useSecondPort;
-
-//    private final ColumnSelectionPanel m_secondInputPortValues;
-
     private final JCheckBox m_addLabelsDynamically;
 
     private final JCheckBox m_useProgressBar;
@@ -221,7 +213,6 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_allowedPageSizesField = new JTextField(TEXT_FIELD_SIZE);
         m_enableShowAllCheckBox = new JCheckBox("Add \"All\" option to page sizes");
         m_enableJumpToPageCheckBox = new JCheckBox("Display field to jump to a page directly");
-        //		m_useSecondPort = new JCheckBox("Use second input port for possible labels");
         m_addLabelsDynamically = new JCheckBox("Add new labels in View");
         m_useProgressBar = new JCheckBox("Show progress bar at the top of the view");
         m_autoSelectNextTile = new JCheckBox("Automatically select next tile when tiles are labeled");
@@ -231,7 +222,6 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_enableSelectionCheckbox = new JCheckBox("Enable selection");
         m_enableSelectionCheckbox.addChangeListener(e -> enableSelectionFields());
         m_enableClearSelectionButtonCheckbox = new JCheckBox("Enable 'Clear Selection' button");
-        m_selectionColumnNameField = new JTextField(TEXT_FIELD_SIZE);
         m_publishSelectionCheckBox = new JCheckBox("Publish selection events");
         m_subscribeSelectionCheckBox = new JCheckBox("Subscribe to selection events");
         m_hideUnselectedCheckbox = new JCheckBox("Show selected rows only");
@@ -271,18 +261,15 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
                 new DataValueColumnFilter(NominalValue.class, DoubleValue.class), true, true);
         m_columnWithPossibleValues =
             new ColumnSelectionPanel(BorderFactory.createTitledBorder("Column with possible labels: "),
-                new DataValueColumnFilter(StringValue.class, DoubleValue.class), true);
+                new DataValueColumnFilter(StringValue.class));
         m_replaceColumnName =
                 new ColumnSelectionPanel(BorderFactory.createTitledBorder("Replace column: "),
                     new DataValueColumnFilter(StringValue.class, DoubleValue.class));
-        //		m_secondInputPortValues = new ColumnSelectionPanel(
-        //				BorderFactory.createTitledBorder("Column with possible labels as values: "),
-        //				new DataValueColumnFilter(NominalValue.class, DoubleValue.class), true, true);
 
-        m_replaceColumnRadio = new JRadioButton("Replace existing variable:");
+        m_replaceColumnRadio = new JRadioButton("Replace existing column:");
         m_replaceColumnRadio.addActionListener(e -> appendVariableChanged());
      // Enable and disable text of not selected Button
-        m_appendColumnRadio = new JRadioButton("Append new variable:");
+        m_appendColumnRadio = new JRadioButton("Append new column:");
         m_appendColumnRadio.addActionListener(e -> appendVariableChanged());
         m_appendColumnName = new JTextField();
 
@@ -354,7 +341,6 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_config.getSettings().getRepresentationSettings().setEnableSelection(m_enableSelectionCheckbox.isSelected());
         m_config.getSettings().getRepresentationSettings()
             .setEnableClearSelectionButton(m_enableClearSelectionButtonCheckbox.isSelected());
-        m_config.getSettings().setSelectionColumnName(m_selectionColumnNameField.getText());
         m_config.getSettings().getValueSettings().setHideUnselected(m_hideUnselectedCheckbox.isSelected());
         m_config.getSettings().getRepresentationSettings()
             .setEnableHideUnselected(m_enableHideUnselectedCheckbox.isSelected());
@@ -383,7 +369,6 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_config.setReplaceCol(m_replaceColumnName.getSelectedColumn());
         m_config.setAppendCol(m_appendColumnName.getText());
         appendVariableChanged();
-        //m_config.setColorScheme(m_colorSchemeSelection.getSelectedItem().toString());
         m_config.setAlignLeft(m_alignLeftRadioButton.isSelected());
         m_config.setAlignRight(m_alignRightRadioButton.isSelected());
         m_config.setAlignCenter(m_alignCenterRadioButton.isSelected());
@@ -421,7 +406,6 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_enableSelectionCheckbox.setSelected(m_config.getSettings().getRepresentationSettings().getEnableSelection());
         m_enableClearSelectionButtonCheckbox
             .setSelected(m_config.getSettings().getRepresentationSettings().getEnableClearSelectionButton());
-        m_selectionColumnNameField.setText(m_config.getSettings().getSelectionColumnName());
         m_hideUnselectedCheckbox.setSelected(m_config.getSettings().getValueSettings().getHideUnselected());
         m_enableHideUnselectedCheckbox
             .setSelected(m_config.getSettings().getRepresentationSettings().getEnableHideUnselected());
@@ -452,10 +436,6 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_replaceColumnName.update(inSpec, m_config.getReplaceCol());
         m_appendColumnName.setText(m_config.getAppendCol());
 
-        //		if (specs.length > 1) {
-        //			final DataTableSpec inSpec2 = (DataTableSpec) specs[1];
-        //			m_secondInputPortValues.update(inSpec2, m_config.getLabelCol(), m_config.getUseRowID());
-        //		}
         m_alignLeftRadioButton.setSelected(m_config.getAlignLeft());
         m_alignRightRadioButton.setSelected(m_config.getAlignRight());
         m_alignCenterRadioButton.setSelected(m_config.getAlignCenter());
@@ -471,7 +451,6 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         setNumberOfFilters(inSpec);
         m_whitespace.setVisible(true);
         appendVariableChanged();
-        //m_colorSchemeSelection.setSelectedItem(m_config.getColorScheme());
     }
 
     // -- Helper methods --
@@ -504,34 +483,6 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         labelPanel.add(m_columnWithPossibleValues, gbcN);
         gbcN.gridy++;
         gbcN.fill = GridBagConstraints.HORIZONTAL;
-
-
-//        gbcN.fill = GridBagConstraints.NONE;
-//        gbcN.gridy++;
-//        final JPanel colorSchemeSubPanel = new JPanel();
-//        m_colorSchemeSelection = new JComboBox<>();
-//        m_colorSchemeSelection.setRenderer(new StringIconListCellRenderer());
-//        final String[] elements = new String[]{"None", "Scheme 1", "Scheme 2"};
-//        for (final String o : elements) {
-//            if (o == null) {
-//                throw new NullPointerException("Options in the selection" + " list can't be null");
-//            }
-//            m_colorSchemeSelection.addItem(o);
-//        }
-//        colorSchemeSubPanel.add(new JLabel("Color Scheme: "), gbcN);
-//        colorSchemeSubPanel.add(m_colorSchemeSelection);
-//        labelPanel.add(colorSchemeSubPanel, gbcN);
-
-//        		gbcN.gridy++;
-//        		labelPanel.add(m_useSecondPort, gbcN);
-//
-//        		gbcN.gridy++;
-//        		gbcN.fill = GridBagConstraints.HORIZONTAL;
-//        		labelPanel.add(m_secondInputPortValues, gbcN);
-//        		m_secondInputPortValues.setEnabled(false);
-//        		gbcN.fill = GridBagConstraints.NONE;
-//
-//        		m_useSecondPort.addChangeListener(e -> m_secondInputPortValues.setEnabled(m_useSecondPort.isSelected()));
 
         gbcN.gridy++;
         labelPanel.add(m_addLabelsDynamically, gbcN);
@@ -739,11 +690,6 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         gbcS.gridx = 0;
         gbcS.gridy++;
         selectionPanel.add(m_subscribeSelectionCheckBox, gbcS);
-        gbcS.gridx = 0;
-        gbcS.gridy++;
-        selectionPanel.add(new JLabel("Selection column name: "), gbcS);
-        gbcS.gridx++;
-        selectionPanel.add(m_selectionColumnNameField, gbcS);
 
         final JPanel panel = new JPanel(new GridBagLayout());
         final GridBagConstraints gbc = DialogUtil.defaultGridBagConstraints();
@@ -843,7 +789,6 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_enableHideUnselectedCheckbox.setEnabled(enable);
         m_publishSelectionCheckBox.setEnabled(enable);
         m_subscribeSelectionCheckBox.setEnabled(enable);
-        m_selectionColumnNameField.setEnabled(enable);
     }
 
     private void enableFormatterFields() {

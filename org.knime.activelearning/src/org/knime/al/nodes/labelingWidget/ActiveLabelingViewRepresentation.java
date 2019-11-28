@@ -222,19 +222,6 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
         m_tableSettings = settings;
     }
 
-    //	@JsonProperty("useSecondInputPort")
-    //	public void setUseSecondInputPort(final boolean useSecondInputPort) {
-    //		m_useSecondInputPort = useSecondInputPort;
-    //	}
-    //
-    //	/**
-    //	 * @return the useSecondInputPort
-    //	 */
-    //	@JsonProperty("useSecondInputPort")
-    //	public boolean getUseSecondInputPort() {
-    //		return m_useSecondInputPort;
-    //	}
-
     /**
      * @return the useNumCols
      */
@@ -408,9 +395,6 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
         settings.addBoolean(ActiveLabelingConfig.CFG_ALIGN_CENTER, m_alignCenter);
         settings.addStringArray(ActiveLabelingConfig.CFG_POSSIBLE_VALUES, m_possibleLabelValues);
         settings.addString(ActiveLabelingConfig.CFG_COLOR_SCHEME, m_colorScheme);
-        //		settings.addBoolean(ActiveLearningConfig.CFG_USE_SECOND_PORT, m_useSecondInputPort);
-        //		settings.addStringArray(ActiveLearningConfig.CFG_SECOND_PORT_VALUES, m_secondPortLabelValues);
-        // TODO label creation =adding labels dynamically?
         settings.addBoolean(ActiveLabelingConfig.CFG_ADD_LABELS_DYNAMICALLY, m_labelCreation);
         settings.addBoolean(ActiveLabelingConfig.CFG_USE_PROGRESS_BAR, m_useProgressBar);
         settings.addBoolean(ActiveLabelingConfig.CFG_AUTO_SELECT_NEXT_TILE, m_autoSelectNextTile);
