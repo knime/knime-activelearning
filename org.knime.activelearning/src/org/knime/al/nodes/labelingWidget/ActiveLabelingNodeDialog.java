@@ -367,6 +367,8 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         }
         m_config.setLabelCol(m_columnWithPossibleValues.getSelectedColumn());
         m_config.setReplaceCol(m_replaceColumnName.getSelectedColumn());
+        m_config.setAppendRadio(m_appendColumnRadio.isSelected());
+        m_config.setReplaceRadio(m_replaceColumnRadio.isSelected());
         m_config.setAppendCol(m_appendColumnName.getText());
         appendVariableChanged();
         m_config.setAlignLeft(m_alignLeftRadioButton.isSelected());
@@ -435,6 +437,8 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_columnWithPossibleValues.update(inSpec, m_config.getLabelCol(), m_config.getUseRowID());
         m_replaceColumnName.update(inSpec, m_config.getReplaceCol());
         m_appendColumnName.setText(m_config.getAppendCol());
+        m_replaceColumnRadio.setSelected(m_config.isReplaceRadio());
+        m_appendColumnRadio.setSelected(m_config.isAppendRadio());
 
         m_alignLeftRadioButton.setSelected(m_config.getAlignLeft());
         m_alignRightRadioButton.setSelected(m_config.getAlignRight());

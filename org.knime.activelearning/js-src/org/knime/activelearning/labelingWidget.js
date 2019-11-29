@@ -9,7 +9,7 @@ window.generalPurposeLabelingWidget = (function () {
 
         // function definitions
         _createContainer, _updateButtonClasses, _getHexColor, _changeSkipButton, _setupSkipButtonHandler, _labelAndLoadNext,
-        _setupAddClassesButtonHandler, _createClassEditorDialog, _getRandomColor, _updateDialogClasses, _initializeView,
+        _setupAddClassesButtonHandler, _createClassEditorDialog, _getNextColorFromPalette, _updateDialogClasses, _initializeView,
         _bindArrowKeys, _updateLabelClasses, _updateDropdownClasses, _filterData, _getAllPossibleValues, _invertColor,
         _hexToRgb, _selectNextTile, _getColorValue, _createRemoveDialog, _combinePossibleValues, _checkIfIsCurrentlyDisplayed,
         _changeToDefaultHeaderColor, _selectFirstTile, _combineColors;
@@ -663,21 +663,27 @@ window.generalPurposeLabelingWidget = (function () {
         var defaultColor = 15790320;
         if (_representation.colorscheme === 'None') {
             bgColor = defaultColor;
-        } else if (_value.possiblevalues[index] in _value.colors) {
-            bgColor = _value.colors[_value.possiblevalues[index]];
+        } else if (index > 6) {
             // if dropdown is used, then colors should all be the same (6 is dropdown limit at the moment)
             // TODO make dropdown limit be configurable
-        } else if (index > 6) {
             bgColor = defaultColor;
             _value.colors[_value.possiblevalues[index]] = bgColor;
+        } else if (_value.possiblevalues[index] in _value.colors) {
+            bgColor = _value.colors[_value.possiblevalues[index]];
         } else {
-            bgColor = _getRandomColor();
+            bgColor = _getNextColorFromPalette();
             _value.colors[_value.possiblevalues[index]] = bgColor;
         }
         return bgColor;
     };
 
-    _getRandomColor = function () {
+    _getNextColorFromPalette = function () {
+        // Calculate the position of the current index and choose one color of the color palette
+        if (_representation.colorSchemeValues) {
+            var alreadyDefinedColorsLength = Object.keys(_representation.colors).length - 1;
+            var nextIndex = alreadyDefinedColorsLength % 12;
+            return _representation.colorSchemeValues[nextIndex]
+        }
         var maxHexNumber = 16777215;
         var color = Math.floor(Math.random() * maxHexNumber);
         return color;

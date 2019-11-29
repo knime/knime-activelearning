@@ -58,6 +58,7 @@ import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.DoubleValue;
+import org.knime.core.data.MissingCell;
 import org.knime.core.data.container.CellFactory;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.container.SingleCellFactory;
@@ -125,7 +126,6 @@ public class ActiveLabelingNodeModel
                 copyConfigToRepresentation();
 
                 // Load possible domain values into representation
-                // final String possibleValuesColumnName = m_tableViewPossibleValuesModel.getStringValue();
                 String possibleValuesColumnName = m_config.getLabelCol();
                 if (possibleValuesColumnName == null) {
                     final Map<String, Integer> colors = new HashMap<String, Integer>();
@@ -146,7 +146,6 @@ public class ActiveLabelingNodeModel
                     // belongs to which label. If no Color Scheme is found all labels get the same
                     // default color.
                     if (getCurrentColorScheme() != null) {
-                        Collections.sort(colorScheme1);
                         for (final String label : values) {
                             if (!colors.containsKey(label)) {
                                 colors.put(label, getNextColorFromScheme());
@@ -180,6 +179,7 @@ public class ActiveLabelingNodeModel
             colName = m_config.getAppendCol();
         }
         final int replacedColumn = in.findColumnIndex(colName);
+        final int possibleValuesCol = in.findColumnIndex(m_config.getLabelCol());
 
         final String newName =
                 replacedColumn >= 0 ? colName : DataTableSpec.getUniqueColumnName(in, m_config.getAppendCol());
@@ -187,6 +187,7 @@ public class ActiveLabelingNodeModel
 
         final DataColumnSpec outColumnSpec = new DataColumnSpecCreator(newName, StringCell.TYPE).createSpec();
         final ColumnRearranger rearranger = new ColumnRearranger(in);
+        final Map<String, String> alreadyLabeled = new HashMap<String, String>();
         CellFactory fac = new SingleCellFactory(outColumnSpec) {
 
             private int m_rowIndex = 0;
@@ -196,18 +197,27 @@ public class ActiveLabelingNodeModel
                 if (++m_rowIndex > m_config.getSettings().getRepresentationSettings().getMaxRows()) {
                     return DataType.getMissingCell();
                 }
+                if (possibleValuesCol > -1 && !row.getCell(possibleValuesCol).getClass().equals(MissingCell.class)) {
+                    alreadyLabeled.put(row.getKey().getString(), row.getCell(possibleValuesCol).toString());
+                }
                 if (labelList == null) {
                     return DataType.getMissingCell();
                 } else if (labelList.keySet().contains(row.getKey().toString()) &&
                     !labelList.get(row.getKey().toString()).equals(SKIP_NAME)) {
                     return new StringCell(labelList.get(row.getKey().toString()));
+                } else if (replacedColumn > -1 && row.getCell(replacedColumn).getClass().equals(MissingCell.class)) {
+                    return new MissingCell(DEFAULT_Label);
                 } else if (row.getKey() != null && replacedColumn > -1) {
                     return new StringCell(row.getCell(replacedColumn).toString());
-                } else  {
+                } else {
                     return DataType.getMissingCell();
                 }
             }
         };
+
+        if (getViewValue() != null && alreadyLabeled.size() > 0) {
+            getViewValue().setLabels(alreadyLabeled);
+        }
 
         if (replacedColumn >= 0) {
             rearranger.replace(fac, replacedColumn);
@@ -265,6 +275,7 @@ public class ActiveLabelingNodeModel
     private Integer[] getCurrentColorScheme() {
         switch (getViewRepresentation().getColorScheme()) {
             case "Scheme 1":
+                Collections.sort(colorScheme1);
                 return colorScheme1.toArray(new Integer[0]);
             default:
                 return null;
@@ -310,6 +321,7 @@ public class ActiveLabelingNodeModel
             viewRepresentation.setLabelColumnName(conf.getLabelCol());
             viewRepresentation.setLabelCol(conf.getLabelCol());
             viewRepresentation.setColorScheme(conf.getColorScheme());
+            viewRepresentation.setColorSchemeValues(getCurrentColorScheme());
             viewRepresentation.setUseNumCols(conf.getUseNumCols());
             viewRepresentation.setUseColWidth(conf.getUseColWidth());
             viewRepresentation.setNumCols(conf.getNumCols());

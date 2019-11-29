@@ -83,7 +83,6 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
     private Map<String, Integer> m_colors = Collections.<String, Integer> emptyMap();
 
     private String m_colorScheme;
-//    private boolean m_useSecondInputPort = false;
 
     private boolean m_useNumCols;
 
@@ -106,6 +105,8 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
     private boolean m_useProgressBar;
 
     private boolean m_autoSelectNextTile;
+
+    private Object[] m_colorSchemeValues;
 
     private TableRepresentationSettings m_settings = new TableRepresentationSettings();
 
@@ -210,6 +211,16 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
     @JsonProperty("autoSelectNextTile")
     public boolean isAutoSelectNextTile() {
         return m_autoSelectNextTile;
+    }
+
+    @JsonProperty("colorSchemeValues")
+    public Object[] getColorSchemeValues() {
+        return m_colorSchemeValues;
+    }
+
+    @JsonProperty("colorSchemeValues")
+    public void setColorSchemeValues(final Object[] colors) {
+        m_colorSchemeValues = colors;
     }
 
     @JsonProperty("tablesettings")
