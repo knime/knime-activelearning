@@ -727,16 +727,45 @@ license terms applicable to such Node, including when such Node is
 propagated with or for interoperation with KNIME.
    </license>
 
-   <requires>
-      <import feature="org.knime.features.dl.tensorflow" version="4.0.0" match="greaterOrEqual"/>
-      <import feature="org.knime.features.dl.keras" version="4.0.0" match="greaterOrEqual"/>
-      <import feature="org.knime.features.python2" version="4.0.0" match="greaterOrEqual"/>
-   </requires>
-
    <plugin
          id="org.knime.weaksupervision"
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+
+   <plugin
+         id="org.knime.tensorflow.bin.windows.amd64.cpu"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"/>
+
+   <plugin
+         id="org.knime.tensorflow.bin.windows.amd64.gpu"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"/>
+         
+  <plugin
+         id="org.knime.tensorflow.bin.linux.amd64.cpu"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"/>
+         
+   <plugin
+         id="org.knime.tensorflow.bin.linux.amd64.gpu"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"/>
+         
+   <plugin
+         id="org.knime.tensorflow.bin.macosx.amd64.cpu"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"/>
 
 </feature>
