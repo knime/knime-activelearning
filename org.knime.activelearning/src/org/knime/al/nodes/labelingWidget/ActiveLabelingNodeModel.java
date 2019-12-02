@@ -60,8 +60,10 @@ import org.knime.core.data.DataType;
 import org.knime.core.data.DoubleValue;
 import org.knime.core.data.MissingCell;
 import org.knime.core.data.container.CellFactory;
+import org.knime.core.data.container.CloseableRowIterator;
 import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.container.SingleCellFactory;
+import org.knime.core.data.container.filter.TableFilter;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.ExecutionContext;
@@ -72,6 +74,8 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.js.core.JSONDataTable;
 import org.knime.js.core.node.table.AbstractTableNodeModel;
+
+import com.google.common.collect.Iterators;
 
 /**
  * This is the model implementation of ActiveLearning.
@@ -118,6 +122,7 @@ public class ActiveLabelingNodeModel
         BufferedDataTable out = (BufferedDataTable)inObjects[0];
         synchronized (getLock()) {
             final ActiveLabelingViewRepresentation viewRepresentation = getViewRepresentation();
+            final ActiveLabelingViewValue viewValue = getViewValue();
             if (viewRepresentation.getSettings().getTable() == null) {
                 m_table = (BufferedDataTable)inObjects[0];
                 final JSONDataTable jsonTable =
@@ -127,13 +132,32 @@ public class ActiveLabelingNodeModel
 
                 // Load possible domain values into representation
                 String possibleValuesColumnName = m_config.getLabelCol();
+                DataTableSpec m_spec = m_table.getDataTableSpec();
                 if (possibleValuesColumnName == null) {
                     final Map<String, Integer> colors = new HashMap<String, Integer>();
                     colors.put(SKIP_NAME, Integer.parseInt(DEFAULT_COLOR, 16));
                     viewRepresentation.setColors(colors);
-                } else if (m_table.getDataTableSpec().getColumnSpec(possibleValuesColumnName) == null) {
+                } else if (m_spec == null || m_spec.getColumnSpec(possibleValuesColumnName) == null) {
                     throw new InvalidSettingsException("The column which is selected for possible values is missing");
                 } else {
+                    if (m_config.getUseExistingLabels()) {
+                        int possibleValuesColumnIndex = m_spec.findColumnIndex(possibleValuesColumnName);
+                        TableFilter tableFilter = TableFilter.materializeCols(possibleValuesColumnIndex);
+                        Map<String, String> existingLabels = new HashMap<String, String>();
+                        int maxRows = m_config.getSettings().getRepresentationSettings().getMaxRows();
+                        try (CloseableRowIterator inDataIterator = ((BufferedDataTable)inObjects[0]).filter(tableFilter).iterator()) {
+                            Iterators.limit(inDataIterator, maxRows);
+                            for (int i = 0; inDataIterator.hasNext() && i < maxRows; i++) {
+                                final DataRow row = inDataIterator.next();
+                                DataCell missingCell = DataType.getMissingCell();
+                                DataCell labelCell = row.getCell(possibleValuesColumnIndex).isMissing() ?
+                                    missingCell :
+                                    row.getCell(possibleValuesColumnIndex);
+                                existingLabels.put(row.getKey().toString(), labelCell.toString());
+                            }
+                            viewValue.setLabels(existingLabels);
+                        }
+                    }
                     final Set<DataCell> possibleValuesSet =
                         m_table.getDataTableSpec().getColumnSpec(possibleValuesColumnName).getDomain().getValues();
                     final Set<String> values = new HashSet<String>();
@@ -157,7 +181,6 @@ public class ActiveLabelingNodeModel
                 }
             }
             // Add labels from view to table
-            final ActiveLabelingViewValue viewValue = getViewValue();
             final DataTableSpec spec = m_table.getDataTableSpec();
             final ColumnRearranger rearranger = createColumnRearranger(spec, viewValue.getLabels());
             out = exec.createColumnRearrangeTable(m_table, rearranger, exec);
@@ -178,11 +201,13 @@ public class ActiveLabelingNodeModel
         } else {
             colName = m_config.getAppendCol();
         }
+
+        final boolean usingSameColumn = colName != m_config.getLabelCol();
         final int replacedColumn = in.findColumnIndex(colName);
         final int possibleValuesCol = in.findColumnIndex(m_config.getLabelCol());
 
         final String newName =
-                replacedColumn >= 0 ? colName : DataTableSpec.getUniqueColumnName(in, m_config.getAppendCol());
+                replacedColumn > -1  || usingSameColumn ? DataTableSpec.getUniqueColumnName(in, colName) : colName;
 
 
         final DataColumnSpec outColumnSpec = new DataColumnSpecCreator(newName, StringCell.TYPE).createSpec();
@@ -219,10 +244,10 @@ public class ActiveLabelingNodeModel
             getViewValue().setLabels(alreadyLabeled);
         }
 
-        if (replacedColumn >= 0) {
-            rearranger.replace(fac, replacedColumn);
-        } else {
+        if (usingSameColumn || replacedColumn == -1) {
             rearranger.append(fac);
+        } else {
+            rearranger.replace(fac, replacedColumn);
         }
         return rearranger;
     }

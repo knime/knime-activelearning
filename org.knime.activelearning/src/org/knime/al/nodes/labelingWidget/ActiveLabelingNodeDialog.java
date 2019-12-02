@@ -130,6 +130,8 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
 
     private final ColumnSelectionPanel m_replaceColumnName;
 
+    private final JCheckBox m_useExistingLabels;
+
     private final JTextField m_appendColumnName;
 
     private final JRadioButton m_replaceColumnRadio;
@@ -265,7 +267,7 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_replaceColumnName =
                 new ColumnSelectionPanel(BorderFactory.createTitledBorder("Replace column: "),
                     new DataValueColumnFilter(StringValue.class, DoubleValue.class));
-
+        m_useExistingLabels = new JCheckBox("Initialize with labels from label column");
         m_replaceColumnRadio = new JRadioButton("Replace existing column:");
         m_replaceColumnRadio.addActionListener(e -> appendVariableChanged());
      // Enable and disable text of not selected Button
@@ -367,6 +369,7 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         }
         m_config.setLabelCol(m_columnWithPossibleValues.getSelectedColumn());
         m_config.setReplaceCol(m_replaceColumnName.getSelectedColumn());
+        m_config.setUseExistingLabels(m_useExistingLabels.isSelected());
         m_config.setAppendRadio(m_appendColumnRadio.isSelected());
         m_config.setReplaceRadio(m_replaceColumnRadio.isSelected());
         m_config.setAppendCol(m_appendColumnName.getText());
@@ -435,6 +438,7 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_colWidthSpinner.loadSettingsFrom(settings, specs);
         m_labelColColumnSelectionPanel.update(inSpec, m_config.getLabelCol(), m_config.getUseRowID());
         m_columnWithPossibleValues.update(inSpec, m_config.getLabelCol(), m_config.getUseRowID());
+        m_useExistingLabels.setSelected(m_config.getUseExistingLabels());
         m_replaceColumnName.update(inSpec, m_config.getReplaceCol());
         m_appendColumnName.setText(m_config.getAppendCol());
         m_replaceColumnRadio.setSelected(m_config.isReplaceRadio());
@@ -487,6 +491,9 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         labelPanel.add(m_columnWithPossibleValues, gbcN);
         gbcN.gridy++;
         gbcN.fill = GridBagConstraints.HORIZONTAL;
+
+        gbcN.gridy++;
+        labelPanel.add(m_useExistingLabels, gbcN);
 
         gbcN.gridy++;
         labelPanel.add(m_addLabelsDynamically, gbcN);

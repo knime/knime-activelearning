@@ -50,7 +50,7 @@ h1 {
     width: 60%;
 }
 
-html, body {
+html, body, .knime-table-container {
     height: 100%;
 }
 
@@ -60,6 +60,10 @@ html, body {
 
 .knime-table-container>div>div>div {
     position: initial !important;
+}
+
+.dataTables_wrapper {
+    overflow: scroll;
 }
 
 .knime-tiles .dataTables_wrapper>.row:nth-child(2) {
@@ -113,7 +117,7 @@ html, body {
 }
 
 #labCurrentProgressBar {
-    background-color: yellow;
+    background-color: rgba(255, 215, 60, 1);
     height: 100%;
     width: 0%;
 }
@@ -134,6 +138,8 @@ html, body {
 #btnSkip {
     -webkit-transition-duration: 0s; /* Safari */
     transition-duration: 0s;
+    background-color: dimgray;
+    color: white;
 }
 
 .btnLabel {

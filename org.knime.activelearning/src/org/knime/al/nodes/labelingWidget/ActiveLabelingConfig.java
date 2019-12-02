@@ -51,6 +51,12 @@ public class ActiveLabelingConfig implements TableConfig {
 
     private String m_labelCol = DEFAULT_LABEL_COL;
 
+    static final String CFG_USE_EXISTING_LABELS = "useExistingLabels";
+
+    private static final boolean DEFAULT_USE_EXISTING_LABELS = true;
+
+    private boolean m_useExistingLabels = DEFAULT_USE_EXISTING_LABELS;
+
     static final String CFG_USE_ROW_ID = "useRowID";
 
     private static final boolean DEFAULT_USE_ROW_ID = false;
@@ -207,6 +213,20 @@ public class ActiveLabelingConfig implements TableConfig {
      */
     public void setLabelCol(final String labelCol) {
         m_labelCol = labelCol;
+    }
+
+    /**
+     * @return the useExistingLabels
+     */
+    public boolean getUseExistingLabels() {
+        return m_useExistingLabels;
+    }
+
+    /**
+     * @param useExistingLabels the useExistingLabels to set
+     */
+    public void setUseExistingLabels(final boolean useExistingLabels) {
+        m_useExistingLabels = useExistingLabels;
     }
 
     /**
@@ -431,6 +451,7 @@ public class ActiveLabelingConfig implements TableConfig {
         settings.addBoolean(CFG_APPEND_RADIO, m_isAppendRadio);
         settings.addString(CFG_APPEND_COL, m_appendCol);
         settings.addBoolean(CFG_REPLACE_RADIO, m_isReplaceRadio);
+        settings.addBoolean(CFG_USE_EXISTING_LABELS, m_useExistingLabels);
     }
 
     /**
@@ -454,6 +475,7 @@ public class ActiveLabelingConfig implements TableConfig {
         m_useNumCols = settings.getBoolean(CFG_USE_NUM_COLS);
         m_useColWidth = settings.getBoolean(CFG_USE_COL_WIDTH);
         m_labelCol = settings.getString(CFG_LABEL_COL);
+        m_useExistingLabels = settings.getBoolean(CFG_USE_EXISTING_LABELS);
         m_useRowID = settings.getBoolean(CFG_USE_ROW_ID);
         m_alignLeft = settings.getBoolean(CFG_ALIGN_LEFT);
         m_alignRight = settings.getBoolean(CFG_ALIGN_RIGHT);
@@ -482,6 +504,7 @@ public class ActiveLabelingConfig implements TableConfig {
         m_numCols = settings.getInt(CFG_NUM_COLS, DEFAULT_NUM_COLS);
         m_colWidth = settings.getInt(CFG_COL_WIDTH, DEFAULT_COL_WIDTH);
         m_labelCol = settings.getString(CFG_LABEL_COL, DEFAULT_LABEL_COL);
+        m_useExistingLabels = settings.getBoolean(CFG_USE_EXISTING_LABELS, DEFAULT_USE_EXISTING_LABELS);
         m_useRowID = settings.getBoolean(CFG_USE_ROW_ID, DEFAULT_USE_ROW_ID);
         m_alignLeft = settings.getBoolean(CFG_ALIGN_LEFT, DEFAULT_ALIGN_LEFT);
         m_alignRight = settings.getBoolean(CFG_ALIGN_RIGHT, DEFAULT_ALIGN_RIGHT);
