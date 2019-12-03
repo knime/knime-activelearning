@@ -64,6 +64,8 @@ html, body, .knime-table-container {
 
 .dataTables_wrapper {
     overflow: scroll;
+    overflow-x: visible;
+    overflow-y: hidden;
 }
 
 .knime-tiles .dataTables_wrapper>.row:nth-child(2) {
@@ -183,7 +185,7 @@ html, body, .knime-table-container {
 }
 
 .infoContainer {
-    max-width: 300px;
+    max-width: 350px;
     width: 100%;
     justify-content: space-between;
 }

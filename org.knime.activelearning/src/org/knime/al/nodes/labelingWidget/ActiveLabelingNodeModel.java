@@ -140,7 +140,7 @@ public class ActiveLabelingNodeModel
                 } else if (m_spec == null || m_spec.getColumnSpec(possibleValuesColumnName) == null) {
                     throw new InvalidSettingsException("The column which is selected for possible values is missing");
                 } else {
-                    if (!m_config.getUseExistingLabels()) {
+                    if (!m_config.getUseExistingLabels() && viewValue.getLabels().isEmpty()) {
                         int possibleValuesColumnIndex = m_spec.findColumnIndex(possibleValuesColumnName);
                         TableFilter tableFilter = TableFilter.materializeCols(possibleValuesColumnIndex);
                         Map<String, String> existingLabels = new HashMap<String, String>();

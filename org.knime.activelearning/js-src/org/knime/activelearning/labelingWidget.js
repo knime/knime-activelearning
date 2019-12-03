@@ -50,6 +50,12 @@ window.generalPurposeLabelingWidget = (function () {
 
     labelingWidget.getComponentValue = function () {
         window.knimeTileView.getComponentValue.apply(window.knimeTileView);
+        // map '?' to undefined to serialize to missing values
+        _rowKeysOnly.forEach(function (row) {
+            if (typeof _value.labels[row] === 'undefined' || _value.labels[row] === '?') {
+                _value.labels[row] = undefined;
+            }
+        });
         return _value;
     };
 
@@ -685,10 +691,11 @@ window.generalPurposeLabelingWidget = (function () {
         var totalLabels = 0;
         var rowKeys = Object.keys(labels);
         var lastLabeledRowInd = 0;
+        var hasPreviouslyLabeledRow;
         rowKeys.forEach(function (rowKey) {
             var label = labels[rowKey];
             var rowInd = rowKeyIndexObj[rowKey].rowInd;
-            if (label !== '?') {
+            if (typeof label !== 'undefined' && label !== '?') {
                 var color = colorMap[label];
                 var labelColor = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
                 tileViewData[rowInd][1] = tileViewData[rowInd][1].replace(
@@ -875,7 +882,7 @@ window.generalPurposeLabelingWidget = (function () {
         return count;
     };
 
-    _selectNextTile = function (selectedRows) {
+    _selectNextTile = function (selectedRows, initialRow) {
         var currentPageCells = knimeTileView._curCells[0];
         var prevRowInd = 0;
         var pageSize = parseInt(document.
@@ -891,7 +898,7 @@ window.generalPurposeLabelingWidget = (function () {
             });
 
             var currentPage = _tileView._dataTable.page();
-            var newRowInd = prevRowInd + 1;
+            var newRowInd = initialRow ? prevRowInd : prevRowInd + 1;
             var pageForRow = Math.floor(newRowInd / pageSize);
             var info = _tileView._getJQueryTable().DataTable().page.info();
 
