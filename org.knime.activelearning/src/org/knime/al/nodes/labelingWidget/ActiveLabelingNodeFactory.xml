@@ -17,6 +17,12 @@
             <option name="Column with possible labels">
                 Possible domain values of the selected column get used as label classes.
             </option>
+            <option name="Ignore existing labels">
+                If this option is selected, the labels from the column chosen for the "Column with possible labels" column
+                are ignored and the view will only use the nominal values in the domain of that column for initializing the
+                available labels in the view (as buttons). This means it will not take the existing values for each row as there label value.
+                If left unchecked, the node will use the existing labels (except for missing values) as labels for the rows.
+            </option>
              <option name="Add new labels in View">
                 When this option is enabled it is possible to add/delete labels when the view is opened.
                 For this, there will be an extra option in the view menu when this option is set.

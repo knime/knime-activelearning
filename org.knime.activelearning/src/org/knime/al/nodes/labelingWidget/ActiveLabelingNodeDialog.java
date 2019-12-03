@@ -267,7 +267,7 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_replaceColumnName =
                 new ColumnSelectionPanel(BorderFactory.createTitledBorder("Replace column: "),
                     new DataValueColumnFilter(StringValue.class, DoubleValue.class));
-        m_useExistingLabels = new JCheckBox("Initialize with labels from label column");
+        m_useExistingLabels = new JCheckBox("Ignore existing labels");
         m_replaceColumnRadio = new JRadioButton("Replace existing column:");
         m_replaceColumnRadio.addActionListener(e -> appendVariableChanged());
      // Enable and disable text of not selected Button

@@ -140,7 +140,7 @@ public class ActiveLabelingNodeModel
                 } else if (m_spec == null || m_spec.getColumnSpec(possibleValuesColumnName) == null) {
                     throw new InvalidSettingsException("The column which is selected for possible values is missing");
                 } else {
-                    if (m_config.getUseExistingLabels()) {
+                    if (!m_config.getUseExistingLabels()) {
                         int possibleValuesColumnIndex = m_spec.findColumnIndex(possibleValuesColumnName);
                         TableFilter tableFilter = TableFilter.materializeCols(possibleValuesColumnIndex);
                         Map<String, String> existingLabels = new HashMap<String, String>();
@@ -205,9 +205,9 @@ public class ActiveLabelingNodeModel
         final boolean usingSameColumn = colName != m_config.getLabelCol();
         final int replacedColumn = in.findColumnIndex(colName);
         final int possibleValuesCol = in.findColumnIndex(m_config.getLabelCol());
+        final boolean useUniqueColumnName = m_config.isAppendRadio() && (replacedColumn > -1  || usingSameColumn);
 
-        final String newName =
-                replacedColumn > -1  || usingSameColumn ? DataTableSpec.getUniqueColumnName(in, colName) : colName;
+        final String newName = useUniqueColumnName ? DataTableSpec.getUniqueColumnName(in, colName) : colName;
 
 
         final DataColumnSpec outColumnSpec = new DataColumnSpecCreator(newName, StringCell.TYPE).createSpec();
@@ -244,7 +244,7 @@ public class ActiveLabelingNodeModel
             getViewValue().setLabels(alreadyLabeled);
         }
 
-        if (usingSameColumn || replacedColumn == -1) {
+        if (useUniqueColumnName) {
             rearranger.append(fac);
         } else {
             rearranger.replace(fac, replacedColumn);

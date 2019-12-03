@@ -52,8 +52,8 @@ public class ActiveLabelingConfig implements TableConfig {
     private String m_labelCol = DEFAULT_LABEL_COL;
 
     static final String CFG_USE_EXISTING_LABELS = "useExistingLabels";
-
-    private static final boolean DEFAULT_USE_EXISTING_LABELS = true;
+    // this actually controls ignoring existing labels, so false keeps labels
+    private static final boolean DEFAULT_USE_EXISTING_LABELS = false;
 
     private boolean m_useExistingLabels = DEFAULT_USE_EXISTING_LABELS;
 
