@@ -2,7 +2,7 @@
 <feature
       id="org.knime.features.weaksupervision"
       label="KNIME Weak Supervision"
-      version="4.1.0.qualifier"
+      version="4.2.0.qualifier"
       provider-name="KNIME AG, Zurich, Switzerland">
 
    <description>
@@ -750,8 +750,8 @@ propagated with or for interoperation with KNIME.
          install-size="0"
          version="0.0.0"
          fragment="true"/>
-         
-  <plugin
+
+   <plugin
          id="org.knime.tensorflow.bin.linux.amd64.cpu"
          os="linux"
          arch="x86_64"
@@ -759,7 +759,7 @@ propagated with or for interoperation with KNIME.
          install-size="0"
          version="0.0.0"
          fragment="true"/>
-         
+
    <plugin
          id="org.knime.tensorflow.bin.linux.amd64.gpu"
          os="linux"
@@ -768,7 +768,7 @@ propagated with or for interoperation with KNIME.
          install-size="0"
          version="0.0.0"
          fragment="true"/>
-         
+
    <plugin
          id="org.knime.tensorflow.bin.macosx.amd64.cpu"
          os="macosx"
