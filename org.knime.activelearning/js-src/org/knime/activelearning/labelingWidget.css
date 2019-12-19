@@ -230,3 +230,8 @@ html, body, .knime-table-container {
 #slcClassesDropdown {
     max-width: 98px;
 }
+
+.knimeTableRowColor {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

@@ -24,16 +24,20 @@ window.generalPurposeLabelingWidget = (function () {
 
     labelingWidget.init = function (representation, value) {
         _representation = representation;
-        // Ignore previous defined row color headers and reset to default color
-        _representation.table.spec.rowColorValues = _changeToDefaultHeaderColor(_representation.table.spec.rowColorValues, '#404040');
-        _representation.table.rows.forEach(function (row, rowInd) {
-            var label = typeof value.labels[row] === 'undefined' ? null : value.labels[row];
-            _rowKeys[row.rowKey] = {
-                rowInd: rowInd,
-                label: label
-            };
-            _rowKeysOnly.push(row.rowKey);
-        });
+
+        // Check if actually data is present
+        if (_representation.table) {
+            // Ignore previous defined row color headers and reset to default color
+            _representation.table.spec.rowColorValues = _changeToDefaultHeaderColor(_representation.table.spec.rowColorValues, '#404040');
+            _representation.table.rows.forEach(function (row, rowInd) {
+                var label = typeof value.labels[row] === 'undefined' ? null : value.labels[row];
+                _rowKeys[row.rowKey] = {
+                    rowInd: rowInd,
+                    label: label
+                };
+                _rowKeysOnly.push(row.rowKey);
+            });
+        }
         _value = value;
         _value.possiblevalues = _combinePossibleValues(_representation, _value);
         // todo remove and add configurable color options
@@ -273,79 +277,81 @@ window.generalPurposeLabelingWidget = (function () {
         _tileView = window.knimeTileView;
         _tileView.init(_representation, _value);
 
-        if (_representation.useProgressBar) {
-            var progressText = document.createElement('div');
-            progressText.id = 'progressText';
+        if (_representation.table) {
+            if (_representation.useProgressBar) {
+                var progressText = document.createElement('div');
+                progressText.id = 'progressText';
 
-            var currentProgress = document.createElement('div');
-            currentProgress.id = 'labCurrentProgress';
+                var currentProgress = document.createElement('div');
+                currentProgress.id = 'labCurrentProgress';
 
-            var currentProgressbar = document.createElement('div');
-            currentProgressbar.id = 'labCurrentProgressBar';
+                var currentProgressbar = document.createElement('div');
+                currentProgressbar.id = 'labCurrentProgressBar';
 
-            if (!_representation.title || _representation.title === '') {
-                currentProgress.className = 'labCurrentProgressWithoutTitle';
+                if (!_representation.title || _representation.title === '') {
+                    currentProgress.className = 'labCurrentProgressWithoutTitle';
+                }
+
+                currentProgress.appendChild(currentProgressbar);
+                var dataTableWrapper = document.getElementsByClassName('dataTables_wrapper')[0];
+                dataTableWrapper.parentNode.insertBefore(currentProgress, dataTableWrapper);
+                dataTableWrapper.parentNode.insertBefore(progressText, dataTableWrapper);
+                // Initialize progress text
+                document.getElementById('progressText').innerHTML = _filterData(_getAllPossibleValues()).length + ' / ' +
+                    _tileView._representation.table.rows.length + ' processed';
             }
 
-            currentProgress.appendChild(currentProgressbar);
-            var dataTableWrapper = document.getElementsByClassName('dataTables_wrapper')[0];
-            dataTableWrapper.parentNode.insertBefore(currentProgress, dataTableWrapper);
-            dataTableWrapper.parentNode.insertBefore(progressText, dataTableWrapper);
-            // Initialize progress text
-            document.getElementById('progressText').innerHTML = _filterData(_getAllPossibleValues()).length + ' / ' +
-                _tileView._representation.table.rows.length + ' labeled';
+            var labelingButtonGroup = document.createElement('div');
+            labelingButtonGroup.id = 'labelingButtonGroup';
+            labelingButtonGroup.className = 'row';
+            labelingContainer.appendChild(labelingButtonGroup);
+
+            var infoContainer = document.createElement('div');
+            infoContainer.className = 'infoContainer';
+
+            var skipButtonContainer = document.createElement('div');
+            skipButtonContainer.id = 'skipButtonContainer';
+            var skipButton = document.createElement('button');
+            skipButton.type = 'button';
+            skipButton.id = 'btnSkip';
+            skipButton.value = 'Skip';
+            skipButton.innerHTML = 'Skip';
+            skipButton.className = 'knime-qf-button btnLabel';
+            skipButton.style.visibility = 'hidden';
+            skipButtonContainer.appendChild(skipButton);
+            infoContainer.appendChild(skipButtonContainer);
+
+            var selectedText = document.createElement('span');
+            selectedText.id = 'selectedText';
+            selectedText.textContent = 'Selected Tiles: 0';
+            infoContainer.appendChild(selectedText);
+            labelingButtonGroup.appendChild(infoContainer);
+
+            var editDialog = _createClassEditorDialog();
+            labelingButtonGroup.appendChild(editDialog);
+            var removeDialog = _createRemoveDialog();
+            editDialog.appendChild(removeDialog);
+
+            var labelingDoneText = document.createElement('h1');
+            labelingDoneText.innerHTML = 'All elements have been labeled.';
+            labelingDoneText.style = 'text-align: center; margin-top: 30px;';
+
+            var labelContainer = document.createElement('div');
+            labelContainer.className = 'labelContainer';
+
+            var labelingButtons = document.createElement('div');
+            var labelingText = document.createElement('span');
+            labelingText.textContent = 'Label as:';
+            labelContainer.appendChild(labelingText);
+            labelingButtons.id = 'divLabels';
+            labelingButtons.className = 'row';
+            labelingButtons.style = 'margin-left:-5px';
+            labelContainer.appendChild(labelingButtons);
+            labelingButtonGroup.appendChild(labelContainer);
+
+            _updateLabelClasses();
+            _setupSkipButtonHandler(skipButton);
         }
-
-        var labelingButtonGroup = document.createElement('div');
-        labelingButtonGroup.id = 'labelingButtonGroup';
-        labelingButtonGroup.className = 'row';
-        labelingContainer.appendChild(labelingButtonGroup);
-
-        var infoContainer = document.createElement('div');
-        infoContainer.className = 'infoContainer';
-
-        var skipButtonContainer = document.createElement('div');
-        skipButtonContainer.id = 'skipButtonContainer';
-        var skipButton = document.createElement('button');
-        skipButton.type = 'button';
-        skipButton.id = 'btnSkip';
-        skipButton.value = 'Skip';
-        skipButton.innerHTML = 'Skip';
-        skipButton.className = 'knime-qf-button btnLabel';
-        skipButton.style.visibility = 'hidden';
-        skipButtonContainer.appendChild(skipButton);
-        infoContainer.appendChild(skipButtonContainer);
-
-        var selectedText = document.createElement('span');
-        selectedText.id = 'selectedText';
-        selectedText.textContent = 'Selected Tiles: 0';
-        infoContainer.appendChild(selectedText);
-        labelingButtonGroup.appendChild(infoContainer);
-
-        var editDialog = _createClassEditorDialog();
-        labelingButtonGroup.appendChild(editDialog);
-        var removeDialog = _createRemoveDialog();
-        editDialog.appendChild(removeDialog);
-
-        var labelingDoneText = document.createElement('h1');
-        labelingDoneText.innerHTML = 'All elements have been labeled.';
-        labelingDoneText.style = 'text-align: center; margin-top: 30px;';
-
-        var labelContainer = document.createElement('div');
-        labelContainer.className = 'labelContainer';
-
-        var labelingButtons = document.createElement('div');
-        var labelingText = document.createElement('span');
-        labelingText.textContent = 'Label as:';
-        labelContainer.appendChild(labelingText);
-        labelingButtons.id = 'divLabels';
-        labelingButtons.className = 'row';
-        labelingButtons.style = 'margin-left:-5px';
-        labelContainer.appendChild(labelingButtons);
-        labelingButtonGroup.appendChild(labelContainer);
-
-        _updateLabelClasses();
-        _setupSkipButtonHandler(skipButton);
     };
 
     _setupSkipButtonHandler = function (skipButton) {
@@ -740,7 +746,7 @@ window.generalPurposeLabelingWidget = (function () {
         var progress = 1 - (tableLength - numberOfPossibleValues) / tableLength;
         if (_tileView._representation.useProgressBar) {
             document.getElementById('labCurrentProgressBar').style.width = progress * 100 + '%';
-            document.getElementById('progressText').innerHTML = numberOfPossibleValues + ' / ' + tableLength + ' labeled';
+            document.getElementById('progressText').innerHTML = numberOfPossibleValues + ' / ' + tableLength + ' processed';
         }
         if (_tileView._value.autoSelectNextTile && lastRowLabeled !== '') {
             if (_value.hideUnselected) {
@@ -770,7 +776,7 @@ window.generalPurposeLabelingWidget = (function () {
                 selectedRows[0] = rowName;
             } else {
                 for (var i = selectedKeyValPairs.length - 1; i >= 0; i--) {
-                    if(selectedKeyValPairs[i] !== "undefined") {
+                    if (selectedKeyValPairs[i] !== "undefined") {
                         rowName = selectedKeyValPairs[i];
                         _tileView._selection[rowName] = false;
                         // Remove operation
@@ -874,8 +880,8 @@ window.generalPurposeLabelingWidget = (function () {
     _getTotalNumberLabeled = function () {
         let possibleLabels = _getAllPossibleValues().split('|');
         let count = 0;
-        Object.keys(_value.labels).forEach(function(rowKey) {
-            if (possibleLabels.includes(_value.labels[rowKey])){
+        Object.keys(_value.labels).forEach(function (rowKey) {
+            if (possibleLabels.includes(_value.labels[rowKey])) {
                 count++;
             }
         });
