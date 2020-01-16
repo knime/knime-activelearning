@@ -20,7 +20,7 @@ window.generalPurposeLabelingWidget = (function () {
         _setupAddClassesButtonHandler, _createClassEditorDialog, _updateDialogClasses, _initializeView,
         _bindArrowKeys, _updateLabelClasses, _updateDropdownClasses, _filterData, _getAllPossibleValues, _invertColor,
         _hexToRgb, _selectNextTile, _getColorValue, _createRemoveDialog, _combinePossibleValues, _checkIfIsCurrentlyDisplayed,
-        _changeToDefaultHeaderColor, _selectFirstTile, _initializeLabels, _getTotalNumberLabeled;
+        _changeToDefaultHeaderColor, _selectFirstTile, _initializeLabels, _getTotalNumberLabeled, _countTrueSelectedValues;
 
     labelingWidget.init = function (representation, value) {
         _representation = representation;
@@ -135,7 +135,7 @@ window.generalPurposeLabelingWidget = (function () {
                 self._dataTable.page(self._value.currentPage).draw('page');
                 // these two lines are new.
                 _selectedTiles = self._selection;
-                document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + Object.keys(_selectedTiles).length;
+                document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + _countTrueSelectedValues(_selectedTiles);
                 //
             }, 0);
         }
@@ -154,7 +154,7 @@ window.generalPurposeLabelingWidget = (function () {
                 delete _selectedTiles[row];
             }
         }
-        document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + Object.keys(_selectedTiles).length;
+        document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + _countTrueSelectedValues(_selectedTiles);
         _changeSkipButton();
     };
 
@@ -256,16 +256,16 @@ window.generalPurposeLabelingWidget = (function () {
             if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
                 if (e.target.checked) {
                     _selectedTiles[e.target.value] = true;
-                    document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + Object.keys(_selectedTiles).length;
+                    document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + _countTrueSelectedValues(_selectedTiles);
                     _changeSkipButton();
                 } else {
                     if (_selectedTiles[e.target.value]) {
                         delete _selectedTiles[e.target.value];
-                        document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + Object.keys(_selectedTiles).length;
+                        document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + _countTrueSelectedValues(_selectedTiles);
                     }
                     _changeSkipButton();
                 }
-                
+
             } else {
                 $(e.currentTarget).find('input[type="checkbox"]').click();
             }
@@ -746,6 +746,7 @@ window.generalPurposeLabelingWidget = (function () {
         var tableLength = _tileView._representation.table.rows.length;
         var numberOfPossibleValues = _getTotalNumberLabeled();
         var progress = 1 - (tableLength - numberOfPossibleValues) / tableLength;
+        var amountTrueSelectedValues = _countTrueSelectedValues(_tileView._selection);
         if (_tileView._representation.useProgressBar) {
             document.getElementById('labCurrentProgressBar').style.width = progress * 100 + '%';
             document.getElementById('progressText').innerHTML = numberOfPossibleValues + ' / ' + tableLength + ' processed';
@@ -755,13 +756,23 @@ window.generalPurposeLabelingWidget = (function () {
                 // nothing todo as no tile should be selected
             } else {
                 knimeService.setSelectedRows(_representation.table.id, [], false);
-                var selectedRowName = _selectNextTile([_rowKeysOnly[lastLabeledRowInd]]);
-                _selectedTiles[selectedRowName] = true;
+                if (amountTrueSelectedValues === 0) {
+                    var selectedRowName = _selectNextTile([_rowKeysOnly[lastLabeledRowInd]], true);
+                    if (selectedRowName) {
+                        _selectedTiles[selectedRowName] = true;
+                    }
+                } else {
+                    var savedPage = _tileView._value.currentPage;
+                    _tileView._getJQueryTable().DataTable().page(savedPage).draw('page');
+                    _selectedTiles = _tileView._selection;
+                }
             }
         }
+        // need to recalculate as it might have changed
+        amountTrueSelectedValues = _countTrueSelectedValues(_tileView._selection);
         // check for amount of selected tiles
-        if (Object.keys(_selectedTiles).length) {
-            document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + Object.keys(_selectedTiles).length;
+        if (amountTrueSelectedValues) {
+            document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + amountTrueSelectedValues;
         } else {
             // set to 0 if selected is undefined (results from fresh loading)
             document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + 0;
@@ -865,18 +876,33 @@ window.generalPurposeLabelingWidget = (function () {
                     // nothing todo as no tile should be selected
                 } else if (!justLabel) {
                     knimeService.setSelectedRows(_representation.table.id, [], false);
-                    selectedRowName = _selectNextTile(selectedRows);
-                    _selectedTiles[selectedRowName] = true;
+                    selectedRowName = _selectNextTile(selectedRows, false);
+                    if (selectedRowName) {
+                        _selectedTiles[selectedRowName] = true;
+                    }
                 }
             }
+
+            var amountTrueSelectedValues = _countTrueSelectedValues(_selectedTiles);
             // check for amount of selected tiles
-            if (Object.keys(_selectedTiles).length) {
-                document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + Object.keys(_selectedTiles).length;
+            if (amountTrueSelectedValues) {
+                document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + amountTrueSelectedValues;
             } else {
                 // set to 0 if selected is undefined (results from fresh loading)
                 document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + 0;
             }
         }
+    };
+    // Method which is required because the base table viewer sets the boolean of the object entry to false rather then deleting it.
+    // TODO check in base table viewer if that makes sense or deleting the row would be more efficient.
+    _countTrueSelectedValues = function (potentiallySelectedList) {
+        var counter = 0;
+        Object.keys(potentiallySelectedList).forEach(function (listEntry) {
+            if (potentiallySelectedList[listEntry] === true) {
+                counter++;
+            }
+        });
+        return counter;
     };
 
     _getTotalNumberLabeled = function () {
@@ -890,7 +916,7 @@ window.generalPurposeLabelingWidget = (function () {
         return count;
     };
 
-    _selectNextTile = function (selectedRows, initialRow) {
+    _selectNextTile = function (selectedRows, initialize) {
         var currentPageCells = knimeTileView._curCells[0];
         var prevRowInd = 0;
         var pageSize = parseInt(document.
@@ -905,10 +931,13 @@ window.generalPurposeLabelingWidget = (function () {
                 }
             });
 
-            var currentPage = _tileView._dataTable.page();
-            var newRowInd = initialRow ? prevRowInd : prevRowInd + 1;
-            var pageForRow = Math.floor(newRowInd / pageSize);
             var info = _tileView._getJQueryTable().DataTable().page.info();
+
+            // Check if previous index was last, then it should select first tile instead of the next
+            var newRowInd = (prevRowInd >= info.recordsTotal - 1) ? 0 : prevRowInd + 1;
+            var currentPage = _tileView._dataTable.page();
+            var savedPage = _tileView._value.currentPage;
+            var pageForRow = (currentPage !== savedPage && initialize) ? savedPage : Math.floor(newRowInd / pageSize);
 
             if (pageForRow >= info.pages) {
                 pageForRow = 0;
@@ -916,10 +945,18 @@ window.generalPurposeLabelingWidget = (function () {
 
             if (currentPage !== pageForRow) {
                 _tileView._getJQueryTable().DataTable().page(pageForRow).draw('page');
+                _tileView._value.currentPage = pageForRow;
             }
 
-            var checkboxIndex = newRowInd - pageForRow * pageSize;
-            $(currentCheckboxes[checkboxIndex]).click();
+            // Check if its not the initial call, if so select then a new tile needs to be selected or if it is a initial call and there is no different saved page from a previous view, then also select the next tile
+            if (!initialize || initialize && currentPage === savedPage) {
+                var checkboxIndex = newRowInd - pageForRow * pageSize;
+                $(currentCheckboxes[checkboxIndex]).click();
+                // Otherwise set the saved page to the correct one and stop
+            } else {
+                _tileView._value.currentPage = pageForRow;
+                return;
+            }
 
             var newRowKey = _rowKeysOnly[newRowInd];
             _selectedTiles[newRowKey] = true;
@@ -971,7 +1008,7 @@ window.generalPurposeLabelingWidget = (function () {
 
     _changeSkipButton = function (changeToRemoveLabel) {
         var skipButton = document.getElementById('btnSkip');
-        if (Object.keys(_selectedTiles).length > 0) {
+        if (_countTrueSelectedValues(_selectedTiles) > 0) {
             skipButton.style.visibility = 'visible';
         } else {
             skipButton.style.visibility = 'hidden';
