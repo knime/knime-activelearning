@@ -96,7 +96,8 @@ window.generalPurposeLabelingWidget = (function () {
             _initialized = true;
             if (Object.keys(value.labels).length > 0) {
                 var colorMap = {
-                    ['?']: _hexToRgb(_getHexColor(8421504))
+                    ['?']: _hexToRgb(_getHexColor(8421504)),
+                    ['Skip']: _hexToRgb(_getHexColor(8421504))
                 };
 
                 value.possiblevalues.forEach(function (labelValue, labelInd) {
@@ -359,7 +360,7 @@ window.generalPurposeLabelingWidget = (function () {
     _setupSkipButtonHandler = function (skipButton) {
         skipButton.onclick = function (e) {
             if (e.target.innerHTML === 'Skip') {
-                _labelAndLoadNext(_hexToRgb('#F0F0F0'), e.target.innerHTML);
+                _labelAndLoadNext(_hexToRgb('#808080'), e.target.innerHTML);
             } else {
                 for (var selectedTile in _selectedTiles) {
                     if (_value.labels[selectedTile]) {
@@ -768,6 +769,7 @@ window.generalPurposeLabelingWidget = (function () {
                 }
             }
         }
+        _changeSkipButton();
         // need to recalculate as it might have changed
         amountTrueSelectedValues = _countTrueSelectedValues(_tileView._selection);
         // check for amount of selected tiles
