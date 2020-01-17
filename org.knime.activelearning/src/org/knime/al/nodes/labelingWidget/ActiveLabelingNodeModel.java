@@ -90,7 +90,7 @@ public class ActiveLabelingNodeModel
 
     private static final String SKIP_NAME = "Skip";
 
-    private static final String DEFAULT_COLOR = "F0F0F0";
+    private static final String DEFAULT_COLOR = "808080";
 
     private final LinkedList<Integer> colorScheme1 = new LinkedList<Integer>();
 
