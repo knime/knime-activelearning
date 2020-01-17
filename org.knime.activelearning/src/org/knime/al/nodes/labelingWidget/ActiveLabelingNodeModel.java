@@ -228,12 +228,9 @@ public class ActiveLabelingNodeModel
                 if (labelList == null) {
                     return DataType.getMissingCell();
                 } else if (labelList.keySet().contains(row.getKey().toString()) &&
-                    !labelList.get(row.getKey().toString()).equals(SKIP_NAME)) {
+                    !labelList.get(row.getKey().toString()).equals(SKIP_NAME) &&
+                    !labelList.get(row.getKey().toString()).equals(DEFAULT_Label)) {
                     return new StringCell(labelList.get(row.getKey().toString()));
-                } else if (replacedColumn > -1 && row.getCell(replacedColumn).getClass().equals(MissingCell.class)) {
-                    return new MissingCell(DEFAULT_Label);
-                } else if (row.getKey() != null && replacedColumn > -1) {
-                    return new StringCell(row.getCell(replacedColumn).toString());
                 } else {
                     return DataType.getMissingCell();
                 }
