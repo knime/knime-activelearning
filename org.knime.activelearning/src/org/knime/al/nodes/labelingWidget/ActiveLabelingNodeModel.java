@@ -86,7 +86,7 @@ import com.google.common.collect.Iterators;
 public class ActiveLabelingNodeModel
     extends AbstractTableNodeModel<ActiveLabelingViewRepresentation, ActiveLabelingViewValue> {
 
-    private static final String DEFAULT_Label = "?";
+    private static final String DEFAULT_LABEL = "?";
 
     private static final String SKIP_NAME = "Skip";
 
@@ -229,7 +229,7 @@ public class ActiveLabelingNodeModel
                     return DataType.getMissingCell();
                 } else if (labelList.keySet().contains(row.getKey().toString()) &&
                     !labelList.get(row.getKey().toString()).equals(SKIP_NAME) &&
-                    !labelList.get(row.getKey().toString()).equals(DEFAULT_Label)) {
+                    !labelList.get(row.getKey().toString()).equals(DEFAULT_LABEL)) {
                     return new StringCell(labelList.get(row.getKey().toString()));
                 } else {
                     return DataType.getMissingCell();

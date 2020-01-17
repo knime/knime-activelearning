@@ -8,7 +8,9 @@
     
     <fullDescription>
         <intro>
-    		This node allows the user to manually assign labels to objects. This is useful to e.g. create training data for learning algorithms or create a ground-truth to test your algorithms etc. New labels can be created, renamed or deleted freely.
+    		This node allows the user to manually assign labels to objects. This is useful to e.g. create training data for learning algorithms
+    		or create a ground-truth to test your algorithms etc. New labels can be created, renamed or deleted freely. <b>NOTE: "?" is a
+    		reserved label and cannot be added. Exsiting labels of "?" will be replaced as Missing Values in the output table.</b>
 		</intro>
         <tab name="Labeling">
             <description>
