@@ -936,7 +936,7 @@ window.generalPurposeLabelingWidget = (function () {
             var info = _tileView._getJQueryTable().DataTable().page.info();
 
             // Check if previous index was last, then it should select first tile instead of the next
-            var newRowInd = (prevRowInd >= info.recordsTotal - 1) ? 0 : prevRowInd + 1;
+            var newRowInd = (prevRowInd >= info.recordsTotal - 1 || initialize) ? 0 : prevRowInd + 1;
             var currentPage = _tileView._dataTable.page();
             var savedPage = _tileView._value.currentPage;
             var pageForRow = (currentPage !== savedPage && initialize) ? savedPage : Math.floor(newRowInd / pageSize);
