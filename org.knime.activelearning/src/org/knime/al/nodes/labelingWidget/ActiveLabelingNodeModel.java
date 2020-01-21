@@ -129,56 +129,56 @@ public class ActiveLabelingNodeModel
                     createJSONTableFromBufferedDataTable(m_table, exec.createSubExecutionContext(0.33));
                 viewRepresentation.getSettings().setTable(jsonTable);
                 copyConfigToRepresentation();
+            }
 
-                // Load possible domain values into representation
-                String possibleValuesColumnName = m_config.getLabelCol();
-                DataTableSpec m_spec = m_table.getDataTableSpec();
-                if (possibleValuesColumnName == null) {
-                    final Map<String, Integer> colors = new HashMap<String, Integer>();
-                    colors.put(SKIP_NAME, Integer.parseInt(DEFAULT_COLOR, 16));
-                    viewRepresentation.setColors(colors);
-                } else if (m_spec == null || m_spec.getColumnSpec(possibleValuesColumnName) == null) {
-                    throw new InvalidSettingsException("The column which is selected for possible values is missing");
-                } else {
-                    if (!m_config.getUseExistingLabels() && viewValue.getLabels().isEmpty()) {
-                        int possibleValuesColumnIndex = m_spec.findColumnIndex(possibleValuesColumnName);
-                        TableFilter tableFilter = TableFilter.materializeCols(possibleValuesColumnIndex);
-                        Map<String, String> existingLabels = new HashMap<String, String>();
-                        int maxRows = m_config.getSettings().getRepresentationSettings().getMaxRows();
-                        try (CloseableRowIterator inDataIterator = ((BufferedDataTable)inObjects[0]).filter(tableFilter).iterator()) {
-                            Iterators.limit(inDataIterator, maxRows);
-                            for (int i = 0; inDataIterator.hasNext() && i < maxRows; i++) {
-                                final DataRow row = inDataIterator.next();
-                                DataCell missingCell = DataType.getMissingCell();
-                                DataCell labelCell = row.getCell(possibleValuesColumnIndex).isMissing() ?
-                                    missingCell :
-                                    row.getCell(possibleValuesColumnIndex);
-                                existingLabels.put(row.getKey().toString(), labelCell.toString());
-                            }
-                            viewValue.setLabels(existingLabels);
+            // Load possible domain values into representation
+            String possibleValuesColumnName = m_config.getLabelCol();
+            DataTableSpec m_spec = m_table.getDataTableSpec();
+            if (possibleValuesColumnName == null) {
+                final Map<String, Integer> colors = new HashMap<String, Integer>();
+                colors.put(SKIP_NAME, Integer.parseInt(DEFAULT_COLOR, 16));
+                viewRepresentation.setColors(colors);
+            } else if (m_spec == null || m_spec.getColumnSpec(possibleValuesColumnName) == null) {
+                throw new InvalidSettingsException("The column which is selected for possible values is missing");
+            } else {
+                if (!m_config.getUseExistingLabels() && viewValue.getLabels().isEmpty()) {
+                    int possibleValuesColumnIndex = m_spec.findColumnIndex(possibleValuesColumnName);
+                    TableFilter tableFilter = TableFilter.materializeCols(possibleValuesColumnIndex);
+                    Map<String, String> existingLabels = new HashMap<String, String>();
+                    int maxRows = m_config.getSettings().getRepresentationSettings().getMaxRows();
+                    try (CloseableRowIterator inDataIterator = ((BufferedDataTable)inObjects[0]).filter(tableFilter).iterator()) {
+                        Iterators.limit(inDataIterator, maxRows);
+                        for (int i = 0; inDataIterator.hasNext() && i < maxRows; i++) {
+                            final DataRow row = inDataIterator.next();
+                            DataCell missingCell = DataType.getMissingCell();
+                            DataCell labelCell = row.getCell(possibleValuesColumnIndex).isMissing() ?
+                                missingCell :
+                                row.getCell(possibleValuesColumnIndex);
+                            existingLabels.put(row.getKey().toString(), labelCell.toString());
                         }
+                        viewValue.setLabels(existingLabels);
                     }
-                    final Set<DataCell> possibleValuesSet =
-                        m_table.getDataTableSpec().getColumnSpec(possibleValuesColumnName).getDomain().getValues();
-                    final Set<String> values = new HashSet<String>();
-                    for (final DataCell dc : possibleValuesSet) {
-                        values.add(dc.toString());
-                    }
-                    viewRepresentation.setPossibleLabelValues(values.toArray(new String[0]));
-                    final Map<String, Integer> colors = new HashMap<String, Integer>();
-                    // Check if there are Colors defined in the Color Scheme and define which color
-                    // belongs to which label. If no Color Scheme is found all labels get the same
-                    // default color.
-                    if (getCurrentColorScheme() != null) {
-                        for (final String label : values) {
-                            if (!colors.containsKey(label)) {
-                                colors.put(label, getNextColorFromScheme());
-                            }
-                        }
-                        colors.put(SKIP_NAME, Integer.parseInt(DEFAULT_COLOR, 16));
-                    }
-                    viewRepresentation.setColors(colors);
                 }
+                final Set<DataCell> possibleValuesSet =
+                    m_table.getDataTableSpec().getColumnSpec(possibleValuesColumnName).getDomain().getValues();
+                final Set<String> values = new HashSet<String>();
+                for (final DataCell dc : possibleValuesSet) {
+                    values.add(dc.toString());
+                }
+                viewRepresentation.setPossibleLabelValues(values.toArray(new String[0]));
+                final Map<String, Integer> colors = new HashMap<String, Integer>();
+                // Check if there are Colors defined in the Color Scheme and define which color
+                // belongs to which label. If no Color Scheme is found all labels get the same
+                // default color.
+                if (getCurrentColorScheme() != null) {
+                    for (final String label : values) {
+                        if (!colors.containsKey(label)) {
+                            colors.put(label, getNextColorFromScheme());
+                        }
+                    }
+                    colors.put(SKIP_NAME, Integer.parseInt(DEFAULT_COLOR, 16));
+                }
+                viewRepresentation.setColors(colors);
             }
             // Add labels from view to table
             final DataTableSpec spec = m_table.getDataTableSpec();
