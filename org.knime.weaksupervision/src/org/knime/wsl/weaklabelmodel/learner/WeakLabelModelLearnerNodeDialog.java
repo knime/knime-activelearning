@@ -54,9 +54,12 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
+import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 
 /**
  * The dialog for the Label Model node.
@@ -80,6 +83,12 @@ final class WeakLabelModelLearnerNodeDialog extends DefaultNodeSettingsPane {
             new DialogComponentNumber(WeakLabelModelLearnerSettings.createLearningRate(), "Learning rate", 0.01));
         setHorizontalPlacement(false);
         closeCurrentGroup();
+        setHorizontalPlacement(true);
+        SettingsModelBoolean useEpsilonModel = WeakLabelModelLearnerSettings.createUseEpsilon();
+        SettingsModelDoubleBounded epsilonModel = WeakLabelModelLearnerSettings.createEpsilon();
+        useEpsilonModel.addChangeListener(e -> epsilonModel.setEnabled(useEpsilonModel.getBooleanValue()));
+        addDialogComponent(new DialogComponentBoolean(useEpsilonModel, "Use fixed epsilon"));
+        addDialogComponent(new DialogComponentNumber(epsilonModel, "", 0.01));
         // TODO uncomment once correlated label sources are supported
         //        addDialogComponent(
         //            new DialogComponentColumnNameSelection(LabelModelSettings.createFirstCorrelationColumn(),
@@ -89,9 +98,6 @@ final class WeakLabelModelLearnerNodeDialog extends DefaultNodeSettingsPane {
         //                "Second correlation column", 1, false, StringValue.class));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void loadAdditionalSettingsFrom(final NodeSettingsRO settings, final DataTableSpec[] specs)
         throws NotConfigurableException {
@@ -99,9 +105,6 @@ final class WeakLabelModelLearnerNodeDialog extends DefaultNodeSettingsPane {
         m_spec = specs[WeakLabelModelLearnerNodeModel.DATA_PORT];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void saveAdditionalSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
         super.saveAdditionalSettingsTo(settings);

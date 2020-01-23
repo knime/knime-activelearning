@@ -105,7 +105,7 @@ final class ConditionalProbabilities {
     double getConditionalProbability(final int lf, final int lfValue, final int labelValue) {
         final int rowIdx = lf * (m_cardinality + 1) + lfValue;
         final int colIdx = labelValue - 1;
-        return LabelModelUtil.clip(m_cProbs[rowIdx][colIdx], 0.01, 0.99);
+        return LabelModelUtil.clip(m_cProbs[rowIdx][colIdx], 0, 1);
     }
 
 }

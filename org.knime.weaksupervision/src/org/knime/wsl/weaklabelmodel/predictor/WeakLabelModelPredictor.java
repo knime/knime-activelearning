@@ -128,6 +128,7 @@ final class WeakLabelModelPredictor implements AutoCloseable {
                 assert m_labelModel != null : "The label model has not been initialized.";
                 final DataRow filtered = new FilterColumnRow(row, sourceIndices);
                 final float[] input = matrixReader.readAndAugmentRow(filtered);
+                final float[][] unnormalizedProbabilities = m_labelModel.calculateUnnormalizedProbabilities(new float[][] {input});
                 final float[][] probabilities = m_labelModel.calculateProbabilities(new float[][]{input});
                 return createCells(probabilities[0]);
             }

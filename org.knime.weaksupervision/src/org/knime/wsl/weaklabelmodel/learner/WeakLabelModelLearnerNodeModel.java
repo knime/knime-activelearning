@@ -93,9 +93,6 @@ final class WeakLabelModelLearnerNodeModel extends NodeModel {
             new PortType[]{WeakLabelModelPortObject.TYPE, BufferedDataTable.TYPE});
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final DataTableSpec dataSpec = (DataTableSpec)inSpecs[DATA_PORT];
@@ -118,9 +115,6 @@ final class WeakLabelModelLearnerNodeModel extends NodeModel {
         return type.isCompatible(NominalDistributionValue.class);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
         final BufferedDataTable data = (BufferedDataTable)inObjects[DATA_PORT];
@@ -134,9 +128,6 @@ final class WeakLabelModelLearnerNodeModel extends NodeModel {
         return new PortObject[]{po, statisticsTable};
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void loadInternals(final File nodeInternDir, final ExecutionMonitor exec)
         throws IOException, CanceledExecutionException {
@@ -144,9 +135,6 @@ final class WeakLabelModelLearnerNodeModel extends NodeModel {
 
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void saveInternals(final File nodeInternDir, final ExecutionMonitor exec)
         throws IOException, CanceledExecutionException {
@@ -154,33 +142,21 @@ final class WeakLabelModelLearnerNodeModel extends NodeModel {
 
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
         m_settings.saveSettingsTo(settings);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.validateSettings(settings);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_settings.loadValidatedSettingsFrom(settings);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void reset() {
         // no state to reset

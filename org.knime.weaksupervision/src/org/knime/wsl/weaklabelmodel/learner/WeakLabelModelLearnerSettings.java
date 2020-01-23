@@ -54,9 +54,12 @@ import org.knime.core.data.probability.nominal.NominalDistributionValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.NotConfigurableException;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.util.CheckUtils;
 
 /**
@@ -66,13 +69,84 @@ import org.knime.core.node.util.CheckUtils;
  */
 final class WeakLabelModelLearnerSettings {
 
+    private static final String CFG_LEARNING_RATE = "learningRate";
+
+    private static final String CFG_EPSILON = "epsilon";
+
+    private static final String CFG_USE_EPSILON = "useFixedEpsilon";
+
     @SuppressWarnings("unchecked")
     static SettingsModelColumnFilter2 createLabelSourceColumns() {
         return new SettingsModelColumnFilter2("noisyLabelColumns", NominalValue.class, NominalDistributionValue.class);
     }
 
     static SettingsModelDoubleBounded createLearningRate() {
-        return new SettingsModelDoubleBounded("learningRate", 0.01, 1e-6, 1);
+        return new SettingsModelDoubleBounded(CFG_LEARNING_RATE, 0.01, 1e-6, 1) {
+            @Override
+            protected void loadSettingsForDialog(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+                throws NotConfigurableException {
+                if (settings.containsKey(CFG_LEARNING_RATE)) {
+                    super.loadSettingsForDialog(settings, specs);
+                } else {
+                    setDoubleValue(0.01);
+                }
+            }
+
+            @Override
+            protected void loadSettingsForModel(final NodeSettingsRO settings) throws InvalidSettingsException {
+                if (settings.containsKey(CFG_LEARNING_RATE)) {
+                    super.loadSettingsForModel(settings);
+                } else {
+                    setDoubleValue(0.01);
+                }
+            }
+        };
+    }
+
+    static SettingsModelDoubleBounded createEpsilon() {
+        return new SettingsModelDoubleBounded(CFG_EPSILON, 0.01, 0, 0.1) {
+            @Override
+            protected void loadSettingsForDialog(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+                throws NotConfigurableException {
+                if (settings.containsKey(CFG_EPSILON)) {
+                    super.loadSettingsForDialog(settings, specs);
+                } else {
+                    setDoubleValue(0.01);
+                }
+            }
+
+            @Override
+            protected void loadSettingsForModel(final NodeSettingsRO settings) throws InvalidSettingsException {
+                if (settings.containsKey(CFG_EPSILON)) {
+                    super.loadSettingsForModel(settings);
+                } else {
+                    setDoubleValue(0.01);
+                }
+            }
+        };
+    }
+
+    static SettingsModelBoolean createUseEpsilon() {
+        return new SettingsModelBoolean(CFG_USE_EPSILON, false) {
+            @Override
+            protected void loadSettingsForDialog(final NodeSettingsRO settings, final PortObjectSpec[] specs)
+                throws NotConfigurableException {
+                if (settings.containsKey(CFG_USE_EPSILON)) {
+                    super.loadSettingsForDialog(settings, specs);
+                } else {
+                    setBooleanValue(true);
+                }
+            }
+
+            @Override
+            protected void loadSettingsForModel(final NodeSettingsRO settings) throws InvalidSettingsException {
+                if (settings.containsKey(CFG_USE_EPSILON)) {
+                    super.loadSettingsForModel(settings);
+                } else {
+                    setBooleanValue(true);
+                }
+            }
+        };
     }
 
     static void checkLabelSources(final DataTableSpec spec, final SettingsModelColumnFilter2 sourceFilter)
@@ -104,11 +178,18 @@ final class WeakLabelModelLearnerSettings {
 
     private final SettingsModelIntegerBounded m_epochs = createEpochs();
 
+    private final SettingsModelDoubleBounded m_epsilon = createEpsilon();
+
+    private final SettingsModelBoolean m_useEpsilon = createUseEpsilon();
+
     void saveSettingsTo(final NodeSettingsWO settings) {
         m_labelSourceColumns.saveSettingsTo(settings);
         //        m_firstCorrelationColumn.saveSettingsTo(settings);
         //        m_secondCorrelationColumn.saveSettingsTo(settings);
         m_epochs.saveSettingsTo(settings);
+        m_learningRate.saveSettingsTo(settings);
+        m_epsilon.saveSettingsTo(settings);
+        m_useEpsilon.saveSettingsTo(settings);
     }
 
     void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
@@ -116,6 +197,9 @@ final class WeakLabelModelLearnerSettings {
         //        m_firstCorrelationColumn.validateSettings(settings);
         //        m_secondCorrelationColumn.validateSettings(settings);
         m_epochs.validateSettings(settings);
+        m_learningRate.validateSettings(settings);
+        m_epsilon.validateSettings(settings);
+        m_useEpsilon.validateSettings(settings);
     }
 
     void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
@@ -123,6 +207,9 @@ final class WeakLabelModelLearnerSettings {
         //        m_firstCorrelationColumn.loadSettingsFrom(settings);
         //        m_secondCorrelationColumn.loadSettingsFrom(settings);
         m_epochs.loadSettingsFrom(settings);
+        m_learningRate.loadSettingsFrom(settings);
+        m_epsilon.loadSettingsFrom(settings);
+        m_useEpsilon.loadSettingsFrom(settings);
     }
 
     SettingsModelColumnFilter2 getLabelSourcesFilter() {
@@ -143,6 +230,14 @@ final class WeakLabelModelLearnerSettings {
 
     int getEpochs() {
         return m_epochs.getIntValue();
+    }
+
+    boolean useFixedEpsilon() {
+        return m_useEpsilon.getBooleanValue();
+    }
+
+    double getFixedEpsilon() {
+        return m_epsilon.getDoubleValue();
     }
 
 }

@@ -102,7 +102,27 @@ final class WeakLabelModelLearner {
             initialize(lma, covarianceMatrix);
             monitor.setProgress(0.8, "Start training.");
             train(lma, monitor.createSubProgress(0.2));
-            return new WeakLabelModelContent(lma.getMu(), getClassBalance());
+            return new WeakLabelModelContent(clampMu(lma.getMu(), table.size()), getClassBalance());
+        }
+    }
+
+    private float[][] clampMu(final float[][] mu, final long n) {
+        final float epsilon;
+        if (m_settings.useFixedEpsilon()) {
+            epsilon = (float)m_settings.getFixedEpsilon();
+        } else {
+            epsilon = (float)Math.min(0.01, 1 / Math.pow(10, Math.ceil(Math.log10(n))));
+        }
+        clampInPlace(mu, epsilon, 1 - epsilon);
+        return mu;
+    }
+
+    private static void clampInPlace(final float[][] matrix, final float lower, final float upper) {
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                final float value = matrix[i][j];
+                matrix[i][j] = Math.min(upper, Math.max(lower, value));
+            }
         }
     }
 

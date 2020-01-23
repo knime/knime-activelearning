@@ -51,7 +51,7 @@ proba_mu = tf.clip_by_value(mu, 0.01, 0.99)
 # TODO add support for dependencies
 jtm = tf.ones(tf.shape(l_aug)[1])
 
-x = tf.exp(tf.matmul(l_aug, tf.matmul(tf.diag(jtm), tf.log(proba_mu)) + tf.log(tf.diag_part(p))))
+x = tf.exp(tf.matmul(l_aug, tf.matmul(tf.diag(jtm), tf.log(proba_mu)) + tf.log(tf.diag_part(p))), name='unnormalized_probabilities')
 z = tf.reduce_sum(x, axis=1, keepdims=True)
 probabilities = tf.div(x, z, name='probabilities')
 

@@ -188,4 +188,8 @@ public final class LabelModelAdapter implements AutoCloseable {
         return m_savedModel.getFloatMatrix("l_aug", labelSourceMatrix, "probabilities");
     }
 
+    public float[][] calculateUnnormalizedProbabilities(final float[][] labelSourceMatrix) {
+        return m_savedModel.getFloatMatrix("l_aug", labelSourceMatrix, "pre_exp_matmul");
+    }
+
 }
