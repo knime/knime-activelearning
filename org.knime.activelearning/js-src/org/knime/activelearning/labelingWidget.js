@@ -250,6 +250,14 @@ window.generalPurposeLabelingWidget = (function () {
      */
     window.knimeTileView._setSelectionHandlers = function () {
         KnimeBaseTableViewer.prototype._setSelectionHandlers.apply(this);
+        var clearSelectionButton = $('#pagedTableClearSelectionButton');
+        // Overwrite clearSelectionButton to properly deselect selected tiles
+        clearSelectionButton.click(function () {
+            _tileView._selectAll(false);
+            _selectedTiles = [];
+            document.getElementById('selectedText').innerHTML = 'Selected tiles: 0';
+            _changeSkipButton();
+        });
         if (!this._representation.enableSelection) {
             return;
         }
