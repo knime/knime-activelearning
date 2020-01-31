@@ -264,9 +264,10 @@ public class ActiveLabelingNodeModel
         final ColumnRearranger rearranger;
 
         String possibleValuesColumnName = m_config.getLabelCol();
-        if (((DataTableSpec)inSpecs[0]).getColumnSpec(possibleValuesColumnName) == null && possibleValuesColumnName == null) {
+        if (possibleValuesColumnName == null) {
             throw new InvalidSettingsException("There is no column selected for possible values");
-        } else if (((DataTableSpec)inSpecs[0]).getColumnSpec(possibleValuesColumnName) == null) {
+        }
+        if (((DataTableSpec)inSpecs[0]).getColumnSpec(possibleValuesColumnName) == null) {
             throw new InvalidSettingsException("The column which is selected for possible values is missing");
         }
 
