@@ -50,10 +50,6 @@ h1 {
     width: 60%;
 }
 
-html, body, .knime-table-container {
-    height: 100%;
-}
-
 .knime-table-container>div>div.row {
     margin: 0 auto !important;
 }
@@ -88,7 +84,6 @@ html, body, .knime-table-container {
 #labelingContainer {
     display: flex;
     flex-direction: column;
-    position: absolute;
     top: 0px;
     bottom: 0px;
     left: 0px;
@@ -97,7 +92,7 @@ html, body, .knime-table-container {
 
 
 .knime-table-container.knime-tiles {
-    flex: initial !important;
+    flex: 1 1 200px !important;
     margin: 0px;
     padding: 0px 10px 10px;
     position: relative;
@@ -134,6 +129,7 @@ html, body, .knime-table-container {
     align-items: center;
     margin-left: auto;
     margin-right: auto;
+    flex: 0;
 }
 
 #skipButtonContainer {
