@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.knime.maven</groupId>
@@ -23,44 +23,48 @@
         <feature-branch-extension.appendArtifactoryProperties>false</feature-branch-extension.appendArtifactoryProperties>
     </properties>
     
-	<modules>
-		<module>org.knime.activelearning</module>
-		<module>org.knime.features.activelearning</module>
-		<module>org.knime.update.activelearning</module>
-	</modules>
+    <modules>
+        <module>org.knime.activelearning</module>
+        <module>org.knime.activelearning.tests</module>
+        <module>org.knime.features.activelearning</module>
+        <module>org.knime.features.weaksupervision</module>
+        <module>org.knime.update.activelearning</module>
+        <module>org.knime.weaksupervision</module>
+        <module>org.knime.weaksupervision.tests</module>
+    </modules>
 
-	<repositories>
-		<repository>
-			<id>knime.base.p2</id>
-			<layout>p2</layout>
-			<url>${knime.base.p2}</url>
-		</repository>
-		<repository>
-			<id>knime.core.p2</id>
-			<layout>p2</layout>
-			<url>${knime.core.p2}</url>
-		</repository>
-		<repository>
-			<id>knime.expressions.p2</id>
-			<layout>p2</layout>
-			<url>${knime.expressions.p2}</url>
-		</repository>
-		<repository>
-			<id>knime.shared.p2</id>
-			<layout>p2</layout>
-			<url>${knime.shared.p2}</url>
-		</repository>
-		<repository>
-			<id>knime.tp.p2</id>
-			<layout>p2</layout>
-			<url>${knime.tp.p2}</url>
-		</repository>
-		<repository>
-			<id>knime.javasnippet.p2</id>
-			<layout>p2</layout>
-			<url>${knime.javasnippet.p2}</url>
-		</repository>
+    <repositories>
         <repository>
+            <id>knime.base.p2</id>
+            <layout>p2</layout>
+            <url>${knime.base.p2}</url>
+        </repository>
+        <repository>
+            <id>knime.core.p2</id>
+            <layout>p2</layout>
+            <url>${knime.core.p2}</url>
+        </repository>
+        <repository>
+            <id>knime.expressions.p2</id>
+            <layout>p2</layout>
+            <url>${knime.expressions.p2}</url>
+        </repository>
+        <repository>
+            <id>knime.shared.p2</id>
+            <layout>p2</layout>
+            <url>${knime.shared.p2}</url>
+        </repository>
+        <repository>
+            <id>knime.tp.p2</id>
+            <layout>p2</layout>
+            <url>${knime.tp.p2}</url>
+        </repository>
+        <repository>
+            <id>knime.javasnippet.p2</id>
+            <layout>p2</layout>
+            <url>${knime.javasnippet.p2}</url>
+        </repository>
+          <repository>
             <id>knime.js.core.p2</id>
             <layout>p2</layout>
             <url>${knime.js.core.p2}</url>
@@ -70,5 +74,42 @@
             <layout>p2</layout>
             <url>${knime.svg.p2}</url>
         </repository>
-	</repositories>
+        <repository>
+            <id>knime.tensorflow.p2</id>
+            <layout>p2</layout>
+            <url>${knime.tensorflow.p2}</url>
+        </repository>
+        <repository>
+            <id>knime.workbench.p2</id>
+            <layout>p2</layout>
+            <url>${knime.workbench.p2}</url>
+        </repository>
+    </repositories>
+
+     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho.extras</groupId>
+                <artifactId>tycho-source-feature-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>source-feature</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>source-feature</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <excludes>
+                        <plugin id="org.knime.tensorflow.bin.windows.amd64.cpu" />
+                        <plugin id="org.knime.tensorflow.bin.windows.amd64.gpu" />
+                        <plugin id="org.knime.tensorflow.bin.linux.amd64.cpu" />
+                        <plugin id="org.knime.tensorflow.bin.linux.amd64.gpu" />
+                        <plugin id="org.knime.tensorflow.bin.macosx.amd64.cpu" />
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

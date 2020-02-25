@@ -12,11 +12,29 @@ properties([
 ])
 
 try {
-    knimetools.defaultTychoBuild('org.knime.update.activelearning')
+    // Needs more RAM because of the dependency on tensorflow
+    // it needs to download and install a bunch of large binaries
+    // Therefore we use the 'large' image and allow mvn to use 4G of memory
+    withEnv(["MAVEN_OPTS=-Xmx4G"]){
+        knimetools.defaultTychoBuild('org.knime.update.activelearning', 'maven && large') 
+    }
+
+    workflowTests.runTests(
+        dependencies: [
+            repositories: ['knime-activelearning', 'knime-tensorflow', 'knime-jep', 'knime-datageneration', 'knime-streaming'],
+        ],
+        withAssertions: true,
+    )
+
+    stage('Sonarqube analysis') {
+        env.lastStage = env.STAGE_NAME
+        workflowTests.runSonar()
+    }
+
 } catch (ex) {
     currentBuild.result = 'FAILURE'
     throw ex
-} finally {
     notifications.notifyBuild(currentBuild.result)
+} finally {
 }
 /* vim: set shiftwidth=4 expandtab smarttab: */

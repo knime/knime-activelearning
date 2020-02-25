@@ -1,4 +1,5 @@
 */bin/
 **/target/
 */build/
-**/.flattened-pom.xml
+.flattened-pom.xml
+org.knime.weaksupervision/knime-weaksupervision.jar

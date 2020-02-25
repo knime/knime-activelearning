@@ -6,6 +6,12 @@
    <feature id="org.knime.features.activelearning.source" version="0.0.0">
       <category name="knime-activelearning"/>
    </feature>
+   <feature id="org.knime.features.weaksupervision" version="0.0.0">
+      <category name="knime-activelearning"/>
+   </feature>
+   <feature id="org.knime.features.weaksupervision.source" version="0.0.0">
+      <category name="knime-activelearning"/>
+   </feature>
 
    <category-def name="knime-activelearning" label="Build artifacts from knime-activelearning">
        <description>Build artifacts from knime-activelearning</description>
