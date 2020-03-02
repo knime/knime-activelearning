@@ -208,6 +208,8 @@ window.generalPurposeLabelingWidget = (function () {
     window.knimeTileView._buildMenuOld = window.knimeTileView._buildMenu;
     window.knimeTileView._buildMenu = function () {
         window.knimeTileView._buildMenuOld.apply(this);
+        // Overwrite the floating calculation of the table view, as floating is wanted in the labeling view
+        knimeService.floatingHeader(true);
         var self = this;
         if (!this._representation.showUnlabeledOnly) {
             var showUnlabeledCheckbox = knimeService.createMenuCheckbox('showUnlabeledCheckbox',
@@ -311,6 +313,9 @@ window.generalPurposeLabelingWidget = (function () {
             // Initialize progress text
             document.getElementById('progressText').innerHTML = _filterData(_getAllPossibleValues()).length + ' / ' +
                 _tileView._representation.table.rows.length + ' processed';
+        } else {
+            // If there is no progress bar, there is no need to save more space towards the top
+            document.getElementById('knime-service-header').style.paddingTop = '7px';
         }
 
         var labelingButtonGroup = document.createElement('div');
@@ -929,9 +934,8 @@ window.generalPurposeLabelingWidget = (function () {
     _selectNextTile = function (selectedRows, initialize) {
         var currentPageCells = knimeTileView._curCells[0];
         var prevRowInd = 0;
-        var pageSize = parseInt(document.
-            querySelector('select.form-control.input-sm.knime-table-control-text.knime-single-line')
-            .value, 10);
+        var info = _tileView._getJQueryTable().DataTable().page.info();
+        var pageSize = info.length;
         if (currentPageCells) {
             var currentCheckboxes = currentPageCells.parentElement.parentElement.getElementsByClassName('selection-cell');
             selectedRows.forEach(function (row) {
@@ -941,7 +945,6 @@ window.generalPurposeLabelingWidget = (function () {
                 }
             });
 
-            var info = _tileView._getJQueryTable().DataTable().page.info();
 
             // Check if previous index was last, then it should select first tile instead of the next
             var newRowInd = (prevRowInd >= info.recordsTotal - 1 || initialize) ? 0 : prevRowInd + 1;
