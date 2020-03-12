@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.knime.features.activelearning_3.8.0.qualifier.jar" id="org.knime.features.activelearning" version="3.8.0.qualifier"/>
+   <feature id="org.knime.features.activelearning" version="0.0.0">
+      <category name="knime-activelearning"/>
+   </feature>
+   <feature id="org.knime.features.activelearning.source" version="0.0.0">
+      <category name="knime-activelearning"/>
+   </feature>
+
+   <category-def name="knime-activelearning" label="Build artifacts from knime-activelearning">
+       <description>Build artifacts from knime-activelearning</description>
+   </category-def>
 </site>

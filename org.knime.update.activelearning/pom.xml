@@ -8,8 +8,7 @@
 	<parent>
 		<groupId>org.knime</groupId>
 		<artifactId>knime-activelearning</artifactId>
-		<version>3.8.0-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
+		<version>${revision}${changelist}</version>
 	</parent>
 
 	<artifactId>org.knime.update.activelearning</artifactId>
