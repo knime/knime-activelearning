@@ -5,6 +5,8 @@ window.generalPurposeLabelingWidget = (function () {
     var _selectedTiles = [];
     var _rowKeys = {};
     var _rowKeysOnly = [];
+    var _originRowKeys = {};
+    var _originRowKeysOnly = [];
     var _tileViewData = null;
     var _initialized = false;
     var _masterColors = [2062516, 3383340, 14883356, 16744192, 6962586, 10931939, 11722634,
@@ -14,6 +16,7 @@ window.generalPurposeLabelingWidget = (function () {
     var _representation,
         _value,
         _tileView,
+        _drawbackTimeout,
 
         // function definitions
         _createContainer, _updateButtonClasses, _getHexColor, _changeSkipButton, _setupSkipButtonHandler, _labelAndLoadNext,
@@ -24,7 +27,6 @@ window.generalPurposeLabelingWidget = (function () {
 
     labelingWidget.init = function (representation, value) {
         _representation = representation;
-
         // Check if actually data is present
         if (!_representation.table) {
             var missingDataText = document.createElement('div');
@@ -36,12 +38,14 @@ window.generalPurposeLabelingWidget = (function () {
         _representation.table.spec.rowColorValues = _changeToDefaultHeaderColor(_representation.table.spec.rowColorValues, '#404040');
         _representation.table.rows.forEach(function (row, rowInd) {
             var label = typeof value.labels[row] === 'undefined' ? null : value.labels[row];
-            _rowKeys[row.rowKey] = {
+            _originRowKeys[row.rowKey] = {
                 rowInd: rowInd,
                 label: label
             };
-            _rowKeysOnly.push(row.rowKey);
+            _originRowKeysOnly.push(row.rowKey);
         });
+        _rowKeys = _originRowKeys;
+        _rowKeysOnly = _originRowKeysOnly;
         _value = value;
         _value.possiblevalues = _combinePossibleValues(_representation, _value);
         // todo remove and add configurable color options
@@ -61,7 +65,7 @@ window.generalPurposeLabelingWidget = (function () {
         // map '?' to undefined to serialize to missing values
         _rowKeysOnly.forEach(function (row) {
             if (typeof _value.labels[row] === 'undefined' || _value.labels[row] === '?') {
-                _value.labels[row] = undefined;
+                _value.labels[row] = '?';
             }
         });
         return _value;
@@ -91,7 +95,7 @@ window.generalPurposeLabelingWidget = (function () {
         return Object.keys(possibleValues);
     };
 
-    _initializeView = function (representation, value) {
+    _initializeView = function (representation, value, redraw) {
         if (_initialized === false) {
             _initialized = true;
             if (Object.keys(value.labels).length > 0) {
@@ -105,7 +109,7 @@ window.generalPurposeLabelingWidget = (function () {
                     colorMap[labelValue] = _hexToRgb(_getHexColor(color));
                 });
 
-                _initializeLabels(value.labels, colorMap, _rowKeys);
+                _initializeLabels(value.labels, colorMap, _originRowKeys, redraw);
             } else if (_representation.autoSelectNextTile) {
                 _selectedTiles[_selectFirstTile().value] = true;
             }
@@ -148,25 +152,63 @@ window.generalPurposeLabelingWidget = (function () {
     window.knimeTileView._selectionChangedOld = window.knimeTileView._selectionChanged;
     window.knimeTileView._selectionChanged = function (data) {
         window.knimeTileView._selectionChangedOld.apply(this, [data]);
-        this._value.selection = this._selection;
-        _selectedTiles = this._selection;
-        for (var row in _selectedTiles) {
-            if (_selectedTiles[row] === false) {
-                delete _selectedTiles[row];
+        if (data.elements) {
+            for (var ele = 0; ele < data.elements[0].rows.length; ele++) {
+                this._selection[data.elements[0].rows[ele]] = true;
             }
+        } else {
+	        this._value.selection = this._selection;
+	        _selectedTiles = this._selection;
+	        for (var row in _selectedTiles) {
+	            if (_selectedTiles[row] === false || !knimeTileView._knimeTable.isRowIncludedInFilter(row, knimeTileView._currentFilter)) {
+	                delete _selectedTiles[row];
+	            }
+	        }
         }
         document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + _countTrueSelectedValues(_selectedTiles);
         _changeSkipButton();
     };
 
     /**
+     * Overwrite filterChanged function to react to filter events from other views.
+     */
+    window.knimeTileView._filterChangedOld = window.knimeTileView._filterChanged;
+    window.knimeTileView._filterChanged = function (data) {
+        window.knimeTileView._filterChangedOld.apply(this, [data]);
+        _rowKeys = [];
+        _rowKeysOnly = [];
+        counter = 0;
+        _representation.table.rows.forEach(function (row, rowInd) {
+            if (!knimeTileView._knimeTable.isRowIncludedInFilter(row.rowKey, knimeTileView._currentFilter)) {
+                return;
+            }
+            var label = typeof _value.labels[row] === 'undefined' ? null : _value.labels[row];
+            _rowKeys[row.rowKey] = {
+                rowInd: counter,
+                label: label
+            };
+            _selectedTiles[row.rowKey] = true;
+            counter ++;
+            _rowKeysOnly.push(row.rowKey);
+        });
+        if (!data.reevaluate) {
+            _initialized = false;
+            _initializeView(knimeTileView._representation, knimeTileView._value, true);
+        }
+    };
+
+    /**
      * Overwrite dataTableDrawCallback function to load selection into view, if there was a previous selection
+     * Add a timeout, as otherwise the method is called everytime a page is rendered.
      */
     window.knimeTileView._dataTableDrawCallbackOld = window.knimeTileView._dataTableDrawCallback;
     window.knimeTileView._dataTableDrawCallback = function () {
         window.knimeTileView._dataTableDrawCallbackOld.apply(this);
         if (window.knimeTileView._dataTable !== null && !_initialized) {
-            _initializeView(_representation, _value);
+            clearTimeout(_drawbackTimeout);
+            _drawbackTimeout = setTimeout(function(){
+                _initializeView(_representation, _value);
+            }, 1000);
         }
     };
 
@@ -707,16 +749,20 @@ window.generalPurposeLabelingWidget = (function () {
         return displayedCheckbox;
     };
 
-    _initializeLabels = function (labels, colorMap, rowKeyIndexObj) {
+    _initializeLabels = function (labels, colorMap, rowKeyIndexObj, redraw) {
         var tileViewData = _tileView._dataTable.data();
         var lastRowLabeled = null;
         var totalLabels = 0;
         var rowKeys = Object.keys(labels);
         var lastLabeledRowInd = 0;
         var hasPreviouslyLabeledRow;
-        rowKeys.forEach(function (rowKey) {
+        _rowKeysOnly.forEach(function (rowKey) {
             var label = labels[rowKey];
             var rowInd = rowKeyIndexObj[rowKey].rowInd;
+            if (!tileViewData[rowInd] ||
+                !knimeTileView._knimeTable.isRowIncludedInFilter(rowKey, knimeTileView._currentFilter)) {
+                return;
+            }
             if (typeof label !== 'undefined' && label !== '?') {
                 var color = colorMap[label];
                 var labelColor = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
@@ -727,7 +773,7 @@ window.generalPurposeLabelingWidget = (function () {
                     /background-color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/, 'background-color: ' + labelColor + ';'
                 );
                 if (/"color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/.test(tileViewData[rowInd][1])) {
-                    tileViewData[rowInd][1] = _tileViewData[rowInd][1].replace(
+                    tileViewData[rowInd][1] = tileViewData[rowInd][1].replace(
                         /"color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/, '"color: rgb(255,255,255);'
                     );
                 } else {
@@ -747,8 +793,6 @@ window.generalPurposeLabelingWidget = (function () {
             }
         });
 
-        _value.selection = [];
-        _selectedTiles = [];
         if (_value.showUnlabeledOnly) {
             _tileView._filterLabeldData();
         }
@@ -765,22 +809,23 @@ window.generalPurposeLabelingWidget = (function () {
             document.getElementById('labCurrentProgressBar').style.width = progress * 100 + '%';
             document.getElementById('progressText').innerHTML = numberOfPossibleValues + ' / ' + tableLength + ' processed';
         }
-        if (_tileView._value.autoSelectNextTile && lastRowLabeled !== '') {
-            if (_value.hideUnselected) {
-                // nothing todo as no tile should be selected
-            } else {
-                knimeService.setSelectedRows(_representation.table.id, [], false);
-                if (amountTrueSelectedValues === 0) {
-                    var selectedRowName = _selectNextTile([_rowKeysOnly[lastLabeledRowInd]], true);
-                    if (selectedRowName) {
-                        _selectedTiles[selectedRowName] = true;
-                    }
-                } else {
-                    var savedPage = _tileView._value.currentPage;
-                    _tileView._getJQueryTable().DataTable().page(savedPage).draw('page');
-                    _selectedTiles = _tileView._selection;
-                }
-            }
+        if (!redraw) {
+	        if (_tileView._value.autoSelectNextTile && lastRowLabeled !== '') {
+	            if (_value.hideUnselected) {
+	                // nothing todo as no tile should be selected
+	            } else {
+	                if (amountTrueSelectedValues === 0) {
+	                    var selectedRowName = _selectNextTile([_rowKeysOnly[lastLabeledRowInd]], true);
+	                    if (selectedRowName) {
+	                        _selectedTiles[selectedRowName] = true;
+	                    }
+	                } else {
+	                    var savedPage = _tileView._value.currentPage;
+	                    _tileView._getJQueryTable().DataTable().page(savedPage).draw('page');
+	                    _selectedTiles = _tileView._selection;
+	                }
+	            }
+	        }
         }
         _changeSkipButton();
         // need to recalculate as it might have changed
@@ -806,6 +851,9 @@ window.generalPurposeLabelingWidget = (function () {
                 for (var i = selectedKeyValPairs.length - 1; i >= 0; i--) {
                     if (selectedKeyValPairs[i] !== "undefined") {
                         rowName = selectedKeyValPairs[i];
+                        if (!knimeTileView._knimeTable.isRowIncludedInFilter(rowName, knimeTileView._currentFilter)) {
+                            continue;
+                        }
                         _tileView._selection[rowName] = false;
                         // Remove operation
                         var currentTile = _checkIfIsCurrentlyDisplayed(rowName);
@@ -840,7 +888,10 @@ window.generalPurposeLabelingWidget = (function () {
             _tileViewData = _tileView._dataTable.data();
             selectedRows.forEach(function (row) {
                 if (row !== '?') {
-                    var rowNumber = _rowKeys[row].rowInd;
+                    if (!_rowKeys[row]) {
+                        return;
+                    }
+                    var rowNumber = _originRowKeys[row].rowInd;
                     // Check for hex string
                     _tileViewData[rowNumber][1] = _tileViewData[rowNumber][1].replace(
                         /background-color:\s*#[A-Fa-f0-9]{6};*/, 'background-color: ' + labelColor + ';'
@@ -913,7 +964,7 @@ window.generalPurposeLabelingWidget = (function () {
     _countTrueSelectedValues = function (potentiallySelectedList) {
         var counter = 0;
         Object.keys(potentiallySelectedList).forEach(function (listEntry) {
-            if (potentiallySelectedList[listEntry] === true) {
+            if (potentiallySelectedList[listEntry] === true && knimeTileView._knimeTable.isRowIncludedInFilter(listEntry, knimeTileView._currentFilter)) {
                 counter++;
             }
         });
@@ -939,15 +990,18 @@ window.generalPurposeLabelingWidget = (function () {
         if (currentPageCells) {
             var currentCheckboxes = currentPageCells.parentElement.parentElement.getElementsByClassName('selection-cell');
             selectedRows.forEach(function (row) {
+                if (!_rowKeys[row]) {
+                    return;
+                }
                 var rowInd = _rowKeys[row].rowInd;
                 if (prevRowInd < rowInd) {
                     prevRowInd = rowInd
                 }
             });
 
-
+            var info = _tileView._getJQueryTable().DataTable().page.info();
             // Check if previous index was last, then it should select first tile instead of the next
-            var newRowInd = (prevRowInd >= info.recordsTotal - 1 || initialize) ? 0 : prevRowInd + 1;
+            var newRowInd = (prevRowInd >= info.recordsDisplay - 1 || initialize) ? 0 : _rowKeys[_rowKeysOnly[prevRowInd + 1]].rowInd;
             var currentPage = _tileView._dataTable.page();
             var savedPage = _tileView._value.currentPage;
             var pageForRow = (currentPage !== savedPage && initialize) ? savedPage : Math.floor(newRowInd / pageSize);
