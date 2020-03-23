@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Weak Supervision Plug-in
 Bundle-SymbolicName: org.knime.weaksupervision;singleton:=true
