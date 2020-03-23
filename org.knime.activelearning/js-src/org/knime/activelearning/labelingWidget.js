@@ -305,8 +305,8 @@ window.generalPurposeLabelingWidget = (function () {
             addClassesButton.type = 'button';
             addClassesButton.id = 'btnEditClasses';
             addClassesButton.innerHTML = '&#x1F527;';
-            addClassesButton.onclick = function () {
-                document.getElementById('dlgEdit').showModal();
+            addClassesButton.onclick = function (e) {
+               $('#dlgEdit').modal();
             };
             knimeService.addMenuItem('Create custom classes', null, addClassesButton);
         }
@@ -512,21 +512,26 @@ window.generalPurposeLabelingWidget = (function () {
      * @returns {Object} removeDialog - the created remove-dialog
      */
     _createRemoveDialog = function () {
-        var removeDialog = document.createElement('dialog');
+    	var removeDialog = document.createElement('div');
         removeDialog.id = 'dlgRemove';
+        removeDialog.className = 'modal fade in modal-dialog';
+
+        removeContent = document.createElement('div')
+        removeContent.className = 'modal-content';
+        removeDialog.appendChild(removeContent);
 
         var removeDialogText = document.createElement('div');
         removeDialogText.innerHTML = '';
         removeDialogText.id = 'dlgRemoveText';
-        removeDialog.appendChild(removeDialogText);
+        removeContent.appendChild(removeDialogText);
 
 
         var removeDialogButtonKeep = document.createElement('button');
         removeDialogButtonKeep.innerHTML = 'Keep';
         removeDialogButtonKeep.onclick = function () {
-            document.getElementById('dlgRemove').close();
+            $('#dlgRemove').modal('hide');
         };
-        removeDialog.appendChild(removeDialogButtonKeep);
+        removeContent.appendChild(removeDialogButtonKeep);
 
         var removeDialogButtonAccept = document.createElement('button');
         removeDialogButtonAccept.innerHTML = 'Remove';
@@ -534,17 +539,29 @@ window.generalPurposeLabelingWidget = (function () {
         removeDialogButtonAccept.onclick = function () {
             var select = document.getElementById('slcClassesEdit');
             var classes = [...select.options].filter(option => option.selected).map(option => option.value);
+            labeledCards = _filterData(classes.join('|'));
             classes.forEach((className) => {
                 var valInd = _value.possiblevalues.indexOf(className);
                 if (valInd > -1) {
                     _value.possiblevalues.splice(valInd, 1);
                 }
+                var labelColor = 'rgb(120, 120, 120)';
+                for (var i = 0; i < labeledCards.length; i++) {
+                    labeledCards[i] = labeledCards[i].replace(className,'');
+                    labeledCards[i] = labeledCards[i].replace(
+                            /background-color:\s*#[A-Fa-f0-9]{6};*/, 'background-color: ' + labelColor + ';'
+                        );
+                    labeledCards[i] = labeledCards[i].replace(
+                            /background-color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/, 'background-color: ' + labelColor + ';'
+                        );
+                };
             });
+            _tileView._dataTable.columns.adjust().draw();
             _updateLabelClasses();
             document.getElementById('btnRemoveLabelClass').hidden = true;
-            document.getElementById('dlgRemove').close();
+            $('#dlgRemove').modal('hide');
         };
-        removeDialog.appendChild(removeDialogButtonAccept);
+        removeContent.appendChild(removeDialogButtonAccept);
 
         return removeDialog;
     };
@@ -554,18 +571,23 @@ window.generalPurposeLabelingWidget = (function () {
      * @returns {Element} - created editor dialog
      */
     _createClassEditorDialog = function () {
-        var editDialog = document.createElement('dialog');
+        var editDialog = document.createElement('div');
         editDialog.id = 'dlgEdit';
+        editDialog.className = 'modal fade in modal-dialog';
+        
+        editDialogContent = document.createElement('div')
+        editDialogContent.className = 'modal-content';
+        editDialog.appendChild(editDialogContent);
 
         var editHeader = document.createElement('h1');
         editHeader.innerHTML = 'Labels';
-        editDialog.appendChild(editHeader);
+        editDialogContent.appendChild(editHeader);
 
         var editTextInput = document.createElement('input');
         editTextInput.id = 'tbxNewLabel';
         editTextInput.style = 'width: 50%;';
         editTextInput.type = 'text';
-        editDialog.appendChild(editTextInput);
+        editDialogContent.appendChild(editTextInput);
 
         var editAddButton = document.createElement('button');
         editAddButton.id = 'btnAddNewLabelClass';
@@ -573,13 +595,13 @@ window.generalPurposeLabelingWidget = (function () {
         editAddButton.type = 'button';
         editAddButton.innerHTML = 'Add';
         _setupAddClassesButtonHandler(editAddButton);
-        editDialog.appendChild(editAddButton);
-        editDialog.appendChild(document.createElement('br'));
+        editDialogContent.appendChild(editAddButton);
+        editDialogContent.appendChild(document.createElement('br'));
         var editList = document.createElement('select');
         editList.id = 'slcClassesEdit';
         editList.style = 'width: 100%;';
         editList.multiple = true;
-        editDialog.appendChild(editList);
+        editDialogContent.appendChild(editList);
 
         editList.onchange = function () {
             var select = document.getElementById('slcClassesEdit');
@@ -589,12 +611,12 @@ window.generalPurposeLabelingWidget = (function () {
             }
         };
 
-        editDialog.appendChild(document.createElement('br'));
+        editDialogContent.appendChild(document.createElement('br'));
 
         var editInfoText = document.createElement('p');
         editInfoText.innerHTML = 'Labels set in the node dialog cannot be removed';
         editInfoText.style = 'color:grey';
-        editDialog.appendChild(editInfoText);
+        editDialogContent.appendChild(editInfoText);
 
         var removeButton = document.createElement('button');
         removeButton.id = 'btnRemoveLabelClass';
@@ -609,22 +631,21 @@ window.generalPurposeLabelingWidget = (function () {
             var removeDialogText = document.getElementById('dlgRemoveText');
             removeDialogText.innerHTML = `Are you sure you want to delete the selected classes? There are ${
                 _filterData(classes.join('|')).length} tiles marked.`;
-            document.getElementById('dlgRemove').showModal();
-        };
+                $('#dlgRemove').modal();
+            }
 
-        editDialog.appendChild(removeButton);
-        editDialog.appendChild(document.createElement('br'));
+        editDialogContent.appendChild(removeButton);
+        editDialogContent.appendChild(document.createElement('br'));
 
         var closeButton = document.createElement('button');
         closeButton.id = 'btnCloseDialog';
-        closeButton.style = 'float: right;';
         closeButton.type = 'button';
         closeButton.innerHTML = 'Close';
-        closeButton.onclick = function () {
-            document.getElementById('dlgEdit').close();
+        closeButton.onclick = function (e) {
+            $('#dlgEdit').modal('hide');
             _updateLabelClasses();
         };
-        editDialog.appendChild(closeButton);
+        editDialogContent.appendChild(closeButton);
 
         return editDialog;
     };
@@ -1189,7 +1210,7 @@ window.generalPurposeLabelingWidget = (function () {
         return _tileView._getJQueryTable().DataTable().column(1).data().filter((value) => {
             var temp1 = value.split('>');
             var temp2 = temp1.length && temp1.length >= 2 ? temp1[1].split('<')[0] : '';
-            return searchTerms.includes(temp2[0]);
+            return searchTerms.includes(temp2);
         });
     };
 

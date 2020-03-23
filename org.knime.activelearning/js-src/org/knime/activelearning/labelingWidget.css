@@ -82,8 +82,6 @@ h1 {
 }
 
 #labelingContainer {
-    display: flex;
-    flex-direction: column;
     top: 0px;
     bottom: 0px;
     left: 0px;
@@ -129,7 +127,6 @@ h1 {
     align-items: center;
     margin-left: auto;
     margin-right: auto;
-    flex: 0;
 }
 
 #skipButtonContainer {
@@ -214,6 +211,20 @@ h1 {
 
 #btnRemove {
     float: right;
+}
+
+#btnCloseDialog {
+    margin-left: auto;
+    margin-top: 5px;
+    display: block;
+}
+
+#dlgEdit {
+    position: absolute;
+}
+
+.modal-content {
+    padding: 5px;
 }
 
 #btnEditClasses {
