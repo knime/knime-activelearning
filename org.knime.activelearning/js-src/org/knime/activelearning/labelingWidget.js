@@ -5,8 +5,6 @@ window.generalPurposeLabelingWidget = (function () {
     var _selectedTiles = [];
     var _rowKeys = {};
     var _rowKeysOnly = [];
-    var _originRowKeys = {};
-    var _originRowKeysOnly = [];
     var _tileViewData = null;
     var _initialized = false;
     var _masterColors = [2062516, 3383340, 14883356, 16744192, 6962586, 10931939, 11722634,
@@ -38,14 +36,13 @@ window.generalPurposeLabelingWidget = (function () {
         _representation.table.spec.rowColorValues = _changeToDefaultHeaderColor(_representation.table.spec.rowColorValues, '#404040');
         _representation.table.rows.forEach(function (row, rowInd) {
             var label = typeof value.labels[row] === 'undefined' ? null : value.labels[row];
-            _originRowKeys[row.rowKey] = {
+            _rowKeys[row.rowKey] = {
                 rowInd: rowInd,
-                label: label
+                label: label,
+                originalRowKey: rowInd
             };
-            _originRowKeysOnly.push(row.rowKey);
+            _rowKeysOnly.push(row.rowKey);
         });
-        _rowKeys = _originRowKeys;
-        _rowKeysOnly = _originRowKeysOnly;
         _value = value;
         _value.possiblevalues = _combinePossibleValues(_representation, _value);
         // todo remove and add configurable color options
@@ -109,7 +106,7 @@ window.generalPurposeLabelingWidget = (function () {
                     colorMap[labelValue] = _hexToRgb(_getHexColor(color));
                 });
 
-                _initializeLabels(value.labels, colorMap, _originRowKeys, redraw);
+                _initializeLabels(value.labels, colorMap, _rowKeys, redraw);
             } else if (_representation.autoSelectNextTile) {
                 _selectedTiles[_selectFirstTile().value] = true;
             }
@@ -175,21 +172,22 @@ window.generalPurposeLabelingWidget = (function () {
     window.knimeTileView._filterChangedOld = window.knimeTileView._filterChanged;
     window.knimeTileView._filterChanged = function (data) {
         window.knimeTileView._filterChangedOld.apply(this, [data]);
-        _rowKeys = [];
-        _rowKeysOnly = [];
         counter = 0;
         _representation.table.rows.forEach(function (row, rowInd) {
             if (!knimeTileView._knimeTable.isRowIncludedInFilter(row.rowKey, knimeTileView._currentFilter)) {
+                _tileView._selection[row.rowKey] = false;
                 return;
             }
             var label = typeof _value.labels[row] === 'undefined' ? null : _value.labels[row];
             _rowKeys[row.rowKey] = {
                 rowInd: counter,
-                label: label
+                label: label,
+                originalRowKey: rowInd
             };
-            _selectedTiles[row.rowKey] = true;
             counter ++;
-            _rowKeysOnly.push(row.rowKey);
+            if (knimeService.isRowSelected(knimeTileView._representation.table.id ,row.rowKey)) {
+                _tileView._selection[row.rowKey] = true;
+            }
         });
         if (!data.reevaluate) {
             _initialized = false;
@@ -758,7 +756,7 @@ window.generalPurposeLabelingWidget = (function () {
         var hasPreviouslyLabeledRow;
         _rowKeysOnly.forEach(function (rowKey) {
             var label = labels[rowKey];
-            var rowInd = rowKeyIndexObj[rowKey].rowInd;
+            var rowInd = rowKeyIndexObj[rowKey].originalRowKey;
             if (!tileViewData[rowInd] ||
                 !knimeTileView._knimeTable.isRowIncludedInFilter(rowKey, knimeTileView._currentFilter)) {
                 return;
@@ -891,7 +889,7 @@ window.generalPurposeLabelingWidget = (function () {
                     if (!_rowKeys[row]) {
                         return;
                     }
-                    var rowNumber = _originRowKeys[row].rowInd;
+                    var rowNumber = _rowKeys[row].originalRowKey;
                     // Check for hex string
                     _tileViewData[rowNumber][1] = _tileViewData[rowNumber][1].replace(
                         /background-color:\s*#[A-Fa-f0-9]{6};*/, 'background-color: ' + labelColor + ';'
