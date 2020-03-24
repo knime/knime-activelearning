@@ -106,7 +106,7 @@ h1 {
     width: 100%;
     padding: 2px;
     margin: 0 auto 10px auto;
-    display: table;
+    display: inline-block;
 }
 
 .labCurrentProgressWithoutTitle {
