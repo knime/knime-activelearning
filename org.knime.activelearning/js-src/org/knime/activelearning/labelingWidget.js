@@ -173,6 +173,7 @@ window.generalPurposeLabelingWidget = (function () {
     window.knimeTileView._filterChanged = function (data) {
         window.knimeTileView._filterChangedOld.apply(this, [data]);
         counter = 0;
+        _rowKeysOnly = [];
         _representation.table.rows.forEach(function (row, rowInd) {
             if (!knimeTileView._knimeTable.isRowIncludedInFilter(row.rowKey, knimeTileView._currentFilter)) {
                 _tileView._selection[row.rowKey] = false;
@@ -188,6 +189,7 @@ window.generalPurposeLabelingWidget = (function () {
             if (knimeService.isRowSelected(knimeTileView._representation.table.id ,row.rowKey)) {
                 _tileView._selection[row.rowKey] = true;
             }
+            _rowKeysOnly.push(row.rowKey);
         });
         if (!data.reevaluate) {
             _initialized = false;
