@@ -19,7 +19,7 @@ window.generalPurposeLabelingWidget = (function () {
         // function definitions
         _createContainer, _updateButtonClasses, _getHexColor, _changeSkipButton, _setupSkipButtonHandler, _labelAndLoadNext,
         _setupAddClassesButtonHandler, _createClassEditorDialog, _updateDialogClasses, _initializeView,
-        _bindArrowKeys, _updateLabelClasses, _updateDropdownClasses, _filterData, _getAllPossibleValues, _invertColor,
+        _bindArrowKeys, _updateLabelClasses, _updateDropdownClasses, _filterData, _getAllPossibleValues,
         _hexToRgb, _selectNextTile, _getColorValue, _createRemoveDialog, _combinePossibleValues, _checkIfIsCurrentlyDisplayed,
         _changeToDefaultHeaderColor, _selectFirstTile, _initializeLabels, _getTotalNumberLabeled, _countTrueSelectedValues;
 
@@ -154,13 +154,10 @@ window.generalPurposeLabelingWidget = (function () {
                 this._selection[data.elements[0].rows[ele]] = true;
             }
         } else {
-	        this._value.selection = this._selection;
-	        _selectedTiles = this._selection;
-	        for (var row in _selectedTiles) {
-	            if (_selectedTiles[row] === false || !knimeTileView._knimeTable.isRowIncludedInFilter(row, knimeTileView._currentFilter)) {
-	                delete _selectedTiles[row];
-	            }
-	        }
+            this._value.selection = this._selection;
+            _selectedTiles = this._selection.filter(function (row) {
+                return _selectedTiles[row] || knimeTileView._knimeTable.isRowIncludedInFilter(row, knimeTileView._currentFilter);
+            });
         }
         document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + _countTrueSelectedValues(_selectedTiles);
         _changeSkipButton();
@@ -172,14 +169,14 @@ window.generalPurposeLabelingWidget = (function () {
     window.knimeTileView._filterChangedOld = window.knimeTileView._filterChanged;
     window.knimeTileView._filterChanged = function (data) {
         window.knimeTileView._filterChangedOld.apply(this, [data]);
-        counter = 0;
+        var counter = 0;
         _rowKeysOnly = [];
         _representation.table.rows.forEach(function (row, rowInd) {
             if (!knimeTileView._knimeTable.isRowIncludedInFilter(row.rowKey, knimeTileView._currentFilter)) {
                 _tileView._selection[row.rowKey] = false;
                 return;
             }
-            var label = typeof _value.labels[row] === 'undefined' ? null : _value.labels[row];
+            var label = typeof _value.labels[row.rowKey] === 'undefined' ? null : _value.labels[row.rowKey];
             _rowKeys[row.rowKey] = {
                 rowInd: counter,
                 label: label,
@@ -257,7 +254,7 @@ window.generalPurposeLabelingWidget = (function () {
             var showUnlabeledCheckbox = knimeService.createMenuCheckbox('showUnlabeledCheckbox',
                 this._value.showUnlabeledOnly, function () {
                     if (this.checked) {
-                        self._filterLabeldData();
+                        self._filterLabeledData();
                         self._value.showUnlabeledOnly = true;
                     } else {
                         self._resetFilter();
@@ -271,7 +268,7 @@ window.generalPurposeLabelingWidget = (function () {
             addClassesButton.type = 'button';
             addClassesButton.id = 'btnEditClasses';
             addClassesButton.innerHTML = '&#x1F527;';
-            addClassesButton.onclick = function (e) {
+            addClassesButton.onclick = function () {
                 document.getElementById('dlgEdit').showModal();
             };
             knimeService.addMenuItem('Create custom classes', null, addClassesButton);
@@ -442,15 +439,7 @@ window.generalPurposeLabelingWidget = (function () {
         };
     };
 
-    // As postet at https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
-    // this should increase the readability of the text color.
-    // --------------------------------------------------------------------------------------------------------------
-    _invertColor = function (rgb, bw) {
-        return { r: 255, g: 255, b: 255 };
-    };
-    // --------------------------------------------------------------------------------------------------------------
-
-    window.knimeTileView._filterLabeldData = function () {
+    window.knimeTileView._filterLabeledData = function () {
         var concatValues = _getAllPossibleValues();
         _tileView._getJQueryTable().DataTable().column(1).search('^(?!.*(' + concatValues + ')).*', true, false).draw();
     };
@@ -528,7 +517,7 @@ window.generalPurposeLabelingWidget = (function () {
         editList.multiple = true;
         editDialog.appendChild(editList);
 
-        editList.onchange = function (e) {
+        editList.onchange = function () {
             var select = document.getElementById('slcClassesEdit');
             var classes = [...select.options].filter(option => option.selected);
             if (classes.length > 0) {
@@ -550,7 +539,7 @@ window.generalPurposeLabelingWidget = (function () {
         removeButton.innerHTML = 'Remove';
         removeButton.hidden = true;
 
-        removeButton.onclick = function (e) {
+        removeButton.onclick = function () {
             var select = document.getElementById('slcClassesEdit');
             var classes = [...select.options].filter(option => option.selected).map(option => option.value);
             var removeDialogText = document.getElementById('dlgRemoveText');
@@ -566,7 +555,7 @@ window.generalPurposeLabelingWidget = (function () {
         closeButton.style = 'float: right;';
         closeButton.type = 'button';
         closeButton.innerHTML = 'Close';
-        closeButton.onclick = function (e) {
+        closeButton.onclick = function () {
             document.getElementById('dlgEdit').close();
             _updateLabelClasses();
         };
@@ -576,7 +565,7 @@ window.generalPurposeLabelingWidget = (function () {
     };
 
     _setupAddClassesButtonHandler = function (addClassesButton) {
-        addClassesButton.onclick = function (e) {
+        addClassesButton.onclick = function () {
             var value = document.getElementById('tbxNewLabel').value;
             var oldIndex = _representation.possiblevalues.indexOf(value);
             var newIndex = _value.possiblevalues.indexOf(value);
@@ -635,7 +624,7 @@ window.generalPurposeLabelingWidget = (function () {
         labelButton.value = 'dropDownLabel';
         labelButton.innerHTML = 'Label';
         labelButton.id = 'labelButton';
-        labelButton.onclick = function (e) {
+        labelButton.onclick = function () {
             var dropdown = document.getElementById('slcClassesDropdown');
             var value = dropdown.options[dropdown.selectedIndex].value;
             var color = knimeTileView._representation.colors[value];
@@ -703,7 +692,7 @@ window.generalPurposeLabelingWidget = (function () {
             bgColor = _getColorValue(k);
             addedLabelButton.style.background = _getHexColor(bgColor);
 
-            textColor = _invertColor(_hexToRgb(_getHexColor(bgColor)), true);
+            textColor = { r: 255, g: 255, b: 255 }
             addedLabelButton.style.color = 'rgb(' + textColor.r + ',' + textColor.g + ', ' + textColor.b + ')';
             addedLabelButton.onclick = function (e) {
                 if (e.target.completeName) {
@@ -753,9 +742,7 @@ window.generalPurposeLabelingWidget = (function () {
         var tileViewData = _tileView._dataTable.data();
         var lastRowLabeled = null;
         var totalLabels = 0;
-        var rowKeys = Object.keys(labels);
         var lastLabeledRowInd = 0;
-        var hasPreviouslyLabeledRow;
         _rowKeysOnly.forEach(function (rowKey) {
             var label = labels[rowKey];
             var rowInd = rowKeyIndexObj[rowKey].originalRowKey;
@@ -794,7 +781,7 @@ window.generalPurposeLabelingWidget = (function () {
         });
 
         if (_value.showUnlabeledOnly) {
-            _tileView._filterLabeldData();
+            _tileView._filterLabeledData();
         }
 
         if (totalLabels === tileViewData.length) {
@@ -810,22 +797,20 @@ window.generalPurposeLabelingWidget = (function () {
             document.getElementById('progressText').innerHTML = numberOfPossibleValues + ' / ' + tableLength + ' processed';
         }
         if (!redraw) {
-	        if (_tileView._value.autoSelectNextTile && lastRowLabeled !== '') {
-	            if (_value.hideUnselected) {
-	                // nothing todo as no tile should be selected
-	            } else {
-	                if (amountTrueSelectedValues === 0) {
-	                    var selectedRowName = _selectNextTile([_rowKeysOnly[lastLabeledRowInd]], true);
-	                    if (selectedRowName) {
-	                        _selectedTiles[selectedRowName] = true;
-	                    }
-	                } else {
-	                    var savedPage = _tileView._value.currentPage;
-	                    _tileView._getJQueryTable().DataTable().page(savedPage).draw('page');
-	                    _selectedTiles = _tileView._selection;
-	                }
-	            }
-	        }
+            if (_tileView._value.autoSelectNextTile && lastRowLabeled !== '') {
+                if (_value.hideUnselected) {
+                    // nothing todo as no tile should be selected
+                } else if (amountTrueSelectedValues === 0) {
+                    var selectedRowName = _selectNextTile([_rowKeysOnly[lastLabeledRowInd]], true);
+                    if (selectedRowName) {
+                        _selectedTiles[selectedRowName] = true;
+                    }
+                } else {
+                    var savedPage = _tileView._value.currentPage;
+                    _tileView._getJQueryTable().DataTable().page(savedPage).draw('page');
+                    _selectedTiles = _tileView._selection;
+                }
+            }
         }
         _changeSkipButton();
         // need to recalculate as it might have changed
@@ -882,7 +867,7 @@ window.generalPurposeLabelingWidget = (function () {
                 var rgbSplit = labelColor.split('(')[1].substring(0, labelColor.split('(')[1].length - 1).split(',');
                 rgbObject = { r: parseInt(rgbSplit[0], 10), g: parseInt(rgbSplit[1], 10), b: parseInt(rgbSplit[2], 10) };
             }
-            var invertedColor = _invertColor(rgbObject, true);
+            var invertedColor = { r: 255, g: 255, b: 255 }
             var invertedRGBColor = 'rgb(' + invertedColor.r + ',' + invertedColor.g + ',' + invertedColor.b + ')';
 
             _tileViewData = _tileView._dataTable.data();
@@ -926,7 +911,7 @@ window.generalPurposeLabelingWidget = (function () {
             _value.selection = [];
             _selectedTiles = [];
             if (_value.showUnlabeledOnly) {
-                _tileView._filterLabeldData();
+                _tileView._filterLabeledData();
             }
             // Calculate the percentage of already labeled tiles and display it
             var tableLength = _tileView._representation.table.rows.length;
@@ -962,18 +947,17 @@ window.generalPurposeLabelingWidget = (function () {
     // Method which is required because the base table viewer sets the boolean of the object entry to false rather then deleting it.
     // TODO check in base table viewer if that makes sense or deleting the row would be more efficient.
     _countTrueSelectedValues = function (potentiallySelectedList) {
-        var counter = 0;
-        Object.keys(potentiallySelectedList).forEach(function (listEntry) {
-            if (potentiallySelectedList[listEntry] === true && knimeTileView._knimeTable.isRowIncludedInFilter(listEntry, knimeTileView._currentFilter)) {
-                counter++;
-            }
-        });
+        var counter = Object.keys(potentiallySelectedList).reduce(function (count, listEntry) {
+            return potentiallySelectedList[listEntry] && knimeTileView._knimeTable.isRowIncludedInFilter(listEntry, knimeTileView._currentFilter)
+                ? count++
+                : count;
+        }, 0);
         return counter;
     };
 
     _getTotalNumberLabeled = function () {
-        let possibleLabels = _getAllPossibleValues().split('|');
-        let count = 0;
+        var possibleLabels = _getAllPossibleValues().split('|');
+        var count = 0;
         Object.keys(_value.labels).forEach(function (rowKey) {
             if (possibleLabels.includes(_value.labels[rowKey])) {
                 count++;
@@ -995,11 +979,10 @@ window.generalPurposeLabelingWidget = (function () {
                 }
                 var rowInd = _rowKeys[row].rowInd;
                 if (prevRowInd < rowInd) {
-                    prevRowInd = rowInd
+                    prevRowInd = rowInd;
                 }
             });
 
-            var info = _tileView._getJQueryTable().DataTable().page.info();
             // Check if previous index was last, then it should select first tile instead of the next
             var newRowInd = (prevRowInd >= info.recordsDisplay - 1 || initialize) ? 0 : _rowKeys[_rowKeysOnly[prevRowInd + 1]].rowInd;
             var currentPage = _tileView._dataTable.page();
@@ -1066,14 +1049,14 @@ window.generalPurposeLabelingWidget = (function () {
     _filterData = function (searchTerm) {
         // todo: improve the performance of this function
         var searchTerms = searchTerm.split('|');
-        return _tileView._getJQueryTable().DataTable().column(1).data().filter(function (value, index) {
+        return _tileView._getJQueryTable().DataTable().column(1).data().filter(function (value) {
             var temp1 = value.split('>');
             var temp2 = temp1.length && temp1.length >= 2 ? temp1[1].split('<')[0] : '';
             return searchTerms.includes(temp2[0]);
         });
     };
 
-    _changeSkipButton = function (changeToRemoveLabel) {
+    _changeSkipButton = function () {
         var skipButton = document.getElementById('btnSkip');
         if (_countTrueSelectedValues(_selectedTiles) > 0) {
             skipButton.style.visibility = 'visible';
