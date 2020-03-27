@@ -1,5 +1,5 @@
 <!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
-<knimeNode icon="PBACScorer.png" type="Manipulator">
+<knimeNode icon="PBACScorer.png" type="Manipulator" deprecated="true">
 	<name>PBAC Scorer</name>
 	<shortDescription>
 		All in one node that calculates/updates the Prototype Based Active Classification (PBAC)

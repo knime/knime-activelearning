@@ -1,5 +1,5 @@
 <!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
-<knimeNode icon="graphdensityscorer.png" type="Manipulator">
+<knimeNode icon="graphdensityscorer.png" type="Manipulator" deprecated="true">
 	<name>Graph Density Uncertainty Scorer</name>
 	<shortDescription>
 		Calculates/Updates the density of a n-dimensional
