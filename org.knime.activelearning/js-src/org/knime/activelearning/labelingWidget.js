@@ -1,8 +1,8 @@
 /* eslint-disable no-magic-numbers */
+/* eslint new-cap: [1, {capIsNewExceptions: ["DataTable"]}] */
 /* global knimeTileView:false, $:false, KnimeBaseTableViewer:false */
 window.generalPurposeLabelingWidget = (function () {
     var labelingWidget = {};
-    var _selectedTiles = [];
     var _rowKeys = {};
     var _rowKeysOnly = [];
     var _tileViewData = null;
@@ -17,11 +17,12 @@ window.generalPurposeLabelingWidget = (function () {
         _drawbackTimeout,
 
         // function definitions
-        _createContainer, _updateButtonClasses, _getHexColor, _changeSkipButton, _setupSkipButtonHandler, _labelAndLoadNext,
-        _setupAddClassesButtonHandler, _createClassEditorDialog, _updateDialogClasses, _initializeView,
-        _bindArrowKeys, _updateLabelClasses, _updateDropdownClasses, _filterData, _getAllPossibleValues,
-        _hexToRgb, _selectNextTile, _getColorValue, _createRemoveDialog, _combinePossibleValues, _checkIfIsCurrentlyDisplayed,
-        _changeToDefaultHeaderColor, _selectFirstTile, _initializeLabels, _getTotalNumberLabeled, _countTrueSelectedValues;
+        _createContainer, _updateButtonClasses, _getHexColor, _changeSkipButton, _setupSkipButtonHandler,
+        _labelAndLoadNext, _setupAddClassesButtonHandler, _createClassEditorDialog, _updateDialogClasses,
+        _initializeView, _bindArrowKeys, _updateLabelClasses, _updateDropdownClasses, _filterData,
+        _getAllPossibleValues, _hexToRgb, _selectNextTile, _getColorValue, _createRemoveDialog,
+        _combinePossibleValues, _checkIfIsCurrentlyDisplayed, _changeToDefaultHeaderColor, _selectFirstTile,
+        _initializeLabels, _getTotalNumberLabeled, _countTrueSelectedValues;
 
     labelingWidget.init = function (representation, value) {
         _representation = representation;
@@ -33,20 +34,22 @@ window.generalPurposeLabelingWidget = (function () {
             return;
         }
         // Ignore previous defined row color headers and reset to default color
-        _representation.table.spec.rowColorValues = _changeToDefaultHeaderColor(_representation.table.spec.rowColorValues, '#404040');
-        _representation.table.rows.forEach(function (row, rowInd) {
+        _representation.table.spec.rowColorValues = _changeToDefaultHeaderColor(
+            _representation.table.spec.rowColorValues, '#404040'
+        );
+        _representation.table.rows.forEach((row, rowInd) => {
             var label = typeof value.labels[row] === 'undefined' ? null : value.labels[row];
             _rowKeys[row.rowKey] = {
-                rowInd: rowInd,
-                label: label,
+                rowInd,
+                label,
                 originalRowKey: rowInd
             };
             _rowKeysOnly.push(row.rowKey);
         });
         _value = value;
         _value.possiblevalues = _combinePossibleValues(_representation, _value);
-        // todo remove and add configurable color options
-        _value.possiblevalues.forEach(function (labelValue, labelInd) {
+        // TODO remove and add configurable color options
+        _value.possiblevalues.forEach((labelValue, labelInd) => {
             _value.colors[labelValue] = _masterColors[labelInd];
         });
         _createContainer();
@@ -60,7 +63,7 @@ window.generalPurposeLabelingWidget = (function () {
     labelingWidget.getComponentValue = function () {
         window.knimeTileView.getComponentValue.apply(window.knimeTileView);
         // map '?' to undefined to serialize to missing values
-        _rowKeysOnly.forEach(function (row) {
+        _rowKeysOnly.forEach((row) => {
             if (typeof _value.labels[row] === 'undefined' || _value.labels[row] === '?') {
                 _value.labels[row] = '?';
             }
@@ -70,9 +73,12 @@ window.generalPurposeLabelingWidget = (function () {
 
     /**
      * Changes any existing colored header rows to a default color
+     * @param {Array} rowColorValues
+     * @param {int} colorValue
+     * @returns {Array}
      */
     _changeToDefaultHeaderColor = function (rowColorValues, colorValue) {
-        rowColorValues.forEach(function (part, index, data) {
+        rowColorValues.forEach((_part, index, data) => {
             data[index] = colorValue;
         });
         return rowColorValues;
@@ -80,35 +86,45 @@ window.generalPurposeLabelingWidget = (function () {
 
     /**
      * combines possible values of representation and value
+     * @param {Object} representation
+     * @param {Object} value
+     * @returns {Array} returns array of all unique values
      */
-    _combinePossibleValues = function (_representationn, _value) {
+    _combinePossibleValues = function (representation, value) {
         var possibleValues = {};
-        _representation.possiblevalues.forEach(function (row) {
+        representation.possiblevalues.forEach((row) => {
             possibleValues[row] = true;
         });
-        _value.possiblevalues.forEach(function (row) {
+        value.possiblevalues.forEach((row) => {
             possibleValues[row] = true;
         });
         return Object.keys(possibleValues);
     };
 
+    /**
+     * combines possible values of representation and value
+     * @param {Object} representation
+     * @param {Object} value
+     * @param {boolean} redraw true if the view should be redrawn
+     * @returns {undefined}
+     */
     _initializeView = function (representation, value, redraw) {
         if (_initialized === false) {
             _initialized = true;
             if (Object.keys(value.labels).length > 0) {
                 var colorMap = {
-                    ['?']: _hexToRgb(_getHexColor(8421504)),
-                    ['Skip']: _hexToRgb(_getHexColor(8421504))
+                    '?': _hexToRgb(_getHexColor(8421504)),
+                    Skip: _hexToRgb(_getHexColor(8421504))
                 };
 
-                value.possiblevalues.forEach(function (labelValue, labelInd) {
+                value.possiblevalues.forEach((labelValue, labelInd) => {
                     var color = value.colors[labelValue] || representation.colors[labelInd];
                     colorMap[labelValue] = _hexToRgb(_getHexColor(color));
                 });
 
                 _initializeLabels(value.labels, colorMap, _rowKeys, redraw);
-            } else if (_representation.autoSelectNextTile) {
-                _selectedTiles[_selectFirstTile().value] = true;
+            } else if (representation.autoSelectNextTile) {
+                knimeTileView._selection[_selectFirstTile().value] = true;
             }
         }
     };
@@ -133,11 +149,10 @@ window.generalPurposeLabelingWidget = (function () {
         }
         if (this._representation.enablePaging && this._value.currentPage) {
             var self = this;
-            setTimeout(function () {
+            setTimeout(() => {
                 self._dataTable.page(self._value.currentPage).draw('page');
-                // these two lines are new.
-                _selectedTiles = self._selection;
-                document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + _countTrueSelectedValues(_selectedTiles);
+                document.getElementById('selectedText').innerHTML = `Selected tiles: ${
+                    _countTrueSelectedValues(self._selection)}`;
                 //
             }, 0);
         }
@@ -151,15 +166,18 @@ window.generalPurposeLabelingWidget = (function () {
         window.knimeTileView._selectionChangedOld.apply(this, [data]);
         if (data.elements) {
             for (var ele = 0; ele < data.elements[0].rows.length; ele++) {
-                this._selection[data.elements[0].rows[ele]] = true;
+                knimeTileView._selection[data.elements[0].rows[ele]] = true;
             }
         } else {
-            this._value.selection = this._selection;
-            _selectedTiles = this._selection.filter(function (row) {
-                return _selectedTiles[row] || knimeTileView._knimeTable.isRowIncludedInFilter(row, knimeTileView._currentFilter);
+            Object.keys(knimeTileView._selection).forEach(row => {
+                if (!knimeTileView._selection[row] && !knimeTileView._knimeTable.isRowIncludedInFilter(row, knimeTileView._currentFilter)) {
+                    delete knimeTileView._selection[row];
+                }
             });
+            this._value.selection = this._selection;
         }
-        document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + _countTrueSelectedValues(_selectedTiles);
+        document.getElementById('selectedText').innerHTML = `Selected tiles: ${
+            _countTrueSelectedValues(knimeTileView._selection)}`;
         _changeSkipButton();
     };
 
@@ -171,7 +189,7 @@ window.generalPurposeLabelingWidget = (function () {
         window.knimeTileView._filterChangedOld.apply(this, [data]);
         var counter = 0;
         _rowKeysOnly = [];
-        _representation.table.rows.forEach(function (row, rowInd) {
+        _representation.table.rows.forEach((row, rowInd) => {
             if (!knimeTileView._knimeTable.isRowIncludedInFilter(row.rowKey, knimeTileView._currentFilter)) {
                 _tileView._selection[row.rowKey] = false;
                 return;
@@ -179,11 +197,11 @@ window.generalPurposeLabelingWidget = (function () {
             var label = typeof _value.labels[row.rowKey] === 'undefined' ? null : _value.labels[row.rowKey];
             _rowKeys[row.rowKey] = {
                 rowInd: counter,
-                label: label,
+                label,
                 originalRowKey: rowInd
             };
-            counter ++;
-            if (knimeService.isRowSelected(knimeTileView._representation.table.id ,row.rowKey)) {
+            counter++;
+            if (knimeService.isRowSelected(knimeTileView._representation.table.id, row.rowKey)) {
                 _tileView._selection[row.rowKey] = true;
             }
             _rowKeysOnly.push(row.rowKey);
@@ -203,7 +221,7 @@ window.generalPurposeLabelingWidget = (function () {
         window.knimeTileView._dataTableDrawCallbackOld.apply(this);
         if (window.knimeTileView._dataTable !== null && !_initialized) {
             clearTimeout(_drawbackTimeout);
-            _drawbackTimeout = setTimeout(function(){
+            _drawbackTimeout = setTimeout(() => {
                 _initializeView(_representation, _value);
             }, 1000);
         }
@@ -220,7 +238,7 @@ window.generalPurposeLabelingWidget = (function () {
         }).nodes().to$().children();
         for (var i = 0; i < curCheckboxes.length; i++) {
             var checkbox = curCheckboxes[i];
-            checkbox.checked = this._selection[checkbox.value];
+            checkbox.checked = knimeTileView._selection[checkbox.value];
             // set tr style
             var $tr = $(checkbox).parent().parent();
             if (checkbox.checked) {
@@ -252,8 +270,8 @@ window.generalPurposeLabelingWidget = (function () {
         var self = this;
         if (!this._representation.showUnlabeledOnly) {
             var showUnlabeledCheckbox = knimeService.createMenuCheckbox('showUnlabeledCheckbox',
-                this._value.showUnlabeledOnly, function () {
-                    if (this.checked) {
+                this._value.showUnlabeledOnly, () => {
+                    if (showUnlabeledCheckbox.checked) {
                         self._filterLabeledData();
                         self._value.showUnlabeledOnly = true;
                     } else {
@@ -275,8 +293,8 @@ window.generalPurposeLabelingWidget = (function () {
         }
         if (!this._representation.autoSelectNext) {
             var autoSelectCheckbox = knimeService.createMenuCheckbox('autoSelectCheckbox',
-                this._value.autoSelectNextTile, function () {
-                    if (this.checked) {
+                this._value.autoSelectNextTile, () => {
+                    if (autoSelectCheckbox.checked) {
                         self._value.autoSelectNextTile = true;
                     } else {
                         self._value.autoSelectNextTile = false;
@@ -288,30 +306,33 @@ window.generalPurposeLabelingWidget = (function () {
 
     /**
      * Overwrite click selection behavior
+     * @returns {undefined}
      */
     window.knimeTileView._setSelectionHandlers = function () {
         KnimeBaseTableViewer.prototype._setSelectionHandlers.apply(this);
         var clearSelectionButton = $('#pagedTableClearSelectionButton');
         // Overwrite clearSelectionButton to properly deselect selected tiles
-        clearSelectionButton.click(function () {
+        clearSelectionButton.click(() => {
             _tileView._selectAll(false);
-            _selectedTiles = [];
+            knimeTileView._selection = [];
             document.getElementById('selectedText').innerHTML = 'Selected tiles: 0';
             _changeSkipButton();
         });
         if (!this._representation.enableSelection) {
             return;
         }
-        this._getJQueryTable().find('tbody').addClass('knime-selection-enabled').on('click', 'tr', function (e) {
+        this._getJQueryTable().find('tbody').addClass('knime-selection-enabled').on('click', 'tr', (e) => {
             if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
                 if (e.target.checked) {
-                    _selectedTiles[e.target.value] = true;
-                    document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + _countTrueSelectedValues(_selectedTiles);
+                    knimeTileView._selection[e.target.value] = true;
+                    document.getElementById('selectedText').innerHTML = `Selected tiles: ${
+                        _countTrueSelectedValues(knimeTileView._selection)}`;
                     _changeSkipButton();
                 } else {
-                    if (_selectedTiles[e.target.value]) {
-                        delete _selectedTiles[e.target.value];
-                        document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + _countTrueSelectedValues(_selectedTiles);
+                    if (knimeTileView._selection[e.target.value]) {
+                        delete knimeTileView._selection[e.target.value];
+                        document.getElementById('selectedText').innerHTML = `Selected tiles: ${
+                            _countTrueSelectedValues(knimeTileView._selection)}`;
                     }
                     _changeSkipButton();
                 }
@@ -322,6 +343,10 @@ window.generalPurposeLabelingWidget = (function () {
         });
     };
 
+    /**
+     * Initializes the tileView and Creates all HTML elements for the labeling widget
+     * @returns {undefined}
+     */
     _createContainer = function () {
         var labelingContainer = document.createElement('div');
         labelingContainer.id = 'labelingContainer';
@@ -350,8 +375,8 @@ window.generalPurposeLabelingWidget = (function () {
             dataTableWrapper.parentNode.insertBefore(currentProgress, dataTableWrapper);
             dataTableWrapper.parentNode.insertBefore(progressText, dataTableWrapper);
             // Initialize progress text
-            document.getElementById('progressText').innerHTML = _filterData(_getAllPossibleValues()).length + ' / ' +
-                _tileView._representation.table.rows.length + ' processed';
+            document.getElementById('progressText').innerHTML = `${_filterData(_getAllPossibleValues()).length} / ${
+                _tileView._representation.table.rows.length} processed`;
         } else {
             // If there is no progress bar, there is no need to save more space towards the top
             document.getElementById('knime-service-header').style.paddingTop = '7px';
@@ -414,7 +439,7 @@ window.generalPurposeLabelingWidget = (function () {
             if (e.target.innerHTML === 'Skip') {
                 _labelAndLoadNext(_hexToRgb('#808080'), e.target.innerHTML);
             } else {
-                for (var selectedTile in _selectedTiles) {
+                for (var selectedTile in knimeTileView._selection) {
                     if (_value.labels[selectedTile]) {
                         delete _value.labels[selectedTile];
                     }
@@ -441,7 +466,7 @@ window.generalPurposeLabelingWidget = (function () {
 
     window.knimeTileView._filterLabeledData = function () {
         var concatValues = _getAllPossibleValues();
-        _tileView._getJQueryTable().DataTable().column(1).search('^(?!.*(' + concatValues + ')).*', true, false).draw();
+        _tileView._getJQueryTable().DataTable().column(1).search(`^(?!.*(${concatValues})).*`, true, false).draw();
     };
 
     window.knimeTileView._resetFilter = function () {
@@ -471,7 +496,7 @@ window.generalPurposeLabelingWidget = (function () {
         removeDialogButtonAccept.onclick = function () {
             var select = document.getElementById('slcClassesEdit');
             var classes = [...select.options].filter(option => option.selected).map(option => option.value);
-            classes.forEach(function (className) {
+            classes.forEach((className) => {
                 var valInd = _value.possiblevalues.indexOf(className);
                 if (valInd > -1) {
                     _value.possiblevalues.splice(valInd, 1);
@@ -488,6 +513,7 @@ window.generalPurposeLabelingWidget = (function () {
 
     /**
      * Create label class editor dialog
+     * @returns {Element} created editor dialog
      */
     _createClassEditorDialog = function () {
         var editDialog = document.createElement('dialog');
@@ -543,7 +569,8 @@ window.generalPurposeLabelingWidget = (function () {
             var select = document.getElementById('slcClassesEdit');
             var classes = [...select.options].filter(option => option.selected).map(option => option.value);
             var removeDialogText = document.getElementById('dlgRemoveText');
-            removeDialogText.innerHTML = 'Are you sure you want to delete the selected classes? There are ' + _filterData(classes.join('|')).length + ' tiles marked.';
+            removeDialogText.innerHTML = `Are you sure you want to delete the selected classes? There are ${
+                _filterData(classes.join('|')).length} tiles marked.`;
             document.getElementById('dlgRemove').showModal();
         };
 
@@ -581,6 +608,7 @@ window.generalPurposeLabelingWidget = (function () {
 
     /**
      * Updates all label classes
+     * @returns {undefined}
      */
     _updateLabelClasses = function () {
         _updateDialogClasses();
@@ -594,6 +622,7 @@ window.generalPurposeLabelingWidget = (function () {
 
     /**
      * Updates the dropdown label classes
+     * @returns {undefined}
      */
     _updateDropdownClasses = function () {
         var buttons = document.getElementById('divLabels');
@@ -638,6 +667,7 @@ window.generalPurposeLabelingWidget = (function () {
 
     /**
      * Updates the dialog label classes
+     * @returns {undefined}
      */
     _updateDialogClasses = function () {
         var options = document.getElementById('slcClassesEdit');
@@ -663,6 +693,8 @@ window.generalPurposeLabelingWidget = (function () {
 
     /**
      * Updates the button label classes
+     * @param {number} maxAmount sets the maximum amount of allowed buttons
+     * @returns {undefined}
      */
     _updateButtonClasses = function (maxAmount) {
         var buttons = document.getElementById('divLabels');
@@ -686,14 +718,14 @@ window.generalPurposeLabelingWidget = (function () {
             } else {
                 addedLabelButton.title = _value.possiblevalues[k];
                 addedLabelButton.completeName = _value.possiblevalues[k];
-                addedLabelButton.innerHTML = _value.possiblevalues[k].substr(0, maxStringLength - 1) + '...';
+                addedLabelButton.innerHTML = `${_value.possiblevalues[k].substr(0, maxStringLength - 1)}...`;
 
             }
             bgColor = _getColorValue(k);
             addedLabelButton.style.background = _getHexColor(bgColor);
 
-            textColor = { r: 255, g: 255, b: 255 }
-            addedLabelButton.style.color = 'rgb(' + textColor.r + ',' + textColor.g + ', ' + textColor.b + ')';
+            textColor = { r: 255, g: 255, b: 255 };
+            addedLabelButton.style.color = `rgb(${textColor.r}, ${textColor.g}, ${textColor.b})`;
             addedLabelButton.onclick = function (e) {
                 if (e.target.completeName) {
                     _labelAndLoadNext(e.target.style.backgroundColor, e.target.completeName);
@@ -724,7 +756,8 @@ window.generalPurposeLabelingWidget = (function () {
     };
 
     _checkIfIsCurrentlyDisplayed = function (rowId) {
-        var currentCheckboxes = knimeTileView._curCells[0].parentElement.parentElement.getElementsByClassName('selection-cell');
+        var currentCheckboxes = knimeTileView._curCells[0].parentElement.parentElement
+            .getElementsByClassName('selection-cell');
         var displayedCheckbox = null;
         for (var checkbox in currentCheckboxes) {
             if (checkbox === 'length') {
@@ -743,7 +776,7 @@ window.generalPurposeLabelingWidget = (function () {
         var lastRowLabeled = null;
         var totalLabels = 0;
         var lastLabeledRowInd = 0;
-        _rowKeysOnly.forEach(function (rowKey) {
+        _rowKeysOnly.forEach((rowKey) => {
             var label = labels[rowKey];
             var rowInd = rowKeyIndexObj[rowKey].originalRowKey;
             if (!tileViewData[rowInd] ||
@@ -752,12 +785,12 @@ window.generalPurposeLabelingWidget = (function () {
             }
             if (typeof label !== 'undefined' && label !== '?') {
                 var color = colorMap[label];
-                var labelColor = 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')';
+                var labelColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
                 tileViewData[rowInd][1] = tileViewData[rowInd][1].replace(
-                    /background-color:\s*#[A-Fa-f0-9]{6};*/, 'background-color: ' + labelColor + ';'
+                    /background-color:\s*#[A-Fa-f0-9]{6};*/, `background-color: ${labelColor};`
                 );
                 tileViewData[rowInd][1] = tileViewData[rowInd][1].replace(
-                    /background-color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/, 'background-color: ' + labelColor + ';'
+                    /background-color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/, `background-color: ${labelColor};`
                 );
                 if (/"color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/.test(tileViewData[rowInd][1])) {
                     tileViewData[rowInd][1] = tileViewData[rowInd][1].replace(
@@ -769,7 +802,7 @@ window.generalPurposeLabelingWidget = (function () {
                     );
                 }
                 tileViewData[rowInd][1] = tileViewData[rowInd][1].replace(
-                    />.*<\/div>/, '>' + label + '</div>'
+                    />.*<\/div>/, `>${label}</div>`
                 );
                 _tileView._dataTable.row(rowInd).invalidate();
                 if (rowInd >= lastLabeledRowInd) {
@@ -793,8 +826,8 @@ window.generalPurposeLabelingWidget = (function () {
         var progress = 1 - (tableLength - numberOfPossibleValues) / tableLength;
         var amountTrueSelectedValues = _countTrueSelectedValues(_tileView._selection);
         if (_tileView._representation.useProgressBar) {
-            document.getElementById('labCurrentProgressBar').style.width = progress * 100 + '%';
-            document.getElementById('progressText').innerHTML = numberOfPossibleValues + ' / ' + tableLength + ' processed';
+            document.getElementById('labCurrentProgressBar').style.width = `${progress * 100}%`;
+            document.getElementById('progressText').innerHTML = `${numberOfPossibleValues} / ${tableLength} processed`;
         }
         if (!redraw) {
             if (_tileView._value.autoSelectNextTile && lastRowLabeled !== '') {
@@ -803,12 +836,11 @@ window.generalPurposeLabelingWidget = (function () {
                 } else if (amountTrueSelectedValues === 0) {
                     var selectedRowName = _selectNextTile([_rowKeysOnly[lastLabeledRowInd]], true);
                     if (selectedRowName) {
-                        _selectedTiles[selectedRowName] = true;
+                        knimeTileView._selection[selectedRowName] = true;
                     }
                 } else {
                     var savedPage = _tileView._value.currentPage;
                     _tileView._getJQueryTable().DataTable().page(savedPage).draw('page');
-                    _selectedTiles = _tileView._selection;
                 }
             }
         }
@@ -817,10 +849,10 @@ window.generalPurposeLabelingWidget = (function () {
         amountTrueSelectedValues = _countTrueSelectedValues(_tileView._selection);
         // check for amount of selected tiles
         if (amountTrueSelectedValues) {
-            document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + amountTrueSelectedValues;
+            document.getElementById('selectedText').innerHTML = `Selected tiles: ${amountTrueSelectedValues}`;
         } else {
             // set to 0 if selected is undefined (results from fresh loading)
-            document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + 0;
+            document.getElementById('selectedText').innerHTML = `Selected tiles: ${0}`;
         }
     };
 
@@ -828,13 +860,15 @@ window.generalPurposeLabelingWidget = (function () {
     _labelAndLoadNext = function (labelColor, labelText, justLabel, rowName, lastToLabel) {
         // only work if something is selected. TODO disable buttons.
         var selectedRows = [];
-        var selectedKeyValPairs = Object.keys(_selectedTiles);
+        // get only the rows which are actually selected
+        var selectedKeyValPairs = Object.keys(knimeTileView._selection)
+            .filter(key => knimeTileView._selection[key]);
         if (selectedKeyValPairs.length > 0 || justLabel) {
             if (justLabel) {
                 selectedRows[0] = rowName;
             } else {
                 for (var i = selectedKeyValPairs.length - 1; i >= 0; i--) {
-                    if (selectedKeyValPairs[i] !== "undefined") {
+                    if (selectedKeyValPairs[i]) {
                         rowName = selectedKeyValPairs[i];
                         if (!knimeTileView._knimeTable.isRowIncludedInFilter(rowName, knimeTileView._currentFilter)) {
                             continue;
@@ -853,7 +887,7 @@ window.generalPurposeLabelingWidget = (function () {
                             }
                         }
                         selectedRows.push(rowName);
-                        delete _selectedTiles[rowName];
+                        delete knimeTileView._selection[rowName];
                     }
                 }
             }
@@ -862,16 +896,24 @@ window.generalPurposeLabelingWidget = (function () {
             // Transform from object to rgb string
             if (typeof labelColor === 'object') {
                 rgbObject = labelColor;
-                labelColor = 'rgb(' + rgbObject.r + ',' + rgbObject.g + ',' + rgbObject.b + ')';
+                labelColor = `rgb(${rgbObject.r}, ${rgbObject.g}, ${rgbObject.b})`;
             } else {
                 var rgbSplit = labelColor.split('(')[1].substring(0, labelColor.split('(')[1].length - 1).split(',');
-                rgbObject = { r: parseInt(rgbSplit[0], 10), g: parseInt(rgbSplit[1], 10), b: parseInt(rgbSplit[2], 10) };
+                rgbObject = {
+                    r: parseInt(rgbSplit[0], 10),
+                    g: parseInt(rgbSplit[1], 10),
+                    b: parseInt(rgbSplit[2], 10)
+                };
             }
-            var invertedColor = { r: 255, g: 255, b: 255 }
-            var invertedRGBColor = 'rgb(' + invertedColor.r + ',' + invertedColor.g + ',' + invertedColor.b + ')';
+            var invertedColor = {
+                r: 255,
+                g: 255,
+                b: 255
+            };
+            var invertedRGBColor = `rgb(${invertedColor.r}, ${invertedColor.g}, ${invertedColor.b})`;
 
             _tileViewData = _tileView._dataTable.data();
-            selectedRows.forEach(function (row) {
+            selectedRows.forEach((row) => {
                 if (row !== '?') {
                     if (!_rowKeys[row]) {
                         return;
@@ -879,25 +921,25 @@ window.generalPurposeLabelingWidget = (function () {
                     var rowNumber = _rowKeys[row].originalRowKey;
                     // Check for hex string
                     _tileViewData[rowNumber][1] = _tileViewData[rowNumber][1].replace(
-                        /background-color:\s*#[A-Fa-f0-9]{6};*/, 'background-color: ' + labelColor + ';'
+                        /background-color:\s*#[A-Fa-f0-9]{6};*/, `background-color: ${labelColor};`
                     );
                     // Check for rgb background string
                     _tileViewData[rowNumber][1] = _tileViewData[rowNumber][1].replace(
-                        /background-color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/, 'background-color: ' + labelColor + ';'
+                        /background-color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/, `background-color: ${labelColor};`
                     );
                     // Check if text color value is set and if yes replace it
                     if (/"color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/.test(_tileViewData[rowNumber][1])) {
                         _tileViewData[rowNumber][1] = _tileViewData[rowNumber][1].replace(
-                            /"color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/, '"color: ' + invertedRGBColor + ';'
+                            /"color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/, `"color: ${invertedRGBColor};`
                         );
                     } else {
                         _tileViewData[rowNumber][1] = _tileViewData[rowNumber][1].replace(
-                            /style="/, 'style="color: ' + invertedRGBColor + ';'
+                            /style="/, `style="color: ${invertedRGBColor};`
                         );
                     }
                     // Replace the text of the tile to the new label
                     _tileViewData[rowNumber][1] = _tileViewData[rowNumber][1].replace(
-                        />.*<\/div>/, '>' + labelText + '</div>'
+                        />.*<\/div>/, `>${labelText}</div>`
                     );
                     _tileView._dataTable.row(rowNumber).invalidate();
                     // Save the current label into the view value, if it is not empty.
@@ -908,8 +950,8 @@ window.generalPurposeLabelingWidget = (function () {
                     }
                 }
             });
-            _value.selection = [];
-            _selectedTiles = [];
+            _value.selection = {};
+            knimeTileView._selection = {};
             if (_value.showUnlabeledOnly) {
                 _tileView._filterLabeledData();
             }
@@ -918,8 +960,8 @@ window.generalPurposeLabelingWidget = (function () {
             var numberOfPossibleValues = _getTotalNumberLabeled();
             var progress = 1 - (tableLength - numberOfPossibleValues) / tableLength;
             if (_tileView._representation.useProgressBar) {
-                document.getElementById('labCurrentProgressBar').style.width = progress * 100 + '%';
-                document.getElementById('progressText').innerHTML = numberOfPossibleValues + ' / ' + tableLength + ' labeled';
+                document.getElementById('labCurrentProgressBar').style.width = `${progress * 100}%`;
+                document.getElementById('progressText').innerHTML = `${numberOfPossibleValues} / ${tableLength} labeled`;
             }
             if (_tileView._value.autoSelectNextTile) {
                 var selectedRowName;
@@ -928,37 +970,41 @@ window.generalPurposeLabelingWidget = (function () {
                 } else if (!justLabel) {
                     knimeService.setSelectedRows(_representation.table.id, [], false);
                     selectedRowName = _selectNextTile(selectedRows, false);
-                    if (selectedRowName) {
-                        _selectedTiles[selectedRowName] = true;
+                    // Only set the selected Row if showUnlabeledOnly is false.
+                    // This is a dirty fix as the filter screws the row index and so select next would not work properly.
+                    // TODO correct this screw (AP-13973)
+                    if (selectedRowName && !_value.showUnlabeledOnly) {
+                        knimeTileView._selection[selectedRowName] = true;
                     }
                 }
             }
 
-            var amountTrueSelectedValues = _countTrueSelectedValues(_selectedTiles);
+            var amountTrueSelectedValues = _countTrueSelectedValues(knimeTileView._selection);
             // check for amount of selected tiles
             if (amountTrueSelectedValues) {
-                document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + amountTrueSelectedValues;
+                document.getElementById('selectedText').innerHTML = `Selected tiles: ${amountTrueSelectedValues}`;
             } else {
                 // set to 0 if selected is undefined (results from fresh loading)
-                document.getElementById('selectedText').innerHTML = 'Selected tiles: ' + 0;
+                document.getElementById('selectedText').innerHTML = `Selected tiles: ${0}`;
             }
         }
     };
     // Method which is required because the base table viewer sets the boolean of the object entry to false rather then deleting it.
     // TODO check in base table viewer if that makes sense or deleting the row would be more efficient.
     _countTrueSelectedValues = function (potentiallySelectedList) {
-        var counter = Object.keys(potentiallySelectedList).reduce(function (count, listEntry) {
-            return potentiallySelectedList[listEntry] && knimeTileView._knimeTable.isRowIncludedInFilter(listEntry, knimeTileView._currentFilter)
-                ? count++
-                : count;
-        }, 0);
+        var counter = Object.keys(potentiallySelectedList).reduce(
+            (count, listEntry) => potentiallySelectedList[listEntry] &&
+             knimeTileView._knimeTable.isRowIncludedInFilter(listEntry, knimeTileView._currentFilter)
+                ? count + 1
+                : count, 0
+        );
         return counter;
     };
 
     _getTotalNumberLabeled = function () {
         var possibleLabels = _getAllPossibleValues().split('|');
         var count = 0;
-        Object.keys(_value.labels).forEach(function (rowKey) {
+        Object.keys(_value.labels).forEach((rowKey) => {
             if (possibleLabels.includes(_value.labels[rowKey])) {
                 count++;
             }
@@ -966,14 +1012,21 @@ window.generalPurposeLabelingWidget = (function () {
         return count;
     };
 
+    /**
+     * Selects the next tile
+     * @param {Object} selectedRows Object containing all selected rows in format {id: true/false}
+     * @param {boolean} initialize if true initialize the view
+     * @returns {String|boolean} next row key to select or false if there is no next row key
+     */
     _selectNextTile = function (selectedRows, initialize) {
         var currentPageCells = knimeTileView._curCells[0];
         var prevRowInd = 0;
         var info = _tileView._getJQueryTable().DataTable().page.info();
         var pageSize = info.length;
         if (currentPageCells) {
-            var currentCheckboxes = currentPageCells.parentElement.parentElement.getElementsByClassName('selection-cell');
-            selectedRows.forEach(function (row) {
+            var currentCheckboxes = currentPageCells.parentElement.parentElement
+                .getElementsByClassName('selection-cell');
+            selectedRows.forEach((row) => {
                 if (!_rowKeys[row]) {
                     return;
                 }
@@ -984,32 +1037,37 @@ window.generalPurposeLabelingWidget = (function () {
             });
 
             // Check if previous index was last, then it should select first tile instead of the next
-            var newRowInd = (prevRowInd >= info.recordsDisplay - 1 || initialize) ? 0 : _rowKeys[_rowKeysOnly[prevRowInd + 1]].rowInd;
+            var newRowInd = prevRowInd >= info.recordsDisplay - 1 || initialize
+                ? 0
+                : _rowKeys[_rowKeysOnly[prevRowInd + 1]].rowInd;
+            // Always choose the first row when showLabeledOnly is active.
+            if (_value.showUnlabeledOnly) {
+                newRowInd = 0;
+            }
             var currentPage = _tileView._dataTable.page();
             var savedPage = _tileView._value.currentPage;
-            var pageForRow = (currentPage !== savedPage && initialize) ? savedPage : Math.floor(newRowInd / pageSize);
+            var pageForRow = currentPage !== savedPage && initialize ? savedPage : Math.floor(newRowInd / pageSize);
 
             if (pageForRow >= info.pages) {
                 pageForRow = 0;
             }
 
-            if (currentPage !== pageForRow) {
+            if (currentPage !== pageForRow && !_value.showUnlabeledOnly) {
                 _tileView._getJQueryTable().DataTable().page(pageForRow).draw('page');
                 _tileView._value.currentPage = pageForRow;
             }
 
-            // Check if its not the initial call, if so select then a new tile needs to be selected or if it is a initial call and there is no different saved page from a previous view, then also select the next tile
-            if (!initialize || initialize && currentPage === savedPage) {
+            // Check if its not the initial call, if so then a new tile needs to be selected or if it is a initial call and there is no different saved page from a previous view, then also select the next tile
+            if (!initialize || (initialize && currentPage === savedPage)) {
                 var checkboxIndex = newRowInd - pageForRow * pageSize;
                 $(currentCheckboxes[checkboxIndex]).click();
                 // Otherwise set the saved page to the correct one and stop
             } else {
                 _tileView._value.currentPage = pageForRow;
-                return;
+                return false;
             }
 
             var newRowKey = _rowKeysOnly[newRowInd];
-            _selectedTiles[newRowKey] = true;
             return newRowKey;
         }
     };
@@ -1033,12 +1091,12 @@ window.generalPurposeLabelingWidget = (function () {
         var concatValues = 'Skip|';
         var possibleValue, possibleNewValues;
         for (possibleValue in _tileView._representation.possiblevalues) {
-            concatValues += _representation.possiblevalues[possibleValue] + '|';
+            concatValues += `${_representation.possiblevalues[possibleValue]} |`;
         }
         concatValues = concatValues.slice(0, -1);
         if (_tileView._value.possiblevalues.length > 0) {
             for (possibleNewValues in _tileView._value.possiblevalues) {
-                concatValues += '|' + _value.possiblevalues[possibleNewValues];
+                concatValues += `|${  _value.possiblevalues[possibleNewValues]}`;
             }
         } else {
             concatValues = concatValues.slice(0, concatValues.length - 1);
@@ -1047,9 +1105,9 @@ window.generalPurposeLabelingWidget = (function () {
     };
 
     _filterData = function (searchTerm) {
-        // todo: improve the performance of this function
+        // TODO: improve the performance of this function
         var searchTerms = searchTerm.split('|');
-        return _tileView._getJQueryTable().DataTable().column(1).data().filter(function (value) {
+        return _tileView._getJQueryTable().DataTable().column(1).data().filter((value) => {
             var temp1 = value.split('>');
             var temp2 = temp1.length && temp1.length >= 2 ? temp1[1].split('<')[0] : '';
             return searchTerms.includes(temp2[0]);
@@ -1058,16 +1116,17 @@ window.generalPurposeLabelingWidget = (function () {
 
     _changeSkipButton = function () {
         var skipButton = document.getElementById('btnSkip');
-        if (_countTrueSelectedValues(_selectedTiles) > 0) {
+        if (_countTrueSelectedValues(knimeTileView._selection) > 0) {
             skipButton.style.visibility = 'visible';
         } else {
             skipButton.style.visibility = 'hidden';
         }
 
         var onlyUnlabeled = true;
-        for (var selectedTile in _selectedTiles) {
+        for (var selectedTile in knimeTileView._selection) {
             if (knimeTileView._value.labels[selectedTile] &&
-                knimeTileView._value.labels[selectedTile] !== '?') {
+                knimeTileView._value.labels[selectedTile] !== '?' &&
+                knimeTileView._selection[selectedTile]) {
                 onlyUnlabeled = false;
             }
         }
@@ -1080,13 +1139,15 @@ window.generalPurposeLabelingWidget = (function () {
 
     /**
      * Return the hex representation of the input integer
+     * @param {int} number for which one wants a hex representation
+     * @returns {String} the hexcode to return
      */
     _getHexColor = function (number) {
         var hexCode = (number >>> 0).toString(16).slice(-6);
         while (hexCode.length < 6) {
-            hexCode = '0' + hexCode;
+            hexCode = `0${hexCode}`;
         }
-        hexCode = '#' + hexCode;
+        hexCode = `#${hexCode}`;
         return hexCode;
     };
 
