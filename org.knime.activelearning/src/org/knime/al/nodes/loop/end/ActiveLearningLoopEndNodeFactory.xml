@@ -43,8 +43,8 @@
         
         <option name="Maximal number of iterations">The maximum number of iterations the loop will run.</option>
         <option name="Minimal number of rows">The minimal number of rows required to continue iterating.</option>
-        <option name="End Loop with Variable">Whether the node execution is controlled by a variable, when enabled allows 
-        choosing the Flow Variable that ends the loop if it's value equals "true".</option>   
+        <option name="End Loop with Variable">Whether to use a boolean Flow Variable as stopping criterion for the loop execution.
+        When enabled, the loop will be terminated if the value of the selected variable is equal to "true".</option>   
         <option name="Collect data from last iteration only">If this option is checked only the last table passed to the collecting 
         table input is passed through to the collected table output (2). Hence, the data of earlier iterations is discarded. If this
         option is enabled, the "Add iteration column" will be ignored.</option>  
