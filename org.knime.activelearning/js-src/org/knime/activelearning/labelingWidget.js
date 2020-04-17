@@ -227,7 +227,7 @@ window.generalPurposeLabelingWidget = (function () {
 
     /**
      * Overwrite the dataTableDrawCallback function to load selection into view, if there was a previous selection
-     * Add a timeout, as otherwise the method is called everytime a page is rendered.
+     * Add a timeout, as otherwise the method is called every time a page is rendered.
      * @returns {undefined}
      */
     window.knimeTileView._dataTableDrawCallbackOld = window.knimeTileView._dataTableDrawCallback;
@@ -377,14 +377,14 @@ window.generalPurposeLabelingWidget = (function () {
             var currentProgress = document.createElement('div');
             currentProgress.id = 'labCurrentProgress';
 
-            var currentProgressbar = document.createElement('div');
-            currentProgressbar.id = 'labCurrentProgressBar';
+            var currentProgressBar = document.createElement('div');
+            currentProgressBar.id = 'labCurrentProgressBar';
 
             if (!_representation.title || _representation.title === '') {
                 currentProgress.className = 'labCurrentProgressWithoutTitle';
             }
 
-            currentProgress.appendChild(currentProgressbar);
+            currentProgress.appendChild(currentProgressBar);
             var dataTableWrapper = document.getElementsByClassName('dataTables_wrapper')[0];
             dataTableWrapper.parentNode.insertBefore(currentProgress, dataTableWrapper);
             dataTableWrapper.parentNode.insertBefore(progressText, dataTableWrapper);
@@ -1154,8 +1154,8 @@ window.generalPurposeLabelingWidget = (function () {
 
     /**
      * Function that prepares a string with all possible labels concatenated
-     * @returns {String} - a string consisting of all possible values concatenated and seperated by a '|'.
-     *                     Adittionally the string for the skip label is always added.
+     * @returns {String} - a string consisting of all possible values concatenated and separated by a '|'.
+     *                     Additionally the string for the skip label is always added.
      */
     _getAllPossibleValues = function () {
         var concatValues = 'Skip|';
@@ -1176,7 +1176,7 @@ window.generalPurposeLabelingWidget = (function () {
 
 
     /**
-     * Filter the DataTable acording to a provided search term
+     * Filter the DataTable according to a provided search term
      * @param {String} searchTerm - a string containing all search terms in format 'Term1|Term2|Term3...
      * @returns {Object} - DataTable object containing only values which include the search term
      */
