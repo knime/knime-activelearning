@@ -132,8 +132,11 @@ window.generalPurposeLabelingWidget = (function () {
                     var color = value.colors[labelValue] || representation.colors[labelInd];
                     colorMap[labelValue] = _hexToRgb(_getHexColor(color));
                 });
-
                 _initializeLabels(value.labels, colorMap, _rowKeys, redraw);
+            // If there are no existing labels, initialize the view with empty labels and an empty colormap
+            // in order to correctly select the first tile
+            } else if (_representation.autoSelectNextTile) {
+                _initializeLabels({}, {}, _rowKeys, redraw);
             }
         }
     };
