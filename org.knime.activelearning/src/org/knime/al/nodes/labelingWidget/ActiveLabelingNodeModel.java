@@ -166,6 +166,12 @@ public class ActiveLabelingNodeModel
                     values.add(dc.toString());
                 }
                 viewRepresentation.setPossibleLabelValues(values.toArray(new String[0]));
+
+                // Overwrite possible values if flow variable is provided
+                if (m_config.getPossibleValues().length > 0) {
+                    viewRepresentation.setPossibleLabelValues(m_config.getPossibleValues());
+                }
+
                 final Map<String, Integer> colors = new HashMap<String, Integer>();
                 // Check if there are Colors defined in the Color Scheme and define which color
                 // belongs to which label. If no Color Scheme is found all labels get the same
