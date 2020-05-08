@@ -798,7 +798,8 @@ window.generalPurposeLabelingWidget = (function () {
      */
     _getColorValue = function (index) {
         var bgColor;
-        var defaultColor = _skipHeaderColor;
+        // Convert hex color to an Integer value, as the Java side expects an Integer value
+        var defaultColor = parseInt(_skipHeaderColor.split('#')[1], 16);
         if (_representation.colorscheme === 'None') {
             bgColor = defaultColor;
         } else if (index > 6) {
@@ -855,6 +856,9 @@ window.generalPurposeLabelingWidget = (function () {
             }
             if (typeof label !== 'undefined' && label !== '?') {
                 var color = colorMap[label];
+                if (!color) {
+                    color = _hexToRgb(_defaultHeaderColor);
+                }
                 var labelColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
                 tileViewData[rowInd][1] = tileViewData[rowInd][1].replace(
                     /background-color:\s*#[A-Fa-f0-9]{6};*/, `background-color: ${labelColor};`
