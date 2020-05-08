@@ -369,9 +369,10 @@ window.generalPurposeLabelingWidget = (function () {
         labelingContainer.id = 'labelingContainer';
         document.body.appendChild(labelingContainer);
 
-        _representation.containerElement = labelingContainer;
         _tileView = window.knimeTileView;
         _tileView.init(_representation, _value);
+        var table = document.getElementById('knimePagedTableContainer');
+        labelingContainer.appendChild(table);
 
         if (_representation.useProgressBar) {
             var progressText = document.createElement('div');
