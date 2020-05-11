@@ -306,7 +306,7 @@ window.generalPurposeLabelingWidget = (function () {
             addClassesButton.id = 'btnEditClasses';
             addClassesButton.innerHTML = '&#x1F527;';
             addClassesButton.onclick = function (e) {
-               $('#dlgEdit').modal();
+                $('#dlgEdit').modal();
             };
             knimeService.addMenuItem('Create custom classes', null, addClassesButton);
         }
@@ -540,24 +540,12 @@ window.generalPurposeLabelingWidget = (function () {
         removeDialogButtonAccept.onclick = function () {
             var select = document.getElementById('slcClassesEdit');
             var classes = [...select.options].filter(option => option.selected).map(option => option.value);
-            labeledCards = _filterData(classes.join('|'));
             classes.forEach((className) => {
                 var valInd = _value.possiblevalues.indexOf(className);
                 if (valInd > -1) {
                     _value.possiblevalues.splice(valInd, 1);
                 }
-                var labelColor = 'rgb(120, 120, 120)';
-                for (var i = 0; i < labeledCards.length; i++) {
-                    labeledCards[i] = labeledCards[i].replace(className,'');
-                    labeledCards[i] = labeledCards[i].replace(
-                            /background-color:\s*#[A-Fa-f0-9]{6};*/, 'background-color: ' + labelColor + ';'
-                        );
-                    labeledCards[i] = labeledCards[i].replace(
-                            /background-color:\s*rgb\(\d*,\s*\d*,\s*\d*\);*/, 'background-color: ' + labelColor + ';'
-                        );
-                };
             });
-            _tileView._dataTable.columns.adjust().draw();
             _updateLabelClasses();
             document.getElementById('btnRemoveLabelClass').hidden = true;
             $('#dlgRemove').modal('hide');
@@ -576,7 +564,7 @@ window.generalPurposeLabelingWidget = (function () {
         editDialog.id = 'dlgEdit';
         editDialog.className = 'modal fade in modal-dialog';
         
-        editDialogContent = document.createElement('div')
+        var editDialogContent = document.createElement('div')
         editDialogContent.className = 'modal-content';
         editDialog.appendChild(editDialogContent);
 
