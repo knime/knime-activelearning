@@ -116,6 +116,8 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
 
     private final DataColumnSpecFilterPanel m_columnFilterPanel;
 
+    private final JCheckBox m_displayColumnHeadersCheckBox;
+
     private final JCheckBox m_useNumColsCheckBox;
 
     private final JCheckBox m_useColWidthCheckBox;
@@ -221,6 +223,7 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_titleField = new JTextField(TEXT_FIELD_SIZE);
         m_subtitleField = new JTextField(TEXT_FIELD_SIZE);
         m_columnFilterPanel = new DataColumnSpecFilterPanel();
+        m_displayColumnHeadersCheckBox = new JCheckBox("Display column headers");
         m_enableSelectionCheckbox = new JCheckBox("Enable selection");
         m_enableSelectionCheckbox.addChangeListener(e -> enableSelectionFields());
         m_enableClearSelectionButtonCheckbox = new JCheckBox("Enable 'Clear Selection' button");
@@ -334,6 +337,7 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_config.getSettings().getRepresentationSettings().setAllowedPageSizes(getAllowedPageSizes());
         m_config.getSettings().getRepresentationSettings().setPageSizeShowAll(m_enableShowAllCheckBox.isSelected());
         m_config.getSettings().getRepresentationSettings().setEnableJumpToPage(m_enableJumpToPageCheckBox.isSelected());
+        m_config.getSettings().getRepresentationSettings().setDisplayColumnHeaders(m_displayColumnHeadersCheckBox.isSelected());
         m_config.getSettings().getRepresentationSettings().setTitle(m_titleField.getText());
         m_config.getSettings().getRepresentationSettings().setSubtitle(m_subtitleField.getText());
         final DataColumnSpecFilterConfiguration filterConfig =
@@ -405,6 +409,8 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         m_enableShowAllCheckBox.setSelected(m_config.getSettings().getRepresentationSettings().getPageSizeShowAll());
         m_enableJumpToPageCheckBox
             .setSelected(m_config.getSettings().getRepresentationSettings().getEnableJumpToPage());
+        m_displayColumnHeadersCheckBox
+        .setSelected(m_config.getSettings().getRepresentationSettings().getDisplayColumnHeaders());
         m_titleField.setText(m_config.getSettings().getRepresentationSettings().getTitle());
         m_subtitleField.setText(m_config.getSettings().getRepresentationSettings().getSubtitle());
         m_columnFilterPanel.loadConfiguration(m_config.getSettings().getColumnFilterConfig(), inSpec);
@@ -586,6 +592,8 @@ public class ActiveLabelingNodeDialog extends NodeDialogPane {
         gbcD.gridwidth = 12;
         gbcD.gridx = 0;
         final JPanel displayRow = new JPanel(new GridLayout(1, 4));
+        m_displayColumnHeadersCheckBox.setHorizontalAlignment(SwingConstants.LEFT);
+        displayRow.add(m_displayColumnHeadersCheckBox);
         displayPanel.add(displayRow, gbcD);
         gbcD.fill = GridBagConstraints.NONE;
         gbcD.gridx = 0;
