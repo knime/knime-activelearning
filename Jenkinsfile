@@ -21,7 +21,19 @@ try {
 
     workflowTests.runTests(
         dependencies: [
-            repositories: ['knime-activelearning', 'knime-tensorflow', 'knime-jep', 'knime-datageneration', 'knime-streaming'],
+            repositories: [
+                'knime-activelearning', 
+                'knime-datageneration', 
+                'knime-deeplearning', 
+                'knime-distance', 
+                'knime-filehandling',
+                'knime-jep', 
+                'knime-jfreechart', 
+                'knime-js-base', 
+                'knime-python', 
+                'knime-streaming', 
+                'knime-tensorflow' 
+            ],
         ],
         withAssertions: true,
     )
