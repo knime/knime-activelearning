@@ -429,6 +429,8 @@ public class ActiveLabelingViewRepresentation extends AbstractTableRepresentatio
         m_alignLeft = settings.getBoolean(ActiveLabelingConfig.CFG_ALIGN_LEFT);
         m_alignRight = settings.getBoolean(ActiveLabelingConfig.CFG_ALIGN_RIGHT);
         m_alignCenter = settings.getBoolean(ActiveLabelingConfig.CFG_ALIGN_CENTER);
+        m_possibleLabelValues = settings.getStringArray(ActiveLabelingConfig.CFG_POSSIBLE_VALUES);
+        m_colorScheme = settings.getString(ActiveLabelingConfig.CFG_COLOR_SCHEME);
         m_labelCreation = settings.getBoolean(ActiveLabelingConfig.CFG_ADD_LABELS_DYNAMICALLY);
         m_useProgressBar = settings.getBoolean(ActiveLabelingConfig.CFG_USE_PROGRESS_BAR);
         m_autoSelectNextTile = settings.getBoolean(ActiveLabelingConfig.CFG_AUTO_SELECT_NEXT_TILE);
