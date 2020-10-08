@@ -45,7 +45,7 @@ package org.knime.al.nodes.labelingWidget;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -161,7 +161,7 @@ public class ActiveLabelingNodeModel
                 }
                 final Set<DataCell> possibleValuesSet =
                     m_table.getDataTableSpec().getColumnSpec(possibleValuesColumnName).getDomain().getValues();
-                final Set<String> values = new HashSet<String>();
+                final Set<String> values = new LinkedHashSet<String>();
                 for (final DataCell dc : possibleValuesSet) {
                     values.add(dc.toString());
                 }
