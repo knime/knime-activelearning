@@ -144,7 +144,7 @@ public class ElementSelectorNodeModel extends AbstractALNodeModel {
         final CloseableRowIterator iterator = sorted.iterator();
 
         int i = 0;
-        while (i < m_numberOfElementsModel.getIntValue()) {
+        while (iterator.hasNext() && i < m_numberOfElementsModel.getIntValue()) {
             try {
                 final DataRow next = iterator.next();
                 // skip rows with missing
