@@ -51,10 +51,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.JOptionPane;
 import javax.swing.event.ChangeEvent;
@@ -75,33 +74,30 @@ import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 /**
  * ActiveLearnLoopEndNodeViewListener
  *
- * Event listener for the GUI of the ActiveLearnLoopEndNodeView and hilite
- * Events.
+ * Event listener for the GUI of the ActiveLearnLoopEndNodeView and hilite Events.
  *
  * Contains complete functionality of the GUI (ActiveLearnLoopEndNodeViewPanel).
  *
  * SOME NOTES:
  *
- * > setting the class of a hilite Is done by HilitetableModel (setValueAt),
- * since it is the most efficient way to update the table. This method is
- * currently only called by the itemEvent of m_classBox.
+ * > setting the class of a hilite Is done by HilitetableModel (setValueAt), since it is the most efficient way to
+ * update the table. This method is currently only called by the itemEvent of m_classBox.
  *
- * > iterations Are prepared in constructor and in prepare() which is called
- * before the interactive gui is shown. Are finalized when continue/terminate
- * button is pressed in actionPerformed()
+ * > iterations Are prepared in constructor and in prepare() which is called before the interactive gui is shown. Are
+ * finalized when continue/terminate button is pressed in actionPerformed()
  *
- * > classBoxCellEditor A custom cell editor, which provided with a class list
- * edits a class cell directly in the table.
+ * > classBoxCellEditor A custom cell editor, which provided with a class list edits a class cell directly in the table.
  *
  * @author Jonathan Hale
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
  */
 
-final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
-        ListSelectionListener, KeyListener, ChangeListener {
+final class ActiveLearnLoopEndNodeViewListener
+    implements ActionListener, ListSelectionListener, KeyListener, ChangeListener {
 
     // reference to the GUI components
     private ActiveLearnLoopEndNodeViewPanel m_gui;
+
     // Corresponding model
     private final ActiveLearnLoopEndNodeModel m_nodeModel;
 
@@ -115,29 +111,26 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
     private ClassViewerTable m_classViewerTable;
 
     private ClassCellRenderer m_classCellRenderer;
+
     private final SettingsModelOptionalString m_defaultClassModel =
-            ActiveLearnLoopEndSettingsModels.createDefaultClassModel();
+        ActiveLearnLoopEndSettingsModels.createDefaultClassModel();
 
     private int m_curRow; // current Row being edited by QuickButton Panel.
 
     /**
      * Constructor
      *
-     * @param nodeModel
-     *            node model of the node which the gui belongs to
+     * @param nodeModel node model of the node which the gui belongs to
      */
-    public ActiveLearnLoopEndNodeViewListener(
-            final ActiveLearnLoopEndNodeModel nodeModel) {
+    public ActiveLearnLoopEndNodeViewListener(final ActiveLearnLoopEndNodeModel nodeModel) {
         m_nodeModel = nodeModel;
         prepareNextIteration();
     }
 
     /**
-     * Set ActiveLearnLoopEndNodeViewPanel to listen to. Should only be done by
-     * the ActiveLearnLoopEndNodeViewPanel
+     * Set ActiveLearnLoopEndNodeViewPanel to listen to. Should only be done by the ActiveLearnLoopEndNodeViewPanel
      *
-     * @param gui
-     *            reference to the gui (ActiveLearnLoopEndNodeViewPanel)
+     * @param gui reference to the gui (ActiveLearnLoopEndNodeViewPanel)
      */
     public void setGUI(final ActiveLearnLoopEndNodeViewPanel gui) {
         m_gui = gui;
@@ -156,10 +149,8 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
 
         m_gui.m_classBtnList.setClassModel(m_nodeModel.getClassModel());
 
-        m_gui.m_classBox
-                .setModel(new ClassListModel(m_nodeModel.getClassModel()));
-        m_gui.m_classList
-                .setModel(new ClassListModel(m_nodeModel.getClassModel()));
+        m_gui.m_classBox.setModel(new ClassListModel(m_nodeModel.getClassModel()));
+        m_gui.m_classList.setModel(new ClassListModel(m_nodeModel.getClassModel()));
 
         m_classCellEditor = new ClassCellEditor(m_nodeModel.getClassModel());
 
@@ -182,23 +173,14 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
     /**
      * Set the class of a row
      *
-     * @param rowkey
-     *            the rowkey
+     * @param rowkey the rowkey
      * @param classValue
      */
     public void setClass(final RowKey rowkey, final String classValue) {
         m_classMap.put(rowkey, classValue);
-
-        // if (getAllRowsLabeled()) {
         notifyAllRowsLabled();
-        // } else {
-        // notifyRowsStillUnlabeled();
-        // }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void valueChanged(final ListSelectionEvent e) {
 
@@ -208,8 +190,7 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
         }
         final Object source = e.getSource();
 
-        if ((source == m_gui.m_hiliteTable.getSelectionModel())
-                && e.getValueIsAdjusting()) { // table row Selection Event
+        if ((source == m_gui.m_hiliteTable.getSelectionModel()) && e.getValueIsAdjusting()) { // table row Selection Event
 
             // If nothing is selected we'll try to select first row in table
             if (m_gui.m_hiliteTable.getSelectedRow() < 0) {
@@ -232,158 +213,137 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
                     m_gui.m_classBox.repaint();
                 }
             }
-            return;
         }
 
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void actionPerformed(final ActionEvent e) {
         final String command = e.getActionCommand();
-
         // continueButton
         if (command.equals("continue")) {
-            if (getAllRowsLabeled() || m_defaultClassModel.isActive()) {
-                // Cleanup and stop
-                finishAndContinue();
-            } else {
-                final int ret = JOptionPane.showConfirmDialog(m_gui,
-                        "Not all rows are labeled, are you sure you want to continue? \n"
-                                + "Continuing will cause these rows to be added back to the unlabeled pool.",
-                        "Continue?", JOptionPane.CANCEL_OPTION,
-                        JOptionPane.WARNING_MESSAGE);
-
-                if ((ret == JOptionPane.CANCEL_OPTION)
-                        || (ret == JOptionPane.CLOSED_OPTION)) {
-                    return;
-                }
-                finishAndContinue();
-            }
-            return;
-        }
-
-        // addClassButton
-        if (command.equals("addClass")) {
+            handleContinue();
+        } else if (command.equals("addClass")) {// addClassButton
             actionUserAddedClass();
+        } else if (command.equals("terminate")) {// terminateButton
+            handleTerminate();
+        } else if (command.equals("setClass")) { // ------ToggleButtonList Buttons ------ //
+            handleSetClass();
+        } else if (command.equals("removeClass")) {
+            handleRemoveClass();
+        } else {
+            // unsupported command -> do nothing
+        }
+    }
 
+    private void handleRemoveClass() {
+        if (m_gui.m_tabbedPane.getSelectedIndex() != CLASS_PANEL) {
             return;
         }
+        final String defName = (m_defaultClassModel.isActive()) ? m_defaultClassModel.getStringValue() : "?";
 
-        // terminateButton
-        if (command.equals("terminate")) {
-            if (getAllRowsLabeled() || m_defaultClassModel.isActive()) {
-                // Cleanup and stop
-                finishCurrentIteration();
-            } else {
-                // Launch a Dialog
-                final int ret = JOptionPane.showConfirmDialog(m_gui,
-                        "Terminating will cause current changes\n"
-                                + "of hilite labels to be discarded!\n",
-                        "Terminating...", JOptionPane.CANCEL_OPTION,
-                        JOptionPane.WARNING_MESSAGE);
+        final int selClassIndex = m_gui.m_classList.getSelectedIndex();
+        final String selClass = m_gui.m_classList.getSelectedValue();
 
-                if ((ret == JOptionPane.CANCEL_OPTION)
-                        || (ret == JOptionPane.CLOSED_OPTION)) {
-                    return;
-                }
-            }
-
-            m_nodeModel.terminate();
-            return;
-        }
-
-        // ------ToggleButtonList Butttons ------ //
-        if (command.equals("setClass")) {
-            setClass(m_curRow, m_gui.m_classBtnList.getSelectedItem());
-
-            // If we're through all the rows, start from beginning
-            RowKey curKey = null;
-
-            while (m_curRow < m_classViewerTable.getRowCount()) {
-                curKey = m_classViewerTable.getRowKeyOf(m_curRow);
-                if (m_classMap.get(curKey).equals(ClassModel.NO_CLASS)) {
-                    break;
-                }
-                m_curRow++;
-            }
-
-            //
-            if (m_curRow >= m_classViewerTable.getRowCount()) {
-                if (!getAllRowsLabeled()) {
-                    if (m_gui.m_autoContCheckBox.isSelected()
-                            && !m_defaultClassModel.isActive()) {
-                        final int ret = JOptionPane.showConfirmDialog(m_gui,
-                                "You are at the end of the list,\n"
-                                        + "but there are still rows unlabeled.\n"
-                                        + "Do you want to continue anyway?\n",
-                                "Continue with unlabeled?",
-                                JOptionPane.YES_NO_OPTION,
-                                JOptionPane.QUESTION_MESSAGE);
-
-                        if (ret == JOptionPane.YES_OPTION) {
-                            finishAndContinue();
-                        }
-                    }
-                    m_curRow = getFirstUnlabeledRow(); // start from first
-                    // unlabeled
-                    updateDetailedView(
-                            m_classViewerTable.getRowKeyOf(m_curRow));
-
-                }else {
-                    finishAndContinue();
-                }
-            } else {
-                // update view with new row.
-                updateDetailedView(curKey);
-            }
-            updateRowStatsLabel(curKey);
-        }
-
-        if (command.equals("removeClass")) {
-            if (m_gui.m_tabbedPane.getSelectedIndex() == CLASS_PANEL) {
-                final String defName = (m_defaultClassModel.isActive())
-                        ? m_defaultClassModel.getStringValue() : "?";
-
-                final int selClassIndex = m_gui.m_classList.getSelectedIndex();
-                final String selClass = m_gui.m_classList.getSelectedValue();
-
-                if ((selClass == null) || (selClassIndex == -1)) {
-                    JOptionPane.showMessageDialog(m_gui,
-                            "No class selected. Please\nselect a class first.",
-                            "Error removing class.", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                if (selClass.equals(ClassModel.NO_CLASS)) {
-                    JOptionPane.showMessageDialog(m_gui,
-                            "You cannot remove the default class!",
-                            "Cannot remove default.",
-                            JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                final int nRows = getNumRowsWithClass(selClass);
-                // Launch a Dialog
-                final int ret = JOptionPane.showConfirmDialog(m_gui,
-                        "Removing this class will reset " + nRows + "\n"
-                                + "rows back to \"" + defName + "\"\n",
-                        "Removing class...", JOptionPane.CANCEL_OPTION,
-                        JOptionPane.WARNING_MESSAGE);
-
-                if ((ret == JOptionPane.CANCEL_OPTION)
-                        || (ret == JOptionPane.CLOSED_OPTION)) {
-                    return;
-                }
-
+        if ((selClass == null) || (selClassIndex == -1)) {
+            JOptionPane.showMessageDialog(m_gui, "No class selected. Please\nselect a class first.",
+                "Error removing class.", JOptionPane.ERROR_MESSAGE);
+        } else if (selClass.equals(ClassModel.NO_CLASS)) {
+            JOptionPane.showMessageDialog(m_gui, "You cannot remove the default class!", "Cannot remove default.",
+                JOptionPane.ERROR_MESSAGE);
+        } else {
+            final int nRows = getNumRowsWithClass(selClass);
+            // Launch a Dialog
+            final int ret = JOptionPane.showConfirmDialog(m_gui,
+                "Removing this class will reset " + nRows + "\n" + "rows back to \"" + defName + "\"\n",
+                "Removing class...", JOptionPane.CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (!isCancelOrClose(ret)) {
                 resetAllWithClass(selClass);
                 m_nodeModel.getClassModel().removeClassAt(selClassIndex);
             }
         }
+    }
 
-        return;
+    private void handleSetClass() {
+        setClass(m_curRow, m_gui.m_classBtnList.getSelectedItem());
+
+        RowKey curKey = findCurrentKey();
+        if (m_curRow >= m_classViewerTable.getRowCount()) {
+            if (!areAllRowsLabeled()) {
+                if (m_gui.m_autoContCheckBox.isSelected() && !m_defaultClassModel.isActive()) {
+                    askUserWhetherToContinue();
+                }
+                m_curRow = getFirstUnlabeledRow(); // start from first
+                // unlabeled
+                updateDetailedView(m_classViewerTable.getRowKeyOf(m_curRow));
+
+            } else {
+                finishAndContinue();
+            }
+        } else {
+            // update view with new row.
+            updateDetailedView(curKey);
+        }
+        updateRowStatsLabel(curKey);
+    }
+
+    private RowKey findCurrentKey() {
+        // If we're through all the rows, start from beginning
+        while (m_curRow < m_classViewerTable.getRowCount()) {
+            RowKey curKey = m_classViewerTable.getRowKeyOf(m_curRow);
+            if (m_classMap.get(curKey).equals(ClassModel.NO_CLASS)) {
+                return curKey;
+            }
+            m_curRow++;
+        }
+        return null;
+    }
+
+    private void askUserWhetherToContinue() {
+        final int ret = JOptionPane.showConfirmDialog(m_gui,
+            "You are at the end of the list,\nbut there are still rows unlabeled.\n"
+                + "Do you want to continue anyway?\n",
+            "Continue with unlabeled?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+
+        if (ret == JOptionPane.YES_OPTION) {
+            finishAndContinue();
+        }
+    }
+
+    private void handleContinue() {
+        if (areAllRowsLabeled() || m_defaultClassModel.isActive()) {
+            // Cleanup and stop
+            finishAndContinue();
+        } else {
+            final int ret = JOptionPane.showConfirmDialog(m_gui,
+                "Not all rows are labeled, are you sure you want to continue? \n"
+                    + "Continuing will cause these rows to be added back to the unlabeled pool.",
+                "Continue?", JOptionPane.CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+
+            if (!isCancelOrClose(ret)) {
+                finishAndContinue();
+            }
+        }
+    }
+
+    private void handleTerminate() {
+        if (areAllRowsLabeled() || m_defaultClassModel.isActive()) {
+            // Cleanup and stop
+            finishCurrentIteration();
+        } else {
+            // Launch a Dialog
+            final int ret = JOptionPane.showConfirmDialog(m_gui,
+                "Terminating will cause current changes\n" + "of hilite labels to be discarded!\n", "Terminating...",
+                JOptionPane.CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+
+            if (!isCancelOrClose(ret)) {
+                m_nodeModel.terminate();
+            }
+        }
+    }
+
+    private static boolean isCancelOrClose(final int ret) {
+        return (ret == JOptionPane.CANCEL_OPTION) || (ret == JOptionPane.CLOSED_OPTION);
     }
 
     /*
@@ -398,49 +358,35 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
         m_nodeModel.continueExecution();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void keyReleased(final KeyEvent e) {
         final Object source = e.getSource();
 
-        if (m_gui.isClassField(source)) {
-            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                actionUserAddedClass();
-            }
+        if (m_gui.isClassField(source) && e.getKeyCode() == KeyEvent.VK_ENTER) {
+            actionUserAddedClass();
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void keyTyped(final KeyEvent arg0) {
         // Nothing to do here
-        return;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void keyPressed(final KeyEvent arg0) {
         // nothing to do here
-        return;
     }
 
     // Some constants for the tabbedPane indices
-    private final int TABLE_PANEL = 0;
-    private final int WIZARD_PANEL = 1;
-    private final int CLASS_PANEL = 2;
+    private static final int TABLE_PANEL = 0;
+
+    private static final int WIZARD_PANEL = 1;
+
+    private static final int CLASS_PANEL = 2;
 
     // The lastly selected Panel
     private int m_lastPanel = TABLE_PANEL;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void stateChanged(final ChangeEvent e) {
         if (e.getSource() == m_gui.m_tabbedPane) {
@@ -451,8 +397,7 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
             if (selectedPanel == TABLE_PANEL) {
                 if (m_lastPanel == WIZARD_PANEL) {
                     // set selection of table to m_curRow
-                    m_gui.m_hiliteTable.changeSelection(m_curRow, m_curRow,
-                            false, false);
+                    m_gui.m_hiliteTable.changeSelection(m_curRow, m_curRow, false, false);
                 }
                 if (m_lastPanel == CLASS_PANEL) {
                     // select first Item
@@ -460,7 +405,7 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
                 }
             } else if (selectedPanel == WIZARD_PANEL) {
                 /* Only change current row if there are unlabeled rows left */
-                if (!getAllRowsLabeled()) {
+                if (!areAllRowsLabeled()) {
                     // set current row to first unlabeled row
                     m_curRow = getFirstUnlabeledRow();
                 }
@@ -497,7 +442,7 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
      * Prepare a new Iteration
      */
     private void prepareNextIteration() {
-        m_classMap = new HashMap<RowKey, String>(); // make a new hiliteMap
+        m_classMap = new HashMap<>(); // make a new hiliteMap
 
         // Add the hilites to our hiliteMap
         for (final RowKey key : m_nodeModel.getRowMap().keySet()) {
@@ -511,28 +456,12 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
      * Finish/Cleanup current Iteration and pass results to the nodeModel
      */
     private void finishCurrentIteration() {
-        if (!getAllRowsLabeled()) {
+        if (!areAllRowsLabeled()) {
             if (m_defaultClassModel.isActive()) {
                 // replace all NO_CLASS with default class
-                for (final RowKey key : m_classMap.keySet()) {
-                    if (m_classMap.get(key).equals(ClassModel.NO_CLASS)) {
-                        m_classMap.put(key,
-                                m_defaultClassModel.getStringValue());
-                    }
-                }
+                replaceNoClassWithDefaultClass();
             } else {
-
-                // add all rows labeled with NO_CLASS to toBeRemoved list
-                final List<RowKey> toBeRemoved = new ArrayList<RowKey>();
-                for (final RowKey key : m_classMap.keySet()) {
-                    if (m_classMap.get(key).equals(ClassModel.NO_CLASS)) {
-                        toBeRemoved.add(key);
-                    }
-                }
-
-                for (final RowKey remove : toBeRemoved) {
-                    m_classMap.remove(remove);
-                }
+                removeKeysWithNoClass();
             }
         }
         m_nodeModel.setClassMap(m_classMap); // Pass the hiliteMap onto the
@@ -540,6 +469,15 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
 
         m_classViewerTable.clearEntries();
         updateDetailedView(null);
+    }
+
+    private void replaceNoClassWithDefaultClass() {
+        final String defaultClass = m_defaultClassModel.getStringValue();
+        m_classMap.replaceAll((k, v) -> v.equals(ClassModel.NO_CLASS) ? defaultClass : v);
+    }
+
+    private void removeKeysWithNoClass() {
+        m_classMap.values().removeIf(v -> v.equals(ClassModel.NO_CLASS));
     }
 
     /*
@@ -564,8 +502,7 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
         }
 
         if (m_defaultClassModel.isActive()) {
-            m_gui.m_classBtnList
-                    .setDefaultText(m_defaultClassModel.getStringValue());
+            m_gui.m_classBtnList.setDefaultText(m_defaultClassModel.getStringValue());
         } else {
             m_gui.m_classBtnList.setDefaultText("- Skip -");
         }
@@ -573,8 +510,7 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
         final RowKey key = m_classViewerTable.getRowKeyOf(m_curRow);
         if (key != null) {
             updateRowStatsLabel(key);
-            m_gui.m_iterLbl.setText("Current Iteration: "
-                    + m_nodeModel.getCurrentIterationIndex());
+            m_gui.m_iterLbl.setText("Current Iteration: " + m_nodeModel.getCurrentIterationIndex());
         }
     }
 
@@ -585,19 +521,16 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
         // Set the data in the GUI and select the first entry in the table
 
         // Tell the node model which column is the class column
-        m_classViewerTable.setClassColumn(m_nodeModel.getClassColumnName(),
-                m_nodeModel.getClassColumnIndex());
+        m_classViewerTable.setClassColumn(m_nodeModel.getClassColumnIndex());
 
-        m_classViewerTable.updateEntries(m_classMap.keySet(),
-                m_nodeModel.getRowMap(), m_nodeModel.getColNames());
+        m_classViewerTable.updateEntries(m_classMap.keySet(), m_nodeModel.getRowMap(), m_nodeModel.getColNames());
         m_gui.m_hiliteTable.changeSelection(0, 0, false, false); // Select first
         // entry
 
         // Set the CellEditor
         final int classColumnIndex = m_classViewerTable.getClassColumnIndex();
 
-        final TableColumn classColumn = m_gui.m_hiliteTable.getColumnModel()
-                .getColumn(classColumnIndex); // get the column with
+        final TableColumn classColumn = m_gui.m_hiliteTable.getColumnModel().getColumn(classColumnIndex); // get the column with
         // that index
         classColumn.setCellEditor(m_classCellEditor);
         classColumn.setCellRenderer(m_classCellRenderer);
@@ -612,8 +545,7 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
 
         if (selectedValue != null) {
 
-            m_gui.m_detailedView
-                    .add(m_nodeModel.requireRenderer(selectedValue));
+            m_gui.m_detailedView.add(m_nodeModel.requireRenderer(selectedValue));
             m_gui.m_detailedView.repaint();
             m_gui.updateUI();
         }
@@ -632,23 +564,22 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
             }
         }
 
-        m_gui.m_rowStatsWiz.setText("Number of unlabeled rows: " + numUnlabeled
-                + ", current row: " + rowKey.toString());
+        m_gui.m_rowStatsWiz
+            .setText("Number of unlabeled rows: " + numUnlabeled + ", current row: " + rowKey.toString());
     }
 
     /*
      * Returns the in the hiliteTabel currently selcted row as a RowKey.
      */
     private RowKey getSelectedRowKey() {
-        return m_classViewerTable
-                .getRowKeyOf(m_gui.m_hiliteTable.getSelectedRow());
+        return m_classViewerTable.getRowKeyOf(m_gui.m_hiliteTable.getSelectedRow());
     }
 
     /*
      * Notification to the listener that all rows have been labeled; no
      * unlabeled rows are left.
      */
-            void notifyAllRowsLabled() {
+    void notifyAllRowsLabled() {
         if (m_defaultClassModel.isActive()) {
             // means, buttons were deactivated
             m_gui.m_continueButton.setEnabled(true);
@@ -672,17 +603,13 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
      * Notify the Listener that there still are unlabeled rows. The Listener
      * will then update the GUI (disable Buttons/ set Tooltips etc).
      */
-            void notifyRowsStillUnlabeled() {
+    void notifyRowsStillUnlabeled() {
         if (m_defaultClassModel.isActive()) {
             return;
         }
 
-        // m_gui.m_continueButton.setEnabled(false);
-
-        m_gui.m_continueButton
-                .setToolTipText("Can't continue with unlabled rows.");
-        m_gui.m_terminateButton
-                .setToolTipText("Terminating will loose current labels!");
+        m_gui.m_continueButton.setToolTipText("Can't continue with unlabled rows.");
+        m_gui.m_terminateButton.setToolTipText("Terminating will loose current labels!");
 
         m_gui.m_labelingDone.setVisible(false);
         m_gui.m_classBtnList.setVisible(true);
@@ -691,9 +618,8 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
     /*
      * Set class of a row (index) to cls
      */
-            void setClass(final int row, final String cls) {
-        m_classViewerTable.setValueAt(cls, row,
-                m_nodeModel.getClassColumnIndex() + 1);
+    void setClass(final int row, final String cls) {
+        m_classViewerTable.setValueAt(cls, row, m_nodeModel.getClassColumnIndex() + 1);
     }
 
     /*
@@ -714,9 +640,9 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
      * Resets all rows with certain class to ClassModel.NO_CLASS
      */
     private void resetAllWithClass(final String selClass) {
-        for (final RowKey row : m_classMap.keySet()) {
-            if (m_classMap.get(row).equals(selClass)) {
-                setClass(row, ClassModel.NO_CLASS);
+        for (final Entry<RowKey, String> row : m_classMap.entrySet()) {
+            if (row.getValue().equals(selClass)) {
+                setClass(row.getKey(), ClassModel.NO_CLASS);
             }
         }
     }
@@ -748,9 +674,9 @@ final class ActiveLearnLoopEndNodeViewListener implements ActionListener,
     }
 
     /*
-     * Retruns true if there are no unlabeled rows left.
+     * Returns true if there are no unlabeled rows left.
      */
-            boolean getAllRowsLabeled() {
+    boolean areAllRowsLabeled() {
         return !m_classMap.containsValue(ClassModel.NO_CLASS);
     }
 }

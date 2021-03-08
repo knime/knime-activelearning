@@ -52,9 +52,10 @@ import java.awt.Component;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -88,10 +89,12 @@ import org.knime.core.node.port.PortType;
  * @author dietzc, hornm, halej, University of Konstanz
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
  */
-final class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
-        implements ActiveLearnLoopEnd {
+final class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel implements ActiveLearnLoopEnd {
+
+    private static final String INTERNAL_FILE_NAME = "LoopEndNode.intern";
 
     private static final int DATA_PORT = 0;
+
     private static final int PASSTHROUGH_PORT = 1;
 
     private int m_repColIdx;
@@ -105,14 +108,15 @@ final class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
     private DataValueRendererFamily m_renderer; // Renderer for a specific cell
     // of the table
 
-    private final SettingsModelString m_classColModel =
-            ActiveLearnLoopEndSettingsModels.createClassColumnModel();
-    private final SettingsModelString m_repColModel =
-            ActiveLearnLoopEndSettingsModels.createRepColumnModel();
+    private final SettingsModelString m_classColModel = ActiveLearnLoopEndSettingsModels.createClassColumnModel();
+
+    private final SettingsModelString m_repColModel = ActiveLearnLoopEndSettingsModels.createRepColumnModel();
+
     private final SettingsModelOptionalString m_defaultClassNameModel =
-            ActiveLearnLoopEndSettingsModels.createDefaultClassModel();
+        ActiveLearnLoopEndSettingsModels.createDefaultClassModel();
+
     private final SettingsModelBoolean m_autoTerminateModel =
-            ActiveLearnLoopEndSettingsModels.createAutoTerminateModel();
+        ActiveLearnLoopEndSettingsModels.createAutoTerminateModel();
 
     private Map<RowKey, String> m_classMap; // User may enter the class labels
     // for certain rows (the hilited
@@ -135,72 +139,61 @@ final class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
      *
      */
     protected ActiveLearnLoopEndNodeModel() {
-        super(new PortType[] { BufferedDataTable.TYPE,
-                BufferedDataTable.TYPE_OPTIONAL, },
-                new PortType[] { BufferedDataTable.TYPE });
+        super(new PortType[]{BufferedDataTable.TYPE, BufferedDataTable.TYPE_OPTIONAL,},
+            new PortType[]{BufferedDataTable.TYPE});
 
         m_isExecuting = false;
         m_isTerminated = false;
 
         // empty row map if no input data is present, yet.
-        m_rowMap = new HashMap<RowKey, DataRow>();
+        m_rowMap = new HashMap<>();
 
         m_classModel = new ClassModel();
 
         m_curIterationIndex = 0;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @SuppressWarnings("deprecation")
     @Override
-    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
-            throws InvalidSettingsException {
+    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
 
-        m_classColIdx = NodeUtils.autoColumnSelection(inSpecs[DATA_PORT],
-                m_classColModel, StringValue.class, this.getClass());
+        m_classColIdx =
+            NodeUtils.autoColumnSelection(inSpecs[DATA_PORT], m_classColModel, StringValue.class, this.getClass());
 
-        m_repColIdx = NodeUtils.autoColumnSelection(inSpecs[DATA_PORT],
-                m_repColModel, DataValue.class, this.getClass());
+        m_repColIdx =
+            NodeUtils.autoColumnSelection(inSpecs[DATA_PORT], m_repColModel, DataValue.class, this.getClass());
 
         m_renderer = inSpecs[DATA_PORT].getColumnSpec(m_repColIdx).getType()
-                .getRenderer(inSpecs[DATA_PORT].getColumnSpec(m_repColIdx));
+            .getRenderer(inSpecs[DATA_PORT].getColumnSpec(m_repColIdx));
 
         m_colNames = inSpecs[DATA_PORT].getColumnNames();
 
         // Pass through
         if (inSpecs[PASSTHROUGH_PORT] != null) {
-            return new DataTableSpec[] { inSpecs[PASSTHROUGH_PORT] };
+            return new DataTableSpec[]{inSpecs[PASSTHROUGH_PORT]};
         }
         // else route the input port
-        return new DataTableSpec[] { inSpecs[DATA_PORT] };
+        return new DataTableSpec[]{inSpecs[DATA_PORT]};
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
-            final ExecutionContext exec) throws Exception {
+    protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec)
+        throws Exception {
 
         if (m_classColIdx == -1) {
-            m_classColIdx = NodeUtils.autoColumnSelection(
-                    inData[DATA_PORT].getDataTableSpec(), m_classColModel,
-                    StringValue.class, this.getClass());
+            m_classColIdx = NodeUtils.autoColumnSelection(inData[DATA_PORT].getDataTableSpec(), m_classColModel,
+                StringValue.class, this.getClass());
         }
 
         if (m_repColIdx == -1) {
-            m_repColIdx = NodeUtils.autoColumnSelection(
-                    inData[DATA_PORT].getDataTableSpec(), m_repColModel,
-                    DataValue.class, this.getClass());
+            m_repColIdx = NodeUtils.autoColumnSelection(inData[DATA_PORT].getDataTableSpec(), m_repColModel,
+                DataValue.class, this.getClass());
         }
 
         m_isExecuting = true;
 
         // Automatically terminate if there are no more rows
-        if (!m_autoTerminateModel.getBooleanValue()
-                || (inData[DATA_PORT].size() > 0)) {
+        if (!m_autoTerminateModel.getBooleanValue() || (inData[DATA_PORT].size() > 0)) {
 
             m_rowMap = new HashMap<>((int)inData[DATA_PORT].size());
             for (final DataRow row : inData[DATA_PORT]) {
@@ -221,27 +214,25 @@ final class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
             super.continueLoop();
             // This called after each loop, nothing is returned on outport of
             // node
-            return null;
+            return null;//NOSONAR
         } else {
             // Pass through
             if (inData[PASSTHROUGH_PORT] != null) {
-                return new BufferedDataTable[] { inData[PASSTHROUGH_PORT] };
+                return new BufferedDataTable[]{inData[PASSTHROUGH_PORT]};
             }
             // If not available return the input data
-            return new BufferedDataTable[] { inData[DATA_PORT] };
+            return new BufferedDataTable[]{inData[DATA_PORT]};
         }
     }
 
     /**
      * Wait for the user to continue or terminate the loop.
      *
-     * @param exec
-     *            the execution context
+     * @param exec the execution context
      * @throws InterruptedException
      * @throws CanceledExecutionException
      */
-    private void suspendExecution(final ExecutionContext exec)
-            throws InterruptedException, CanceledExecutionException {
+    private void suspendExecution(final ExecutionContext exec) throws InterruptedException, CanceledExecutionException {
         m_semaphore.setState(false);
         stateChanged();
 
@@ -270,21 +261,21 @@ final class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
      *
      * @param classMap
      */
-    protected void setClassMap(final Map<RowKey, String> classMap) {
-        m_classMap = new HashMap<RowKey, String>(classMap);
+    void setClassMap(final Map<RowKey, String> classMap) {
+        m_classMap = new HashMap<>(classMap);
     }
 
     /**
      * Step out of suspended state and continue executm_classColModelion
      */
-    protected void continueExecution() {
+    void continueExecution() {
         m_semaphore.setState(true);
     }
 
     /**
      * Terminate execution, move to terminated state
      */
-    protected void terminate() {
+    void terminate() {
         m_isExecuting = false;
         m_isTerminated = true;
         m_curIterationIndex = 0;
@@ -300,13 +291,11 @@ final class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
     /**
      * @return the current state of node (NodeModelState)
      */
-    protected NodeModelState getNodeState() {
+    NodeModelState getNodeState() {
         if (m_isExecuting) {
-            return m_semaphore.getState() ? NodeModelState.EXECUTING
-                    : NodeModelState.SUSPENDED;
+            return m_semaphore.getState() ? NodeModelState.EXECUTING : NodeModelState.SUSPENDED;
         } else {
-            return m_isTerminated ? NodeModelState.TERMINATED
-                    : NodeModelState.CONFIGURED;
+            return m_isTerminated ? NodeModelState.TERMINATED : NodeModelState.CONFIGURED;
         }
     }
 
@@ -321,10 +310,8 @@ final class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
     /**
      * Get renderer of data referenced by RowKey parameter.
      *
-     * @param key
-     *            the key of the desired row
-     * @return Component which represents a renderer for the data referenced by
-     *         key
+     * @param key the key of the desired row
+     * @return Component which represents a renderer for the data referenced by key
      */
     public Component requireRenderer(final RowKey key) {
         final DataRow dataRow = m_rowMap.get(key);
@@ -362,9 +349,6 @@ final class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
      * KNIME RELATED STUFF
      */
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected List<SettingsModel> collectSettingsModels() {
         if (m_settingsModels == null) {
@@ -377,56 +361,32 @@ final class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
         return m_settingsModels;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected void loadInternals(final File nodeInternDir,
-            final ExecutionMonitor exec)
-                    throws IOException, CanceledExecutionException {
-
-        final String path = nodeInternDir.getAbsolutePath();
-
-        final File file = new File(path + "LoopEndNode.intern");
-
-        final DataInputStream is =
-                new DataInputStream(new FileInputStream(file));
-
-        final int numClasses = is.readInt();
-
-        for (int i = 0; i < numClasses; i++) {
-            m_classModel.addClass(is.readUTF());
+    protected void loadInternals(final File nodeInternDir, final ExecutionMonitor exec)
+        throws IOException, CanceledExecutionException {
+        final String pathString = nodeInternDir.getAbsolutePath();
+        final Path path = Paths.get(pathString, INTERNAL_FILE_NAME);
+        try (final DataInputStream is = new DataInputStream(Files.newInputStream(path))) {
+            final int numClasses = is.readInt();
+            for (int i = 0; i < numClasses; i++) {
+                m_classModel.addClass(is.readUTF());
+            }
         }
-        is.close();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected void saveInternals(final File nodeInternDir,
-            final ExecutionMonitor exec)
-                    throws IOException, CanceledExecutionException {
-
-        final String path = nodeInternDir.getAbsolutePath();
-
-        final File file = new File(path + "LoopEndNode.intern");
-
+    protected void saveInternals(final File nodeInternDir, final ExecutionMonitor exec)
+        throws IOException, CanceledExecutionException {
         // save the defined classes
-        final DataOutputStream os =
-                new DataOutputStream(new FileOutputStream(file));
-
-        os.writeInt(m_classModel.getSize());
-
-        for (final String clsName : m_classModel.getDefinedClasses()) {
-            os.writeUTF(clsName);
+        try (final DataOutputStream os =
+            new DataOutputStream(Files.newOutputStream(Paths.get(nodeInternDir.toString(), INTERNAL_FILE_NAME)))) {
+            os.writeInt(m_classModel.getSize());
+            for (final String clsName : m_classModel.getDefinedClasses()) {
+                os.writeUTF(clsName);
+            }
         }
-        os.close();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void reset() {
         m_isExecuting = false;
@@ -434,25 +394,24 @@ final class ActiveLearnLoopEndNodeModel extends AbstractALNodeModel
     }
 
     // Helper class
-    private class Semaphore {
+    private static final class Semaphore {
         private boolean m_state;
 
-        public Semaphore(final boolean state) {
+        Semaphore(final boolean state) {
             setState(state);
         }
 
         /**
-         * @param state
-         *            the state to set
+         * @param state the state to set
          */
-        public void setState(final boolean state) {
+        void setState(final boolean state) {
             m_state = state;
         }
 
         /**
          * @return the state
          */
-        public boolean getState() {
+        boolean getState() {//NOSONAR, isState sounds weird
             return m_state;
         }
     }

@@ -102,9 +102,6 @@ public final class DensityScorerPortObject extends FileStorePortObject {
          */
         private static final String CFG_NEIGHBORHOOD_ID = "neighborhoodId";
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void savePortObject(final DensityScorerPortObject portObject, final PortObjectZipOutputStream out,
             final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
@@ -115,9 +112,6 @@ public final class DensityScorerPortObject extends FileStorePortObject {
             mc.saveToXML(out);
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public DensityScorerPortObject loadPortObject(final PortObjectZipInputStream in, final PortObjectSpec spec,
             final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
@@ -164,9 +158,6 @@ public final class DensityScorerPortObject extends FileStorePortObject {
 
     private int m_nrRows;
 
-    /**
-     *
-     */
     private DensityScorerPortObject(final DensityScorerPortObjectSpec spec, final DensityScorerModel model,
         final FileStore neighborhoodFilestore, final FileStore potentialsFilestore) {
         super(Lists.newArrayList(neighborhoodFilestore, potentialsFilestore));
@@ -295,26 +286,17 @@ public final class DensityScorerPortObject extends FileStorePortObject {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getSummary() {
         return String.format("Density Scorer Model consisting of %s %s-dimensional data points.", m_nrRows,
             m_nrFeatures);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public DensityScorerPortObjectSpec getSpec() {
         return m_spec;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JComponent[] getViews() {
         return new JComponent[0];

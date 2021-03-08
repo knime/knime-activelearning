@@ -52,14 +52,12 @@ import org.knime.al.nodes.score.density.AbstractDensityInitializerNodeDialog;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 
 /**
+ * Dialog for the Potential Density Initializer.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
 final class PotentialInitializerNodeDialog extends AbstractDensityInitializerNodeDialog {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void addAlgorithmSettings() {
         addDialogComponent(new DialogComponentNumber(

@@ -50,6 +50,7 @@ package org.knime.al.nodes.score.density;
 
 import org.knime.al.nodes.score.ExceptionHandling;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponent;
 import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
 
@@ -60,7 +61,7 @@ import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter2;
 public abstract class AbstractDensityInitializerNodeDialog extends DefaultNodeSettingsPane {
 
     /**
-     *
+     * Constructor.
      */
     protected AbstractDensityInitializerNodeDialog() {
         createNewGroup("Column Selection");
@@ -68,7 +69,7 @@ public abstract class AbstractDensityInitializerNodeDialog extends DefaultNodeSe
             new DialogComponentColumnFilter2(AbstractDensityInitializerNodeModel.createColumnFilterModel(),
                 AbstractDensityInitializerNodeModel.DATA_PORT));
         createNewGroup("Algorithm Settings");
-        addAlgorithmSettings();
+        addAlgorithmSettings();//NOSONAR
         createNewGroup("Missing Value Handling");
         addDialogComponent(
             new DialogComponentButtonGroup(AbstractDensityInitializerNodeModel.createMissingValueHandling(),
@@ -76,8 +77,19 @@ public abstract class AbstractDensityInitializerNodeDialog extends DefaultNodeSe
     }
 
     /**
-     * Add the dialog components for the algorithm settings.
+     * Add the dialog components for the algorithm settings.<br>
+     * Implementations must not rely on any state set by their constructor because it hasn't been called yet.
      */
     protected abstract void addAlgorithmSettings();
+
+    @Override
+    public final void createNewGroup(final String title) {
+        super.createNewGroup(title);
+    }
+
+    @Override
+    public final void addDialogComponent(final DialogComponent diaC) {
+        super.addDialogComponent(diaC);
+    }
 
 }

@@ -66,6 +66,8 @@ import org.knime.core.node.ExecutionMonitor;
  */
 public final class NeighborhoodStructure implements Externalizable {
 
+    private static final long serialVersionUID = 5856190872740332944l;
+
     private int[][] m_neighborhoods;
 
     private boolean m_isSorted;
@@ -105,18 +107,12 @@ public final class NeighborhoodStructure implements Externalizable {
         return m_neighborhoods[idx];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         m_neighborhoods = (int[][])in.readObject();
         m_isSorted = in.readBoolean();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
         out.writeObject(m_neighborhoods);
@@ -146,9 +142,8 @@ public final class NeighborhoodStructure implements Externalizable {
             return new NeighborhoodStructure(neighborhoods, m_sortNeighborhoods);
         }
 
-        @SuppressWarnings("resource") // toArray is a terminal operation
         private int[] createNeighborsArray(final DensityDataPoint<?> dataPoint) {
-            IntStream stream = dataPoint.getNeighbors().stream().map(p -> p.getKey()).mapToInt(this::getIndex);
+            IntStream stream = dataPoint.getNeighbors().stream().map(DensityDataPoint::getKey).mapToInt(this::getIndex);
             if (m_sortNeighborhoods) {
                 stream = stream.sorted();
             }
@@ -159,7 +154,7 @@ public final class NeighborhoodStructure implements Externalizable {
             try {
                 return m_keyMap.getIndex(key);
             } catch (UnknownRowException ex) {
-                throw new IllegalStateException("Unknown row during model creation.");
+                throw new IllegalStateException("Unknown row during model creation.", ex);
             }
         }
     }

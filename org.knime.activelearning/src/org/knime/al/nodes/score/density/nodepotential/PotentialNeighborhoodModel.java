@@ -75,6 +75,8 @@ import gnu.trove.list.TDoubleList;
  */
 final class PotentialNeighborhoodModel extends AbstractNeighborhoodModel {
 
+    private static final long serialVersionUID = -3134333369301887161l;
+
     private double m_beta;
 
     /**
@@ -114,9 +116,6 @@ final class PotentialNeighborhoodModel extends AbstractNeighborhoodModel {
         return new Creator(keyMap, neighborhoods, beta).create(dataPoints, monitor);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
@@ -125,9 +124,6 @@ final class PotentialNeighborhoodModel extends AbstractNeighborhoodModel {
         m_beta = in.readDouble();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
         super.writeExternal(out);

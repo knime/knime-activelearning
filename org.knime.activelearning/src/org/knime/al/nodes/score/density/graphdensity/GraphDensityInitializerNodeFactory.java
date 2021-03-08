@@ -53,47 +53,33 @@ import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
 /**
+ * NodeFactory for the Graph Density Intializer.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
 public final class GraphDensityInitializerNodeFactory extends NodeFactory<GraphDensityInitializerNodeModel> {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public GraphDensityInitializerNodeModel createNodeModel() {
         return new GraphDensityInitializerNodeModel();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected int getNrNodeViews() {
         return 0;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public NodeView<GraphDensityInitializerNodeModel> createNodeView(final int viewIndex,
         final GraphDensityInitializerNodeModel nodeModel) {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected boolean hasDialog() {
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
         return new GraphDensityInitializerNodeDialog();

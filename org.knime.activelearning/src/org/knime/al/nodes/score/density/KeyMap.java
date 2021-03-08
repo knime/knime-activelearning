@@ -67,6 +67,8 @@ import org.knime.core.node.ExecutionMonitor;
  */
 public final class KeyMap implements Externalizable {
 
+    private static final long serialVersionUID = 9038311966735490420l;
+
     private Map<String, Integer> m_keyMap;
 
     private KeyMap(final Map<String, Integer> keyMap) {
@@ -115,9 +117,6 @@ public final class KeyMap implements Externalizable {
         return m_keyMap.size();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         @SuppressWarnings("unchecked")
@@ -125,9 +124,6 @@ public final class KeyMap implements Externalizable {
         m_keyMap = keyMap;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
         out.writeObject(m_keyMap);

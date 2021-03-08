@@ -40,67 +40,46 @@ import org.knime.core.node.defaultnodesettings.DialogComponentString;
 /**
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
  */
-public class NodePotentialScorerNodeFactory
-        extends NodeFactory<NodePotentialScorerNodeModel> {
+public class NodePotentialScorerNodeFactory extends NodeFactory<NodePotentialScorerNodeModel> {
 
-    /**
-     * Constructor.
-     */
-    public NodePotentialScorerNodeFactory() {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getNrNodeViews() {
         return 0;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean hasDialog() {
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public NodeView<NodePotentialScorerNodeModel> createNodeView(
-            final int viewIndex, final NodePotentialScorerNodeModel nodeModel) {
+    public NodeView<NodePotentialScorerNodeModel> createNodeView(final int viewIndex,
+        final NodePotentialScorerNodeModel nodeModel) {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public NodePotentialScorerNodeModel createNodeModel() {
         return new NodePotentialScorerNodeModel();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected NodeDialogPane createNodeDialogPane() {
-        return new DefaultNodeSettingsPane() {
-            {
-                createNewGroup("Scoring Settings");
-                addDialogComponent(new DialogComponentNumber(
-                        NodePotentialScorerNodeModel.createConstRAlphaModel(),
-                        "Radius Alpha", 0.1));
+        return new NodePotentialDialog();
+    }
 
-                createNewGroup("Column Selection");
-                addDialogComponent(new DialogComponentColumnFilter2(
-                        NodePotentialScorerNodeModel.createColumnFilterModel(),
-                        0));
-                createNewGroup("Output Settings");
-                addDialogComponent(new DialogComponentString(NodePotentialScorerNodeModel.createOutputColumnNameModel(), "Output Column Name"));
-            }
-        };
+    private static final class NodePotentialDialog extends DefaultNodeSettingsPane {
+        NodePotentialDialog() {
+            createNewGroup("Scoring Settings");
+            addDialogComponent(
+                new DialogComponentNumber(NodePotentialScorerNodeModel.createConstRAlphaModel(), "Radius Alpha", 0.1));
+
+            createNewGroup("Column Selection");
+            addDialogComponent(
+                new DialogComponentColumnFilter2(NodePotentialScorerNodeModel.createColumnFilterModel(), 0));
+            createNewGroup("Output Settings");
+            addDialogComponent(new DialogComponentString(NodePotentialScorerNodeModel.createOutputColumnNameModel(),
+                "Output Column Name"));
+        }
     }
 }

@@ -127,9 +127,6 @@ public abstract class AbstractDensityScorerModelCreator<V extends DensityDataPoi
     protected abstract NeighborhoodModel buildModel(final List<V> dataPoints, final ExecutionMonitor monitor)
         throws CanceledExecutionException;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Optional<String> getWarning() {
         if (m_ignoredRows > 0) {
@@ -153,9 +150,6 @@ public abstract class AbstractDensityScorerModelCreator<V extends DensityDataPoi
         return m_dataPoints.size();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final void addRow(final DataRow row) {
         CheckUtils.checkArgument(row.getNumCells() == m_nrFeatures,
@@ -170,9 +164,6 @@ public abstract class AbstractDensityScorerModelCreator<V extends DensityDataPoi
         m_kdTreeBuilder.addPattern(vector, dataPoint);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final DensityScorerModel buildModel(final ExecutionMonitor monitor) throws CanceledExecutionException {
         initializeUnnormalizedPotentials(monitor.createSubProgress(0.3));
@@ -203,7 +194,7 @@ public abstract class AbstractDensityScorerModelCreator<V extends DensityDataPoi
             "Searching for min and max potentials in row %s of %s."));
         final double min = stats.getMin();
         final double max = stats.getMax();
-        if (min == max) {
+        if (min == max) { //NOSONAR
             monitor.setProgress(1.0);
             return;
         }
@@ -211,10 +202,10 @@ public abstract class AbstractDensityScorerModelCreator<V extends DensityDataPoi
     }
 
     private static DoubleUnaryOperator getNormalizer(final double min, final double max) {
-        if (min == max) {
+        if (min == max) {//NOSONAR
             // if all potentials are zero, then there is no density
             // but if all potentials are the same non-zero value all points have the highest density
-            return min == 0 ? p -> 0 : p -> 1;
+            return min == 0 ? p -> 0 : p -> 1; //NOSONAR
         } else {
             return p -> (p - min) / (max - min);
         }
@@ -232,24 +223,27 @@ public abstract class AbstractDensityScorerModelCreator<V extends DensityDataPoi
         for (int i = 0; i < m_nrFeatures; i++) {
             final DataCell cell = row.getCell(i);
             if (cell.isMissing()) {
-                switch (m_missingValueHandling) {
-                    case FAIL:
-                        throw new IllegalArgumentException(
-                            String.format("Missing value in row %s detected.", row.getKey()));
-                    case IGNORE:
-                        m_ignoredRows++;
-                        return null;
-                    default:
-                        throw new IllegalStateException(
-                            String.format("Unknown missing value handling %s detected.", m_missingValueHandling));
-
-                }
+                return handleMissingValue(row);
             }
             CheckUtils.checkArgument(cell instanceof DoubleValue, "Non numeric cell in column %s of row %s detected.",
                 i, row);
             vector[i] = ((DoubleValue)cell).getDoubleValue();
         }
         return vector;
+    }
+
+    private double[] handleMissingValue(final DataRow row) {
+        switch (m_missingValueHandling) {
+            case FAIL:
+                throw new IllegalArgumentException(
+                    String.format("Missing value in row %s detected.", row.getKey()));
+            case IGNORE:
+                m_ignoredRows++;
+                return null;//NOSONAR null is used to mark an ignored row
+            default:
+                throw new IllegalStateException(
+                    String.format("Unknown missing value handling %s detected.", m_missingValueHandling));
+        }
     }
 
 }

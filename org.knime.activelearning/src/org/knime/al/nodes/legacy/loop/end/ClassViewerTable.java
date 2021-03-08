@@ -51,12 +51,14 @@ package org.knime.al.nodes.legacy.loop.end;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.table.AbstractTableModel;
 
 import org.knime.core.data.DataRow;
 import org.knime.core.data.RowKey;
+import org.knime.core.node.util.CheckUtils;
 
 /**
  * Table model for the hiliteTable
@@ -64,14 +66,12 @@ import org.knime.core.data.RowKey;
  * @author Jonathan Hale
  */
 final class ClassViewerTable extends AbstractTableModel {
-    /**
-     *
-     */
-    private final ActiveLearnLoopEndNodeViewListener m_listener;
+
+    private final transient ActiveLearnLoopEndNodeViewListener m_listener;
 
     private static final long serialVersionUID = 1956861398744750844L;
 
-    private final List<DataRow> m_rows;
+    private final transient List<DataRow> m_rows;
     private String[] m_columnNames;
 
     private int m_classColumnIndex = -1;
@@ -86,14 +86,13 @@ final class ClassViewerTable extends AbstractTableModel {
         super();
         m_listener = listener;
 
-        m_rows = new ArrayList<DataRow>();
+        m_rows = new ArrayList<>();
     }
 
     /**
      * Update the tables entries with a set of keys.
      *
-     * @param keys
-     *            the
+     * @param keys the
      * @param dataMap
      * @param columnNames
      */
@@ -111,18 +110,12 @@ final class ClassViewerTable extends AbstractTableModel {
             m_columnNames[i + 1] = columnNames[i];
         }
 
-        // FIXME: UGLY UGLY CODE
-        for (final RowKey rowKey : dataMap.keySet()) {
+        for (final Entry<RowKey, DataRow> entry : dataMap.entrySet()) {
+            final RowKey rowKey = entry.getKey();
             if (keys.contains(rowKey)) {
-                boolean alreadyExists = false;
-                for (final DataRow dataRow : m_rows) {
-                    if (dataRow.getKey() == rowKey) {
-                        alreadyExists = true;
-                        break;
-                    }
-                }
+                final boolean alreadyExists = m_rows.stream().map(DataRow::getKey).anyMatch(rowKey::equals);
                 if (!alreadyExists) {
-                    m_rows.add(dataMap.get(rowKey));
+                    m_rows.add(entry.getValue());
                 }
             }
         }
@@ -133,11 +126,9 @@ final class ClassViewerTable extends AbstractTableModel {
     /**
      * tells the HiliteTable which column is the class column With the next call
      * of updateEntities, the class column index is found.
-     *
-     * @param columnName
      * @param index
      */
-    public void setClassColumn(final String columnName, final int index) {
+    public void setClassColumn(final int index) {
         m_classColumnIndex = index + 1; // because of RowID in the beginning
     }
 
@@ -157,9 +148,6 @@ final class ClassViewerTable extends AbstractTableModel {
         m_rows.clear();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getColumnCount() {
         if (m_columnNames == null) {
@@ -169,20 +157,14 @@ final class ClassViewerTable extends AbstractTableModel {
         return m_columnNames.length;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getRowCount() {
         return m_rows.size();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getValueAt(final int row, final int col) {
-        if (m_rows.size() == 0) { // this will probably not be called if,
+        if (m_rows.isEmpty()) { // this will probably not be called if,
             // but making sure anyway
             return null;
         }
@@ -212,37 +194,24 @@ final class ClassViewerTable extends AbstractTableModel {
         return m_rows.get(row).getKey();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Class getColumnClass(final int c) {
-        return getValueAt(0, c).getClass();
+        Object value = getValueAt(0, c);
+        CheckUtils.checkArgumentNotNull(value, "There is no column with index %s.", c);
+        return value.getClass();// NOSONAR the above check ensures that value isn't null
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getColumnName(final int column) {
         return m_columnNames[column];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isCellEditable(final int row, final int column) {
-        if (column == m_classColumnIndex) {
-            return true;
-        }
-        return false;
+        return column == m_classColumnIndex;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setValueAt(final Object value, final int row,
             final int column) {
@@ -253,10 +222,4 @@ final class ClassViewerTable extends AbstractTableModel {
         }
     }
 
-    /**
-     * @param classMap
-     *            the class map
-     */
-    public void setClassmap(final Map<RowKey, String> classMap) {
-    }
 }

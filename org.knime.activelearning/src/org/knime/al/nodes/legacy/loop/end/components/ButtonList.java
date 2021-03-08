@@ -5,6 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -21,12 +23,12 @@ import javax.swing.event.ListDataListener;
  *
  * @author Jonathan Hale
  */
-public class ButtonList extends JPanel
+public final class ButtonList extends JPanel
         implements ActionListener, ListDataListener {
 
     private static final long serialVersionUID = 987049663025341598L;
 
-    private ClassModel m_classModel;
+    private transient ClassModel m_classModel;
 
     private String m_selectedItem;
 
@@ -37,6 +39,10 @@ public class ButtonList extends JPanel
     private JPanel m_lastPanel;
 
     private String m_defaultText = "default";
+
+    // ACTION HANDLING
+    private final transient CopyOnWriteArraySet<ActionListener> m_actionListeners = new CopyOnWriteArraySet<>();
+    String m_actionCommand = "action";
 
     /**
      * Constructor.
@@ -145,22 +151,13 @@ public class ButtonList extends JPanel
         return btn;
     }
 
-    // ACTION HANDLING
-    // TODO: (probably the "unofficial" way... is there an Interface for this?)
-    List<ActionListener> m_actionListeners = new ArrayList<ActionListener>();
-    String m_actionCommand = "action";
-
     /**
      * Add an ActionListener to the ToggleButtonList
      *
      * @param listener
      */
     public void addActionListener(final ActionListener listener) {
-        if (m_actionListeners.contains(listener)) {
-            return;
-        }
-
-        m_actionListeners.add(listener);
+        m_actionListeners.add(listener);//NOSONAR, thread-safety before efficiency
     }
 
     /**
@@ -169,7 +166,7 @@ public class ButtonList extends JPanel
      * @param listener
      */
     public void removeActionListener(final ActionListener listener) {
-        m_actionListeners.remove(listener);
+        m_actionListeners.remove(listener);//NOSONAR, thread-safety before efficiency
     }
 
     /*
@@ -190,9 +187,6 @@ public class ButtonList extends JPanel
         m_actionCommand = actionCommand;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void actionPerformed(final ActionEvent e) {
         final Object source = e.getSource();
@@ -210,7 +204,7 @@ public class ButtonList extends JPanel
             m_selectedItem = ClassModel.NO_CLASS;
         }
 
-        fireActionEvent(new ActionEvent(btn, (int) (Math.random() * 12312),
+        fireActionEvent(new ActionEvent(btn, new Random().nextInt() * 12312,
                 m_actionCommand));
     }
 
@@ -239,25 +233,16 @@ public class ButtonList extends JPanel
     }
 
     // Recreate the button list from scatch, when ClassModel changes
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void contentsChanged(final ListDataEvent arg0) {
         recreateButtonList();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void intervalAdded(final ListDataEvent arg0) {
         recreateButtonList();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void intervalRemoved(final ListDataEvent arg0) {
         recreateButtonList();

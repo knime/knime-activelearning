@@ -71,6 +71,7 @@ import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelColumnFilter2;
 import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
@@ -85,6 +86,8 @@ import org.knime.core.util.UniqueNameGenerator;
  * @author <a href="mailto:gabriel.einsdorf@uni.kn">Gabriel Einsdorf</a>
  */
 final class NodePotentialScorerNodeModel extends AbstractALNodeModel {
+
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(NodePotentialScorerNodeModel.class);
 
     private static final int UNLABELED_PORT = 0;
 
@@ -141,9 +144,6 @@ final class NodePotentialScorerNodeModel extends AbstractALNodeModel {
             new PortType[]{BufferedDataTable.TYPE});
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
 
@@ -176,9 +176,7 @@ final class NodePotentialScorerNodeModel extends AbstractALNodeModel {
         return rearranger;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @SuppressWarnings("deprecation")
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec)
         throws Exception {
@@ -227,13 +225,15 @@ final class NodePotentialScorerNodeModel extends AbstractALNodeModel {
                 m_dataPoints.put(row.getKey(), p);
             }
         } catch (final ClassCastException e) {
-            throw new CanceledExecutionException("Missing values are not allowed!");
+            LOGGER.error("Missing values are not allowed!", e);
+            CanceledExecutionException ex = new CanceledExecutionException("Missing values are not allowed!");
+            ex.initCause(e);
+            throw ex;
         }
         m_dataPointsKDTree = allDataPointsBuilder.buildTree();
     }
 
-    private void initPotentials() throws CanceledExecutionException, InterruptedException {
-
+    private void initPotentials() {
         for (final NodePotentialDataPoint p : m_dataPoints.values()) {
             final List<NearestNeighbour<NodePotentialDataPoint>> maxDistanceNeighbours =
                 m_dataPointsKDTree.getMaxDistanceNeighbours(p.getVector(), m_radiusAlphaModel.getDoubleValue());
@@ -282,7 +282,8 @@ final class NodePotentialScorerNodeModel extends AbstractALNodeModel {
                 decreasePotential(potential, p);
             }
             exec.checkCanceled();
-            exec.setProgress((double)rowIdx++ / rowCount);
+            exec.setProgress((double)rowIdx / rowCount);
+            rowIdx++;
         }
     }
 
@@ -291,17 +292,11 @@ final class NodePotentialScorerNodeModel extends AbstractALNodeModel {
         p.getData().decreasePotential(potential * Math.exp(-m_beta * distance * distance));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void reset() {
         // Nothing to do here
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected List<SettingsModel> collectSettingsModels() {
         if (m_settingsModels == null) {

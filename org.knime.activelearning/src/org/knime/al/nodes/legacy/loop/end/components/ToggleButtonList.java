@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
@@ -16,35 +18,38 @@ import javax.swing.event.ListDataListener;
 /**
  * ToggleButtonList
  *
- * A single-selection, no-duplicates list of toggle buttons for quick selection
- * of an item.
+ * A single-selection, no-duplicates list of toggle buttons for quick selection of an item.
  *
  * Used in ActiveLearnLoopEndNodeViewPanel
  *
  * @author Jonathan Hale
  */
-public class ToggleButtonList extends JPanel
-        implements ActionListener, ListDataListener {
+public final class ToggleButtonList extends JPanel implements ActionListener, ListDataListener {
 
     private static final long serialVersionUID = 987049663025341598L;
 
-    private ClassModel m_classModel;
+    private transient ClassModel m_classModel;
 
     private String m_selectedItem;
 
     private final int m_maxRows;
 
     private final List<JPanel> m_panels;
+
     private final List<JToggleButton> m_buttons;
+
     private JPanel m_lastPanel;
 
     private String m_defaultText = " ";
 
+    private final transient CopyOnWriteArraySet<ActionListener> m_actionListeners = new CopyOnWriteArraySet<>();
+
+    private String m_actionCommand = "action";
+
     /**
      * Constructor.
      *
-     * @param maxRows
-     *            maximum number of buttons in a column
+     * @param maxRows maximum number of buttons in a column
      */
     public ToggleButtonList(final int maxRows) {
         super();
@@ -60,13 +65,10 @@ public class ToggleButtonList extends JPanel
     }
 
     /**
-     * Contructor with ClassModel Initializes ClassModel directly via the
-     * constructor.
+     * Contructor with ClassModel Initializes ClassModel directly via the constructor.
      *
-     * @param classModel
-     *            the ClassModel
-     * @param maxRows
-     *            maximum number of buttons per column
+     * @param classModel the ClassModel
+     * @param maxRows maximum number of buttons per column
      */
     public ToggleButtonList(final ClassModel classModel, final int maxRows) {
         super();
@@ -94,9 +96,8 @@ public class ToggleButtonList extends JPanel
     /**
      * setSelectedItem - sets the ToggleButtonLists selected button.
      *
-     * Iterates through all buttons deselecting the ones whoes getText() doesn't
-     * match the itemName given in the parameter. If the Item does not match any
-     * in the List, selection won't change.
+     * Iterates through all buttons deselecting the ones whoes getText() doesn't match the itemName given in the
+     * parameter. If the Item does not match any in the List, selection won't change.
      *
      * @param itemName
      */
@@ -117,14 +118,9 @@ public class ToggleButtonList extends JPanel
 
         // iterate through all buttons
         for (final JToggleButton btn : m_buttons) {
-            // check whether text matches itemName
-            if (btn.getText().equals(sel)) {
-                btn.setSelected(true); // it is our item, so select it
-            } else {
-                btn.setSelected(false); // deselect everything else
-            }
-            revalidate();
+            btn.setSelected(btn.getText().equals(sel));
         }
+        revalidate();
 
     }
 
@@ -152,11 +148,7 @@ public class ToggleButtonList extends JPanel
         // create an initial button for the start.
         for (final String name : m_classModel.getDefinedClasses()) {
             final JToggleButton btn = addButton(name);
-            if (name.equals(m_selectedItem)) {
-                btn.setSelected(true);
-            } else {
-                btn.setSelected(false);
-            }
+            btn.setSelected(name.equals(m_selectedItem));
         }
     }
 
@@ -190,21 +182,13 @@ public class ToggleButtonList extends JPanel
     }
 
     // ACTION HANDLING
-    // TODO: (probably the "unofficial" way... is there an Interface for this?)
-    List<ActionListener> m_actionListeners = new ArrayList<ActionListener>();
-    String m_actionCommand = "action";
-
     /**
      * Add an ActionListener to the ToggleButtonList
      *
      * @param listener
      */
     public void addActionListener(final ActionListener listener) {
-        if (m_actionListeners.contains(listener)) {
-            return;
-        }
-
-        m_actionListeners.add(listener);
+        m_actionListeners.add(listener);//NOSONAR
     }
 
     /**
@@ -213,7 +197,7 @@ public class ToggleButtonList extends JPanel
      * @param listener
      */
     public void removeActionListener(final ActionListener listener) {
-        m_actionListeners.remove(listener);
+        m_actionListeners.remove(listener);//NOSONAR
     }
 
     /*
@@ -234,9 +218,6 @@ public class ToggleButtonList extends JPanel
         m_actionCommand = actionCommand;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void actionPerformed(final ActionEvent e) {
         final Object source = e.getSource();
@@ -246,7 +227,7 @@ public class ToggleButtonList extends JPanel
         }
 
         // only dealing with the toggleButtons
-        final JToggleButton btn = (JToggleButton) source;
+        final JToggleButton btn = (JToggleButton)source;
 
         String sel = btn.getText(); // future selection
 
@@ -255,8 +236,7 @@ public class ToggleButtonList extends JPanel
         }
 
         setSelectedItem(sel);
-        fireActionEvent(new ActionEvent(btn, (int) (Math.random() * 12312),
-                m_actionCommand));
+        fireActionEvent(new ActionEvent(btn, new Random().nextInt() * 12312, m_actionCommand));
     }
 
     /**
@@ -284,34 +264,23 @@ public class ToggleButtonList extends JPanel
     }
 
     // Recreate the button list from scatch, when ClassModel changes
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void contentsChanged(final ListDataEvent arg0) {
         recreateButtonList();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void intervalAdded(final ListDataEvent arg0) {
         recreateButtonList();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void intervalRemoved(final ListDataEvent arg0) {
         recreateButtonList();
     }
 
-    private class CustomToggleButton extends JToggleButton {
-        /**
-         *
-         */
+    private static class CustomToggleButton extends JToggleButton {
+
         private static final long serialVersionUID = -390311905442686674L;
 
         public CustomToggleButton(final String caption) {

@@ -90,9 +90,6 @@ public abstract class AbstractNeighborhoodModel implements NeighborhoodModel {
         // no op serialization constructor
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void writeExternal(final ObjectOutput out) throws IOException {
         out.writeObject(m_keyMap);
@@ -100,9 +97,6 @@ public abstract class AbstractNeighborhoodModel implements NeighborhoodModel {
         out.writeObject(m_id);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
         m_keyMap = (KeyMap)in.readObject();
@@ -131,17 +125,11 @@ public abstract class AbstractNeighborhoodModel implements NeighborhoodModel {
         return m_neighborhoods;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final int getNrRows() {
         return m_keyMap.size();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final UUID getId() {
         return m_id;

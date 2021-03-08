@@ -77,6 +77,7 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.CheckUtils;
 
 /**
+ * Abstract implementation of a Density Initializer.
  *
  * @author Adrian Nembach, KNIME GmbH, Konstanz, Germany
  */
@@ -106,9 +107,6 @@ public abstract class AbstractDensityInitializerNodeModel extends AbstractALNode
         super(new PortType[]{BufferedDataTable.TYPE}, new PortType[]{DensityScorerPortObject.TYPE});
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected final PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
         final DataTableSpec tableSpec = (DataTableSpec)inSpecs[DATA_PORT];
@@ -129,9 +127,6 @@ public abstract class AbstractDensityInitializerNodeModel extends AbstractALNode
         return new DensityScorerPortObjectSpec(featureSpec);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected final PortObject[] execute(final PortObject[] inData, final ExecutionContext exec) throws Exception {
         // Init data structures and potentials
@@ -143,10 +138,12 @@ public abstract class AbstractDensityInitializerNodeModel extends AbstractALNode
         try {
             model = initialize(unlabeledTable, exec);
         } catch (OutOfMemoryError error) {
-            throw new OutOfMemoryError(
+            final OutOfMemoryError descriptiveError = new OutOfMemoryError(
                 "The initialization process ran out of memory. "
                 + "Please try to increase the amount of RAM KNIME can use or check the node description "
                 + "for how to reduce the memory requirements of this node.");
+            descriptiveError.initCause(error);
+            throw descriptiveError;
         }
         final FileStore neighborhoodFileStore = createFileStore(exec);
         final FileStore potentialsFilestore = createFileStore(exec);
@@ -193,9 +190,6 @@ public abstract class AbstractDensityInitializerNodeModel extends AbstractALNode
         return builder;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void reset() {
         // Nothing to reset
@@ -207,9 +201,6 @@ public abstract class AbstractDensityInitializerNodeModel extends AbstractALNode
      */
     protected abstract DensityScorerModelCreator createBuilder(final int nrFeatures);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected final List<SettingsModel> collectSettingsModels() {
         final List<SettingsModel> list = new ArrayList<>();
