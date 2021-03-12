@@ -38,6 +38,8 @@ public final class ToggleButtonList extends JPanel implements ActionListener, Li
 
     private final List<JToggleButton> m_buttons;
 
+    private final Random m_random = new Random();
+
     private JPanel m_lastPanel;
 
     private String m_defaultText = " ";
@@ -236,7 +238,7 @@ public final class ToggleButtonList extends JPanel implements ActionListener, Li
         }
 
         setSelectedItem(sel);
-        fireActionEvent(new ActionEvent(btn, new Random().nextInt() * 12312, m_actionCommand));
+        fireActionEvent(new ActionEvent(btn, m_random.nextInt() * 12312, m_actionCommand));
     }
 
     /**

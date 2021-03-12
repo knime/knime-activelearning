@@ -40,6 +40,8 @@ public final class ButtonList extends JPanel
 
     private String m_defaultText = "default";
 
+    private final Random m_random = new Random();
+
     // ACTION HANDLING
     private final transient CopyOnWriteArraySet<ActionListener> m_actionListeners = new CopyOnWriteArraySet<>();
     String m_actionCommand = "action";
@@ -204,7 +206,7 @@ public final class ButtonList extends JPanel
             m_selectedItem = ClassModel.NO_CLASS;
         }
 
-        fireActionEvent(new ActionEvent(btn, new Random().nextInt() * 12312,
+        fireActionEvent(new ActionEvent(btn, m_random.nextInt() * 12312,
                 m_actionCommand));
     }
 

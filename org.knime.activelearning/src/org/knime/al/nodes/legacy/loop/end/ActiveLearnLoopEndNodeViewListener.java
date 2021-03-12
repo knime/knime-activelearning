@@ -284,7 +284,9 @@ final class ActiveLearnLoopEndNodeViewListener
             // update view with new row.
             updateDetailedView(curKey);
         }
-        updateRowStatsLabel(curKey);
+        if (curKey != null) {
+            updateRowStatsLabel(curKey);
+        }
     }
 
     private RowKey findCurrentKey() {
