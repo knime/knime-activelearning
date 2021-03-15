@@ -142,8 +142,10 @@ public final class NeighborhoodStructure implements Externalizable {
             return new NeighborhoodStructure(neighborhoods, m_sortNeighborhoods);
         }
 
-        private int[] createNeighborsArray(final DensityDataPoint<?> dataPoint) {
-            IntStream stream = dataPoint.getNeighbors().stream().map(DensityDataPoint::getKey).mapToInt(this::getIndex);
+        private int[] createNeighborsArray(final DensityDataPoint<? extends DensityDataPoint<?>> dataPoint) {
+            IntStream stream = dataPoint.getNeighbors().stream()//
+                    .map(DensityDataPoint::getKey)//
+                    .mapToInt(this::getIndex);
             if (m_sortNeighborhoods) {
                 stream = stream.sorted();
             }
