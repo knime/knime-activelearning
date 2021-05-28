@@ -83,30 +83,4 @@
         </repository>
     </repositories>
 
-     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.eclipse.tycho.extras</groupId>
-                <artifactId>tycho-source-feature-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>source-feature</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>source-feature</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <excludes>
-                        <plugin id="org.knime.tensorflow.bin.windows.amd64.cpu"/>
-                        <plugin id="org.knime.tensorflow.bin.windows.amd64.gpu"/>
-                        <plugin id="org.knime.tensorflow.bin.linux.amd64.cpu"/>
-                        <plugin id="org.knime.tensorflow.bin.linux.amd64.gpu"/>
-                        <plugin id="org.knime.tensorflow.bin.macosx.amd64.cpu"/>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
