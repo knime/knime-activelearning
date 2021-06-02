@@ -28,6 +28,7 @@ try {
                 'knime-deeplearning', 
                 'knime-distance', 
                 'knime-filehandling',
+                'knime-kerberos',
                 'knime-jep', 
                 'knime-jfreechart', 
                 'knime-js-base', 
