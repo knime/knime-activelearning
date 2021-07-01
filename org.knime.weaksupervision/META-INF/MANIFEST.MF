@@ -3,7 +3,7 @@ Eclipse-BundleShape: dir
 Bundle-ManifestVersion: 2
 Bundle-Name: KNIME Weak Supervision Plug-in
 Bundle-SymbolicName: org.knime.weaksupervision;singleton:=true
-Bundle-Version: 4.4.0.qualifier
+Bundle-Version: 4.5.0.qualifier
 Bundle-ClassPath: knime-weaksupervision.jar
 Bundle-Vendor: KNIME AG, Zurich, Switzerland
 Require-Bundle: org.knime.core;bundle-version="[4.0.0,5.0.0)",
