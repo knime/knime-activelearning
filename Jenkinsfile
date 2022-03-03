@@ -32,7 +32,6 @@ try {
                 'knime-jep', 
                 'knime-jfreechart', 
                 'knime-js-base', 
-                'knime-python', 
                 'knime-streaming', 
                 'knime-tensorflow' 
             ],
