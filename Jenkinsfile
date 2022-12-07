@@ -17,7 +17,7 @@ try {
     // it needs to download and install a bunch of large binaries
     // Therefore we use the 'large' image and allow mvn to use 4G of memory
     withEnv(["MAVEN_OPTS=-Xmx4G"]){
-        knimetools.defaultTychoBuild('org.knime.update.activelearning', 'maven && large && java11')
+        knimetools.defaultTychoBuild('org.knime.update.activelearning', 'maven && large && java17')
     }
 
     workflowTests.runTests(
