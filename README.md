@@ -1,4 +1,9 @@
-# ![Image](https://www.knime.com/files/knime_logo_github_40x40_4layers.png) KNIME® Active Learning
+# KNIME® Active Learning
+
+[![Jenkins](https://jenkins.knime.com/buildStatus/icon?job=knime-activelearning%2Fmaster)](https://jenkins.knime.com/job/knime-activelearning/job/master/)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=KNIME_knime-activelearning&metric=alert_status&token=55129ac721eacd76417f57921368ed587ad8339d)](https://sonarcloud.io/summary/new_code?id=KNIME_knime-activelearning)
+
+This repository is maintained by [Team Rakete](mailto:team-rakete@knime.com).
 
 The KNIME Active Learning plugin comprises a set of KNIME nodes for
 modular active learning and novelty detection in KNIME. Active learning
