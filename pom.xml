@@ -20,7 +20,7 @@
         <feature-branch-extension.appendArtifactoryProperties>false</feature-branch-extension.appendArtifactoryProperties>
         <knime.sonar-env>Sonarcloud</knime.sonar-env>
     </properties>
-    
+
     <modules>
         <module>org.knime.activelearning</module>
         <module>org.knime.activelearning.tests</module>
@@ -47,7 +47,7 @@
 			<layout>p2</layout>
 			<url>${knime.core.ui.p2}</url>
 		</repository>
-        <repository>        
+        <repository>
             <id>knime.expressions.p2</id>
             <layout>p2</layout>
             <url>${knime.expressions.p2}</url>
@@ -56,6 +56,11 @@
             <id>knime.shared.p2</id>
             <layout>p2</layout>
             <url>${knime.shared.p2}</url>
+        </repository>
+        <repository>
+            <id>knime.gateway.p2</id>
+            <layout>p2</layout>
+            <url>${knime.gateway.p2}</url>
         </repository>
         <repository>
             <id>knime.tp.p2</id>
