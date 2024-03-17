@@ -75,8 +75,6 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.js.core.JSONDataTable;
 import org.knime.js.core.node.table.AbstractTableNodeModel;
 
-import com.google.common.collect.Iterators;
-
 /**
  * This is the model implementation of ActiveLearning.
  *
@@ -146,8 +144,8 @@ public class ActiveLabelingNodeModel
                     TableFilter tableFilter = TableFilter.materializeCols(possibleValuesColumnIndex);
                     Map<String, String> existingLabels = new HashMap<String, String>();
                     int maxRows = m_config.getSettings().getRepresentationSettings().getMaxRows();
-                    try (CloseableRowIterator inDataIterator = ((BufferedDataTable)inObjects[0]).filter(tableFilter).iterator()) {
-                        Iterators.limit(inDataIterator, maxRows);
+                    try (CloseableRowIterator inDataIterator =
+                            ((BufferedDataTable)inObjects[0]).filter(tableFilter).iterator()) {
                         for (int i = 0; inDataIterator.hasNext() && i < maxRows; i++) {
                             final DataRow row = inDataIterator.next();
                             DataCell missingCell = DataType.getMissingCell();
