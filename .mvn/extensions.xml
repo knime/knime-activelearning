@@ -6,8 +6,8 @@
         <version>1.4.0</version>
     </extension>
     <extension>
-          <groupId>com.nuance.clu.maven</groupId>
-          <artifactId>maven-feature-branch-extension</artifactId>
-          <version>0.6.0</version>
+    	  <groupId>com.nuance.clu.maven</groupId>
+    	  <artifactId>maven-feature-branch-extension</artifactId>
+          <version>1.2.1.0021-407a3b6</version>
      </extension>
 </extensions>
