@@ -8,7 +8,9 @@ properties([
         upstream('knime-javasnippet/' + env.BRANCH_NAME.replaceAll('/', '%2F'))
     ]),
     buildDiscarder(logRotator(numToKeepStr: '5')),
-	parameters(workflowTests.getConfigurationsAsParameters()),
+	parameters(workflowTests.getConfigurationsAsParameters([
+        ignoreConfiguration: ['macosx-aarch']
+    ])),
     disableConcurrentBuilds()
 ])
 
