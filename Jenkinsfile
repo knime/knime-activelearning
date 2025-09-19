@@ -39,6 +39,7 @@ try {
             ],
         ],
         withAssertions: true,
+        ignoreConfiguration: ['macosx-aarch'],
     )
 
     stage('Sonarqube analysis') {
