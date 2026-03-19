@@ -1,7 +1,7 @@
 # KNIME® Active Learning
 
 [![Jenkins](https://jenkins.knime.com/buildStatus/icon?job=knime-activelearning%2Fmaster)](https://jenkins.knime.com/job/knime-activelearning/job/master/)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=KNIME_knime-activelearning&metric=alert_status&token=55129ac721eacd76417f57921368ed587ad8339d)](https://sonarcloud.io/summary/new_code?id=KNIME_knime-activelearning)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=knime_knime-activelearning&metric=alert_status&token=55129ac721eacd76417f57921368ed587ad8339d)](https://sonarcloud.io/summary/new_code?id=knime_knime-activelearning)
 
 This repository is maintained by [KNIME Team spAIceship](mailto:team-spaiceship@knime.com).
 
